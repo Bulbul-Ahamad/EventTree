@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.06`**
+**Next up: `1.07`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -25,7 +25,7 @@
 
 **Migrations (one concern per file, applied in order)**
 - [x] **1.05** — Migration `…_extensions_enums`: extensions, `app_private` schema, all enums (`05_Schema §2`). _Done when:_ `db:reset` succeeds; enums exist.
-- [ ] **1.06** — Migration `…_profiles`: table, `handle_new_user` trigger with `full_name`/`name`/email-prefix fallback. _Done when:_ pgTAP test creating an `auth.users` row produces a profile.
+- [x] **1.06** — Migration `…_profiles`: table, `handle_new_user` trigger with `full_name`/`name`/email-prefix fallback. _Done when:_ pgTAP test creating an `auth.users` row produces a profile.
 - [ ] **1.07** — Migration `…_organizations`: `organizations`, `org_members`, `generate_join_code`, last-admin / owns-events / unassign-on-removal triggers. _Done when:_ pgTAP tests for the three org guards pass.
 - [ ] **1.08** — Migration `…_nodes`: `nodes` table, constraints, indexes, triggers `01_prepare`, `02_validate`, `04_progress_leaf`. _Done when:_ pgTAP tests for shape checks, `E_PARENT_IS_TASK`, `E_MAX_DEPTH`, `E_NODE_LIMIT`, `E_ASSIGNEE_NOT_IN_ORG`, `E_ROOT_IMMUTABLE` pass.
 - [ ] **1.09** — Migration `…_event_tables`: `event_settings`, `event_members`, `node_updates` (+ immutability trigger, `event_id`/`user_id` forcing trigger); `nodes_03_guard` and `nodes_05_event_members` triggers. _Done when:_ pgTAP tests for lifecycle read-only, cascade-not-blocked, event_members sync pass.
@@ -131,6 +131,7 @@
 | 2026-10-29 | 1.03 | Strict TS (`noUncheckedIndexedAccess`, `noImplicitOverride`), ESLint `no-console`, Prettier + tailwind plugin, all TRD §11 scripts, `src/lib/env-schema.ts` + `env.ts` (Zod), `src/instrumentation.ts` boot validation, `.env.example` (un-ignored in `.gitignore`), Vitest config + 4 env unit tests. `pnpm check` passes; a missing env var stops `pnpm dev` with a clear error naming it. | 5fd25b3, d1c3de4 | First test run failed because `env.ts` validated at import; fixed by splitting pure `parseEnv` into `env-schema.ts`. `vitest.config.ts` renamed `.mts` (Vite ESM warning). `seed` script uses `tsx`, which is not in the TRD stack and not installed: `pnpm seed` will not run until a decision is made (open question for Bulbul). `test:int`, `test:e2e`, `test:db` are stubs until later steps. |
 | 2026-10-29 | 1.04 | `supabase init`; `supabase/config.toml` set per `05_Schema §7.8`: site URL `http://localhost:3000`, redirect `http://localhost:3000/**`, min password 10, email confirmations ON, JWT 3600, refresh rotation ON, signup enabled. Local stack starts (`pnpm db:start`); `pnpm db:reset` succeeds on empty migration set. | 2e27e63, 72ea164 | Postgres major_version 17 (TRD says 15+). `db:reset` warns `supabase/seed.sql` not found: expected, no seed yet. Production redirect URL to be added at deploy. Push needed `git pull --rebase` (remote had plan commit); author identity fixed on 2e27e63. |
 | 2026-10-29 | 1.05 | Migration `20261029040500_extensions_enums.sql`: `ltree`, `pgcrypto`, `app_private` schema, 8 enums per `05_Schema §2`. pgTAP `01_extensions_enums.test.sql` (11 tests) passes via `pnpm test:db`. | a03853f | None. |
+| 2026-10-29 | 1.06 | Migration `20261029041000_profiles.sql`: `profiles`, `lower(email)` unique index, `app_private.handle_new_user` + `on_auth_user_created` trigger (full_name/name/email-prefix fallback), `profiles_set_updated_at`. pgTAP `02_profiles.test.sql` (9 tests) passes; `db:reset` + `test:db` green (20 tests). | a5802fd | Added reusable helper `app_private.touch_updated_at()` (05_Schema §8 says updated_at is trigger-maintained). RLS/grants for profiles deferred to 1.12 per plan. |
 
 ## Decisions & Deviations Log
 
