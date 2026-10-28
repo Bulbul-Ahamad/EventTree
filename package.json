@@ -3,10 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests/unit",
+    "test:int": "vitest run tests/integration",
+    "test:db": "supabase test db",
+    "test:e2e": "playwright test",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local > src/types/database.ts",
+    "seed": "tsx scripts/seed.ts",
+    "check": "pnpm lint && pnpm typecheck && pnpm test"
   },
   "dependencies": {
     "@hookform/resolvers": "^6.0.1",
