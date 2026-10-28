@@ -1,0 +1,60 @@
+# .cursorrules — EventTree
+
+EventTree is an event-management web app for clubs, organizations and university programs. An **event is a tree**: event (root) → segments (subtrees) → tasks (leaves). Every node has one assignee; managers up the tree see and verify work below them; progress rolls up from leaves to root.
+
+The six documents in `/docs` are the **single source of truth**. Do not rely on memory, assumptions or general conventions where a doc is specific.
+
+## 1. Before ANY task (mandatory)
+
+1. Read, in this order, in full: docs/01_PRD.md → docs/02_AppFlow.md → docs/03_UI_Spec.md → docs/04_TRD.md → docs/05_Schema.md → docs/06_Plan.md.
+2. In docs/06_Plan.md, read "Current Step" and the first unchecked step. Work on that step only, unless the user explicitly names another.
+3. If your context was reset or you start a new chat, repeat steps 1–2 before editing anything.
+
+## 2. How to work
+
+- One plan step at a time, in order. Do not skip ahead, batch steps, or start later phases early.
+- Stay in scope. Anything under "Out of Scope (Non-Goals)" in docs/01_PRD.md §9 must not be built, stubbed or "prepared for". If a step seems to require it, stop and ask.
+- The stack is locked (docs/04_TRD.md §2). Do not add or swap dependencies. Do not install anything listed under "Explicitly NOT in the stack".
+- Business rules live in Postgres (constraints, triggers, RLS, RPCs). App code is a thin layer. UI permission checks mirror the DB; they never replace it.
+- Use design tokens from docs/03_UI_Spec.md. No hard-coded colors, font sizes or arbitrary spacing. Verify light and dark themes.
+- Use the error codes, routes, status names and field names exactly as written in the docs.
+- Tests are part of the step. A step is not done until its "Done when" condition is true.
+- If docs conflict or are ambiguous: STOP and ask the user. Do not guess. Do not edit docs 01–05 yourself; propose the change and wait for approval, then record it in the "Decisions & Deviations Log" of docs/06_Plan.md. (Exception: filling the "Resolved" version column in docs/04_TRD.md during step 1.02, and adding a newly discovered error code to docs/02_AppFlow.md §7.)
+
+## 3. After EVERY completed step (mandatory)
+
+Update docs/06_Plan.md immediately:
+1. Tick the step's checkbox `- [x]`.
+2. Append a row to the Progress Log: date, step ID, what changed, commit hash, notes/deviations.
+3. Update "Current Step" to the next unchecked step ID.
+4. Commit (Conventional Commits, e.g. `db: add nodes table (1.08)`), including the plan update in the same commit.
+
+Never mark a step done if checks fail. If you are blocked, leave it unchecked and write the blocker in the Progress Log.
+
+## 4. Commands
+
+pnpm dev | build | lint | typecheck | test   — app + unit tests
+pnpm check                                     — lint + typecheck + unit tests (run before every commit)
+pnpm db:start | db:reset | db:types            — local Supabase, rebuild DB, regenerate src/types/database.ts
+pnpm test:db                                   — pgTAP tests (supabase test db)
+pnpm test:int                                  — integration tests against local Supabase
+pnpm test:e2e                                  — Playwright
+pnpm seed                                      — local demo data (localhost only)
+
+## 5. Code conventions
+
+- TypeScript strict; no `any`, no non-null `!` without a comment; Zod-validate every Server Action input (`.strict()`).
+- Reads in Server Components via features/*/queries.ts; writes via Server Actions returning `ActionResult` (never throw for expected errors).
+- Never edit src/types/database.ts by hand; regenerate after every migration.
+- Migrations are append-only SQL files in supabase/migrations/; never edit an applied migration — add a new one.
+- Files kebab-case, components PascalCase, DB snake_case. Keep files under ~300 lines.
+- User content is rendered as plain text only.
+
+## 6. Never
+
+- Never use or expose SUPABASE_SERVICE_ROLE_KEY in src/, client code, or Vercel env.
+- Never use dangerouslySetInnerHTML, eval, or raw string-concatenated SQL.
+- Never disable RLS, skip a failing test, or weaken a check to make a step pass.
+- Never write status/progress columns from application code outside the defined RPCs.
+- Never commit secrets or .env.local.
+- Never reveal whether an email or join code exists in error messages.
