@@ -134,7 +134,7 @@ Record here any approved change to the docs (what, why, who approved, date).
 
 | Date | Doc | Change | Approved by |
 |---|---|---|---|
-| — | — | — | — |
+| 2026-10-29 | 04_TRD §2 | Locked versions changed: pnpm 9.x → 12.x; Tailwind CSS 4.1 → 4.3 (installed by create-next-app; build passes) | Bulbul |
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
 

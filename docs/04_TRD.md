@@ -20,11 +20,11 @@ Versions are locked at **major.minor**. Step 1.02 of `06_Plan.md` must verify ea
 | Layer | Choice | Locked version | Resolved (fill in step 1.02) |
 |---|---|---|---|
 | Runtime | Node.js LTS | 22.x | |
-| Package manager | pnpm | 9.x | |
+| Package manager | pnpm | 12.x | |
 | Language | TypeScript | 5.9 | |
 | Framework | Next.js (App Router, `src/` dir, **no Pages Router**) | 15.5 | |
 | UI library | React / React DOM | 19.1 | |
-| Styling | Tailwind CSS | 4.1 | |
+| Styling | Tailwind CSS | 4.3 | |
 | Components | shadcn/ui (CLI-generated, copied into `src/components/ui`) | CLI latest at install; components pinned by commit | |
 | Primitives | Radix UI (via shadcn) | as pulled by shadcn | |
 | Icons | lucide-react | 0.5xx (latest at install) | |
