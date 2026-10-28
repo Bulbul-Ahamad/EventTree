@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.09`**
+**Next up: `1.10`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -28,7 +28,7 @@
 - [x] **1.06** — Migration `…_profiles`: table, `handle_new_user` trigger with `full_name`/`name`/email-prefix fallback. _Done when:_ pgTAP test creating an `auth.users` row produces a profile.
 - [x] **1.07** — Migration `…_organizations`: `organizations`, `org_members`, `generate_join_code`, last-admin / owns-events / unassign-on-removal triggers. _Done when:_ pgTAP tests for the three org guards pass.
 - [x] **1.08** — Migration `…_nodes`: `nodes` table, constraints, indexes, triggers `01_prepare`, `02_validate`, `04_progress_leaf`. _Done when:_ pgTAP tests for shape checks, `E_PARENT_IS_TASK`, `E_MAX_DEPTH`, `E_NODE_LIMIT`, `E_ASSIGNEE_NOT_IN_ORG`, `E_ROOT_IMMUTABLE` pass.
-- [ ] **1.09** — Migration `…_event_tables`: `event_settings`, `event_members`, `node_updates` (+ immutability trigger, `event_id`/`user_id` forcing trigger); `nodes_03_guard` and `nodes_05_event_members` triggers. _Done when:_ pgTAP tests for lifecycle read-only, cascade-not-blocked, event_members sync pass.
+- [x] **1.09** — Migration `…_event_tables`: `event_settings`, `event_members`, `node_updates` (+ immutability trigger, `event_id`/`user_id` forcing trigger); `nodes_03_guard` and `nodes_05_event_members` triggers. _Done when:_ pgTAP tests for lifecycle read-only, cascade-not-blocked, event_members sync pass.
 - [ ] **1.10** — Migration `…_progress_rollup`: `recompute_progress_upwards`, `nodes_06_rollup`. _Done when:_ pgTAP parity test (cached progress == recursive CTE) passes after insert/delete/status/weight changes incl. empty segment.
 - [ ] **1.11** — Migration `…_rls_helpers`: all functions in `05_Schema §4` with grants. _Done when:_ pgTAP tests exercise each helper for owner/head/assignee/outsider/admin.
 - [ ] **1.12** — Migration `…_rls_policies`: enable RLS, base privileges, column grants, all policies of `05_Schema §5`. _Done when:_ pgTAP: RLS enabled on all tables; `anon` has no access; org-isolation tests pass; client cannot update `status`/`progress_cached`.
@@ -133,6 +133,7 @@
 | 2026-10-29 | 1.05 | Migration `20261029040500_extensions_enums.sql`: `ltree`, `pgcrypto`, `app_private` schema, 8 enums per `05_Schema §2`. pgTAP `01_extensions_enums.test.sql` (11 tests) passes via `pnpm test:db`. | a03853f | None. |
 | 2026-10-29 | 1.06 | Migration `20261029041000_profiles.sql`: `profiles`, `lower(email)` unique index, `app_private.handle_new_user` + `on_auth_user_created` trigger (full_name/name/email-prefix fallback), `profiles_set_updated_at`. pgTAP `02_profiles.test.sql` (9 tests) passes; `db:reset` + `test:db` green (20 tests). | a5802fd | Added reusable helper `app_private.touch_updated_at()` (05_Schema §8 says updated_at is trigger-maintained). RLS/grants for profiles deferred to 1.12 per plan. |
 | 2026-10-29 | 1.07 + 1.08 | Migrations `20261029042000_organizations.sql` (organizations, org_members, `generate_join_code`, last-admin guard) and `20261029042500_nodes.sql` (nodes, indexes, triggers 01_prepare/02_validate/04_progress_leaf, plus the `E_OWNS_EVENTS` and unassign-on-removal org guards). pgTAP `03_organizations` (10) and `04_nodes` (18) pass; `db:reset` + `test:db` green (48 tests). | 5c2e4c6 | Executed together by decision (see Decisions log): the owns-events and unassign guards read `nodes`, which only exists from 1.08. RLS/grants deferred to 1.12. |
+| 2026-10-29 | 1.09 | Migration `20261029043000_event_tables.sql`: `event_settings`, `event_members`, `node_updates` (append-only, event_id/user_id forcing triggers), `nodes_03_guard`, `nodes_05_event_members`. pgTAP `05_event_tables` (23) passes; `test:db` green (71 tests). | 4a78c6c, 320a3a4 | First run failed because the test inserted a child into an already-archived event (guard correctly blocked it); fixed test ordering, no migration change. `user_id` is forced to `auth.uid()` only when a JWT is present, so RPC/trigger inserts as a superuser keep their value. |
 
 ## Decisions & Deviations Log
 
