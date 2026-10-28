@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.02`**
+**Next up: `1.03`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -19,7 +19,7 @@
 
 **Repo & tooling**
 - [x] **1.01** — Scaffold Next.js (App Router, TypeScript, Tailwind, ESLint, `src/` dir, alias `@/*`, pnpm) in repo root without overwriting `docs/`, `CLAUDE.md`, `.cursorrules`. Add `.nvmrc` (22). _Done when:_ `pnpm dev` serves the default page and `pnpm build` succeeds.
-- [ ] **1.02** — Verify every dependency in `04_TRD §2` exists at its locked minor; install; fill the "Resolved" column in `04_TRD.md`; commit lockfile. _Done when:_ table has no empty Resolved cells; `pnpm install --frozen-lockfile` works.
+- [x] **1.02** — Verify every dependency in `04_TRD §2` exists at its locked minor; install; fill the "Resolved" column in `04_TRD.md`; commit lockfile. _Done when:_ table has no empty Resolved cells; `pnpm install --frozen-lockfile` works.
 - [ ] **1.03** — Configure TS strict options, ESLint, Prettier (+ tailwind plugin), and the scripts table from `04_TRD §11` (stubs allowed for later scripts). Add `src/lib/env.ts` (Zod) and `.env.example`. _Done when:_ `pnpm check` passes; missing env var makes app fail fast with a clear message.
 - [ ] **1.04** — Init Supabase CLI (`supabase init`), configure `config.toml` per `05_Schema §7.8` (email confirm on, min password 10, redirect URLs), start local stack. _Done when:_ `pnpm db:start` runs and `pnpm db:reset` succeeds on an empty migration set.
 
@@ -127,6 +127,7 @@
 |---|---|---|---|---|
 | — | — | Plan created | — | — |
 | 2026-10-29 | 1.01 | Scaffolded Next.js 15.5.28 (App Router, TS 5.9, Tailwind 4.3, ESLint, `src/`, `@/*`, pnpm 12) + `.nvmrc` (22). `pnpm dev` serves default page; `pnpm build` passes. | ccd5860 | pnpm 12 blocks install scripts: approved `unrs-resolver` via `pnpm approve-builds`. First build failed with `useContext` null on /404; fixed by clean reinstall (`rm -rf .next node_modules`). ESLint-patch warning seen once, gone after reinstall. Plan tick committed after scaffold commit. |
+| 2026-10-29 | 1.02 | Installed all TRD §2 dependencies; filled Resolved column in `04_TRD.md`; committed lockfile; renamed package to `eventtree`. `pnpm install --frozen-lockfile` and `pnpm build` pass. | 44a99b3 | Deviations approved by Bulbul and logged: pnpm 9→12, Tailwind 4.1→4.3, ssr 0.7→0.12, resolvers 5→6, react-hook-form 7.6x→7.9x, lucide 0.5xx→1.x, vitest 3→5, playwright 1.5x→1.6x. shadcn/Radix not yet installed (added on demand). |
 
 ## Decisions & Deviations Log
 
