@@ -135,6 +135,7 @@ Record here any approved change to the docs (what, why, who approved, date).
 | Date | Doc | Change | Approved by |
 |---|---|---|---|
 | 2026-10-29 | 04_TRD §2 | Locked versions changed: pnpm 9.x → 12.x; Tailwind CSS 4.1 → 4.3 (installed by create-next-app; build passes) | Bulbul |
+| 2026-10-29 | 04_TRD §2 | Locked versions changed to installed latest: @supabase/ssr 0.7→0.12, @hookform/resolvers 5.x→6.x, react-hook-form 7.6x→7.9x, lucide-react 0.5xx→1.x, vitest 3.x→5.x, @playwright/test 1.5x→1.6x | Bulbul |
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
 

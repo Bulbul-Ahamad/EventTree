@@ -19,30 +19,30 @@ Versions are locked at **major.minor**. Step 1.02 of `06_Plan.md` must verify ea
 
 | Layer | Choice | Locked version | Resolved (fill in step 1.02) |
 |---|---|---|---|
-| Runtime | Node.js LTS | 22.x | |
-| Package manager | pnpm | 12.x | |
-| Language | TypeScript | 5.9 | |
-| Framework | Next.js (App Router, `src/` dir, **no Pages Router**) | 15.5 | |
-| UI library | React / React DOM | 19.1 | |
-| Styling | Tailwind CSS | 4.3 | |
-| Components | shadcn/ui (CLI-generated, copied into `src/components/ui`) | CLI latest at install; components pinned by commit | |
-| Primitives | Radix UI (via shadcn) | as pulled by shadcn | |
-| Icons | lucide-react | 0.5xx (latest at install) | |
-| Theming | next-themes | 0.4 | |
-| Backend platform | Supabase (Postgres 15+, Auth, PostgREST) | managed | |
-| Supabase JS | @supabase/supabase-js | 2.x (latest 2) | |
-| Supabase SSR | @supabase/ssr | 0.7 | |
-| Supabase CLI | supabase (dev dependency) | 2.x (latest 2) | |
-| Validation | zod | 4.x | |
-| Forms | react-hook-form + @hookform/resolvers | 7.6x + 5.x | |
-| Dates | date-fns | 4.x | |
-| Class utils | clsx, tailwind-merge, class-variance-authority | latest at install | |
-| Unit/integration tests | vitest + @testing-library/react + jsdom | vitest 3.x | |
-| E2E tests | @playwright/test | 1.5x (latest at install) | |
-| DB tests | pgTAP via `supabase test db` | bundled | |
-| Lint/format | ESLint (next/core-web-vitals + typescript-eslint), Prettier + prettier-plugin-tailwindcss | latest at install | |
-| CI | GitHub Actions | — | |
-| Hosting | Vercel (web) + Supabase Cloud (DB/Auth) | — | |
+| Runtime | Node.js LTS | 22.x | 22.x (`.nvmrc` = 22; local v22) |
+| Package manager | pnpm | 12.x | 12.16.1 |
+| Language | TypeScript | 5.9 | 5.9.3 |
+| Framework | Next.js (App Router, `src/` dir, **no Pages Router**) | 15.5 | 15.5.28 |
+| UI library | React / React DOM | 19.1 | 19.1.0 |
+| Styling | Tailwind CSS | 4.3 | 4.3.3 (+ @tailwindcss/postcss 4.3.3) |
+| Components | shadcn/ui (CLI-generated, copied into `src/components/ui`) | CLI latest at install; components pinned by commit | Added on demand with `pnpm dlx shadcn@latest add`; CLI version recorded when first used |
+| Primitives | Radix UI (via shadcn) | as pulled by shadcn | Resolved when first shadcn component is added |
+| Icons | lucide-react | 1.x (latest at install) | 1.62.0 |
+| Theming | next-themes | 0.4 | 0.4.6 |
+| Backend platform | Supabase (Postgres 15+, Auth, PostgREST) | managed | Local: Supabase CLI 2.122.0 stack; Cloud: managed |
+| Supabase JS | @supabase/supabase-js | 2.x (latest 2) | 2.118.0 |
+| Supabase SSR | @supabase/ssr | 0.12 | 0.12.7 |
+| Supabase CLI | supabase (dev dependency) | 2.x (latest 2) | 2.122.0 |
+| Validation | zod | 4.x | 4.6.7 |
+| Forms | react-hook-form + @hookform/resolvers | 7.9x + 6.x | react-hook-form 7.91.0 + @hookform/resolvers 6.0.1 |
+| Dates | date-fns | 4.x | 4.4.0 |
+| Class utils | clsx, tailwind-merge, class-variance-authority | latest at install | clsx 2.1.1, tailwind-merge 3.7.0, class-variance-authority 0.7.1 |
+| Unit/integration tests | vitest + @testing-library/react + jsdom | vitest 5.x | vitest 5.0.5, @testing-library/react 16.3.3, @testing-library/jest-dom 7.0.1, jsdom 30.1.3, @vitejs/plugin-react 6.1.2 |
+| E2E tests | @playwright/test | 1.6x (latest at install) | 1.64.1 |
+| DB tests | pgTAP via `supabase test db` | bundled | Bundled with Supabase CLI 2.122.0 |
+| Lint/format | ESLint (next/core-web-vitals + typescript-eslint), Prettier + prettier-plugin-tailwindcss | latest at install | ESLint 9.39.5 + eslint-config-next 15.5.28; Prettier 3.9.10 + prettier-plugin-tailwindcss 0.8.1 |
+| CI | GitHub Actions | — | n/a (service) |
+| Hosting | Vercel (web) + Supabase Cloud (DB/Auth) | n/a (service) |
 
 **Explicitly NOT in the stack (do not install):** Redux/Zustand/MobX, TanStack Query, tRPC, Prisma/Drizzle (DB access is via supabase-js and SQL migrations), Express/Nest, GraphQL, Firebase, NextAuth/Auth.js, Moment.js, Axios, any CSS-in-JS library, any component library other than shadcn/ui, Storybook, Sentry (not in MVP).
 
