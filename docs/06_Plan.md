@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.04`**
+**Next up: `1.05`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -21,7 +21,7 @@
 - [x] **1.01** — Scaffold Next.js (App Router, TypeScript, Tailwind, ESLint, `src/` dir, alias `@/*`, pnpm) in repo root without overwriting `docs/`, `CLAUDE.md`, `.cursorrules`. Add `.nvmrc` (22). _Done when:_ `pnpm dev` serves the default page and `pnpm build` succeeds.
 - [x] **1.02** — Verify every dependency in `04_TRD §2` exists at its locked minor; install; fill the "Resolved" column in `04_TRD.md`; commit lockfile. _Done when:_ table has no empty Resolved cells; `pnpm install --frozen-lockfile` works.
 - [x] **1.03** — Configure TS strict options, ESLint, Prettier (+ tailwind plugin), and the scripts table from `04_TRD §11` (stubs allowed for later scripts). Add `src/lib/env.ts` (Zod) and `.env.example`. _Done when:_ `pnpm check` passes; missing env var makes app fail fast with a clear message.
-- [ ] **1.04** — Init Supabase CLI (`supabase init`), configure `config.toml` per `05_Schema §7.8` (email confirm on, min password 10, redirect URLs), start local stack. _Done when:_ `pnpm db:start` runs and `pnpm db:reset` succeeds on an empty migration set.
+- [x] **1.04** — Init Supabase CLI (`supabase init`), configure `config.toml` per `05_Schema §7.8` (email confirm on, min password 10, redirect URLs), start local stack. _Done when:_ `pnpm db:start` runs and `pnpm db:reset` succeeds on an empty migration set.
 
 **Migrations (one concern per file, applied in order)**
 - [ ] **1.05** — Migration `…_extensions_enums`: extensions, `app_private` schema, all enums (`05_Schema §2`). _Done when:_ `db:reset` succeeds; enums exist.
@@ -129,6 +129,7 @@
 | 2026-10-29 | 1.01 | Scaffolded Next.js 15.5.28 (App Router, TS 5.9, Tailwind 4.3, ESLint, `src/`, `@/*`, pnpm 12) + `.nvmrc` (22). `pnpm dev` serves default page; `pnpm build` passes. | ccd5860 | pnpm 12 blocks install scripts: approved `unrs-resolver` via `pnpm approve-builds`. First build failed with `useContext` null on /404; fixed by clean reinstall (`rm -rf .next node_modules`). ESLint-patch warning seen once, gone after reinstall. Plan tick committed after scaffold commit. |
 | 2026-10-29 | 1.02 | Installed all TRD §2 dependencies; filled Resolved column in `04_TRD.md`; committed lockfile; renamed package to `eventtree`. `pnpm install --frozen-lockfile` and `pnpm build` pass. | 44a99b3 | Deviations approved by Bulbul and logged: pnpm 9→12, Tailwind 4.1→4.3, ssr 0.7→0.12, resolvers 5→6, react-hook-form 7.6x→7.9x, lucide 0.5xx→1.x, vitest 3→5, playwright 1.5x→1.6x. shadcn/Radix not yet installed (added on demand). |
 | 2026-10-29 | 1.03 | Strict TS (`noUncheckedIndexedAccess`, `noImplicitOverride`), ESLint `no-console`, Prettier + tailwind plugin, all TRD §11 scripts, `src/lib/env-schema.ts` + `env.ts` (Zod), `src/instrumentation.ts` boot validation, `.env.example` (un-ignored in `.gitignore`), Vitest config + 4 env unit tests. `pnpm check` passes; a missing env var stops `pnpm dev` with a clear error naming it. | 5fd25b3, d1c3de4 | First test run failed because `env.ts` validated at import; fixed by splitting pure `parseEnv` into `env-schema.ts`. `vitest.config.ts` renamed `.mts` (Vite ESM warning). `seed` script uses `tsx`, which is not in the TRD stack and not installed: `pnpm seed` will not run until a decision is made (open question for Bulbul). `test:int`, `test:e2e`, `test:db` are stubs until later steps. |
+| 2026-10-29 | 1.04 | `supabase init`; `supabase/config.toml` set per `05_Schema §7.8`: site URL `http://localhost:3000`, redirect `http://localhost:3000/**`, min password 10, email confirmations ON, JWT 3600, refresh rotation ON, signup enabled. Local stack starts (`pnpm db:start`); `pnpm db:reset` succeeds on empty migration set. | 2e27e63, 72ea164 | Postgres major_version 17 (TRD says 15+). `db:reset` warns `supabase/seed.sql` not found: expected, no seed yet. Production redirect URL to be added at deploy. Push needed `git pull --rebase` (remote had plan commit); author identity fixed on 2e27e63. |
 
 ## Decisions & Deviations Log
 
