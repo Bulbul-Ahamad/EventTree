@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.01`**
+**Next up: `1.02`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -18,7 +18,7 @@
 ## Phase 1 — Database & Auth
 
 **Repo & tooling**
-- [ ] **1.01** — Scaffold Next.js (App Router, TypeScript, Tailwind, ESLint, `src/` dir, alias `@/*`, pnpm) in repo root without overwriting `docs/`, `CLAUDE.md`, `.cursorrules`. Add `.nvmrc` (22). _Done when:_ `pnpm dev` serves the default page and `pnpm build` succeeds.
+- [x] **1.01** — Scaffold Next.js (App Router, TypeScript, Tailwind, ESLint, `src/` dir, alias `@/*`, pnpm) in repo root without overwriting `docs/`, `CLAUDE.md`, `.cursorrules`. Add `.nvmrc` (22). _Done when:_ `pnpm dev` serves the default page and `pnpm build` succeeds.
 - [ ] **1.02** — Verify every dependency in `04_TRD §2` exists at its locked minor; install; fill the "Resolved" column in `04_TRD.md`; commit lockfile. _Done when:_ table has no empty Resolved cells; `pnpm install --frozen-lockfile` works.
 - [ ] **1.03** — Configure TS strict options, ESLint, Prettier (+ tailwind plugin), and the scripts table from `04_TRD §11` (stubs allowed for later scripts). Add `src/lib/env.ts` (Zod) and `.env.example`. _Done when:_ `pnpm check` passes; missing env var makes app fail fast with a clear message.
 - [ ] **1.04** — Init Supabase CLI (`supabase init`), configure `config.toml` per `05_Schema §7.8` (email confirm on, min password 10, redirect URLs), start local stack. _Done when:_ `pnpm db:start` runs and `pnpm db:reset` succeeds on an empty migration set.
@@ -126,6 +126,7 @@
 | Date | Step | What changed | Commit | Notes / deviations |
 |---|---|---|---|---|
 | — | — | Plan created | — | — |
+| 2026-10-29 | 1.01 | Scaffolded Next.js 15.5.28 (App Router, TS 5.9, Tailwind 4.3, ESLint, `src/`, `@/*`, pnpm 12) + `.nvmrc` (22). `pnpm dev` serves default page; `pnpm build` passes. | ccd5860 | pnpm 12 blocks install scripts: approved `unrs-resolver` via `pnpm approve-builds`. First build failed with `useContext` null on /404; fixed by clean reinstall (`rm -rf .next node_modules`). ESLint-patch warning seen once, gone after reinstall. Plan tick committed after scaffold commit. |
 
 ## Decisions & Deviations Log
 
