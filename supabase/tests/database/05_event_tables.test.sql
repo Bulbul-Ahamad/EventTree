@@ -74,12 +74,12 @@ select throws_ok(
   'P0001', 'E_EVENT_READONLY', 'active event cannot be deleted');
 
 -- cascade is not blocked by the guard
-insert into public.event_settings (event_id, event_status) values
-  ('20000000-0000-0000-0000-000000000002', 'draft'),
-  ('20000000-0000-0000-0000-000000000003', 'archived');
 insert into public.nodes (type, parent_id, title, created_by) values
   ('task', '20000000-0000-0000-0000-000000000002', 'd1', '00000000-0000-0000-0000-0000000000a1'),
   ('task', '20000000-0000-0000-0000-000000000003', 'a1', '00000000-0000-0000-0000-0000000000a1');
+insert into public.event_settings (event_id, event_status) values
+  ('20000000-0000-0000-0000-000000000002', 'draft'),
+  ('20000000-0000-0000-0000-000000000003', 'archived');
 select lives_ok(
   $$ delete from public.nodes where id = '20000000-0000-0000-0000-000000000002' $$,
   'draft event can be deleted with its children');
