@@ -46,9 +46,11 @@ type PersonKey = keyof typeof PEOPLE;
 
 const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
-function must<T>(result: { data: T | null; error: { message: string } | null }, what: string): T {
-  if (result.error || result.data === null) fail(`${what}: ${result.error?.message ?? "no data"}`);
-  return result.data;
+function must<T>(result: { data: T; error: { message: string } | null }, what: string): NonNullable<T> {
+  if (result.error || result.data === null || result.data === undefined) {
+    fail(`${what}: ${result.error?.message ?? "no data"}`);
+  }
+  return result.data as NonNullable<T>;
 }
 
 async function ensureUsers(client: SupabaseClient): Promise<Record<PersonKey, string>> {
