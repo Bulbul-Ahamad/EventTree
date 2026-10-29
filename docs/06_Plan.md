@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.11`**
+**Next up: `1.12`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -30,7 +30,7 @@
 - [x] **1.08** — Migration `…_nodes`: `nodes` table, constraints, indexes, triggers `01_prepare`, `02_validate`, `04_progress_leaf`. _Done when:_ pgTAP tests for shape checks, `E_PARENT_IS_TASK`, `E_MAX_DEPTH`, `E_NODE_LIMIT`, `E_ASSIGNEE_NOT_IN_ORG`, `E_ROOT_IMMUTABLE` pass.
 - [x] **1.09** — Migration `…_event_tables`: `event_settings`, `event_members`, `node_updates` (+ immutability trigger, `event_id`/`user_id` forcing trigger); `nodes_03_guard` and `nodes_05_event_members` triggers. _Done when:_ pgTAP tests for lifecycle read-only, cascade-not-blocked, event_members sync pass.
 - [x] **1.10** — Migration `…_progress_rollup`: `recompute_progress_upwards`, `nodes_06_rollup`. _Done when:_ pgTAP parity test (cached progress == recursive CTE) passes after insert/delete/status/weight changes incl. empty segment.
-- [ ] **1.11** — Migration `…_rls_helpers`: all functions in `05_Schema §4` with grants. _Done when:_ pgTAP tests exercise each helper for owner/head/assignee/outsider/admin.
+- [x] **1.11** — Migration `…_rls_helpers`: all functions in `05_Schema §4` with grants. _Done when:_ pgTAP tests exercise each helper for owner/head/assignee/outsider/admin.
 - [ ] **1.12** — Migration `…_rls_policies`: enable RLS, base privileges, column grants, all policies of `05_Schema §5`. _Done when:_ pgTAP: RLS enabled on all tables; `anon` has no access; org-isolation tests pass; client cannot update `status`/`progress_cached`.
 - [ ] **1.13** — Migration `…_rpc_orgs`: `create_organization`, `join_org_by_code`, `rotate_join_code`, `set_org_member_role`, `remove_org_member`. _Done when:_ pgTAP covers success + each error code.
 - [ ] **1.14** — Migration `…_rpc_events`: `create_event`, `create_node`, `set_event_status`. _Done when:_ pgTAP covers creation, permission failures, lifecycle table.
@@ -135,6 +135,7 @@
 | 2026-10-29 | 1.07 + 1.08 | Migrations `20261029042000_organizations.sql` (organizations, org_members, `generate_join_code`, last-admin guard) and `20261029042500_nodes.sql` (nodes, indexes, triggers 01_prepare/02_validate/04_progress_leaf, plus the `E_OWNS_EVENTS` and unassign-on-removal org guards). pgTAP `03_organizations` (10) and `04_nodes` (18) pass; `db:reset` + `test:db` green (48 tests). | 5c2e4c6 | Executed together by decision (see Decisions log): the owns-events and unassign guards read `nodes`, which only exists from 1.08. RLS/grants deferred to 1.12. |
 | 2026-10-29 | 1.09 | Migration `20261029043000_event_tables.sql`: `event_settings`, `event_members`, `node_updates` (append-only, event_id/user_id forcing triggers), `nodes_03_guard`, `nodes_05_event_members`. pgTAP `05_event_tables` (23) passes; `test:db` green (71 tests). | 4a78c6c, 320a3a4 | First run failed because the test inserted a child into an already-archived event (guard correctly blocked it); fixed test ordering, no migration change. `user_id` is forced to `auth.uid()` only when a JWT is present, so RPC/trigger inserts as a superuser keep their value. |
 | 2026-10-29 | 1.10 | Migration `20261029043500_progress_rollup.sql`: `recompute_progress_upwards`, `nodes_06_rollup`. pgTAP `06_progress_rollup` (19) passes: cached progress equals a from-scratch oracle after insert/delete/status/weight changes, empty segment, subtree delete. `test:db` green (90 tests). | bfc9e42 | Oracle is a recursive plpgsql function, not a recursive CTE (same result, rounds per level like the trigger). |
+| 2026-10-29 | 1.11 | Migration `20261029044000_rls_helpers.sql`: 7 helper functions of `05_Schema §4`, execute revoked from public/anon and granted to authenticated. pgTAP `07_rls_helpers` (31) passes with owner/head/nested head/assignee/outsider/admin personas; `test:db` green (121 tests). | f3c60fc | Tests set `request.jwt.claims` as superuser rather than switching DB role (helpers are SECURITY DEFINER); grants checked via `has_function_privilege`. |
 
 ## Decisions & Deviations Log
 
