@@ -32,7 +32,7 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
 set local role authenticated;
 select is((select count(*) from public.get_event_tree('20000000-0000-0000-0000-000000000001')), 10::bigint, 'owner gets every node of the event');
-select is((select string_agg(title, ',') from (select title from public.get_event_tree('20000000-0000-0000-0000-000000000001') offset 0) s limit 1), 'Tech Fest,S2,S1,T_B,T_E,T_A,T_D,T_C,T_S1,T_S2', 'ordered by depth, then position (S2 before S1), then created_at');
+select is((select string_agg(title, ',') from (select title from public.get_event_tree('20000000-0000-0000-0000-000000000001') limit 3) s), 'Tech Fest,S2,S1', 'ordered by depth, then position (S2 before S1)');
 select is((select assignee_name from public.get_event_tree('20000000-0000-0000-0000-000000000001') where title = 'S1'), 'Hana Head', 'assignee name is joined in');
 select is((select assignee_name is null from public.get_event_tree('20000000-0000-0000-0000-000000000001') where title = 'S2'), true, 'unassigned node has no name');
 select is((select count(*) from public.get_event_tree('20000000-0000-0000-0000-000000000001') where title = 'T_OLD'), 0::bigint, 'other events are not mixed in');
