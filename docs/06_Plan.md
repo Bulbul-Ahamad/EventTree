@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.14`**
+**Next up: `1.15`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -33,7 +33,7 @@
 - [x] **1.11** — Migration `…_rls_helpers`: all functions in `05_Schema §4` with grants. _Done when:_ pgTAP tests exercise each helper for owner/head/assignee/outsider/admin.
 - [x] **1.12** — Migration `…_rls_policies`: enable RLS, base privileges, column grants, all policies of `05_Schema §5`. _Done when:_ pgTAP: RLS enabled on all tables; `anon` has no access; org-isolation tests pass; client cannot update `status`/`progress_cached`.
 - [x] **1.13** — Migration `…_rpc_orgs`: `create_organization`, `join_org_by_code`, `rotate_join_code`, `set_org_member_role`, `remove_org_member`. _Done when:_ pgTAP covers success + each error code.
-- [ ] **1.14** — Migration `…_rpc_events`: `create_event`, `create_node`, `set_event_status`. _Done when:_ pgTAP covers creation, permission failures, lifecycle table.
+- [x] **1.14** — Migration `…_rpc_events`: `create_event`, `create_node`, `set_event_status`. _Done when:_ pgTAP covers creation, permission failures, lifecycle table.
 - [ ] **1.15** — Migration `…_rpc_status`: `transition_task_status` per `05_Schema §6.1`. _Done when:_ pgTAP covers T1–T7 × roles × modes, stale state, comment-required, self-verify rule, inactive event.
 - [ ] **1.16** — Migration `…_rpc_reads`: `get_event_tree`, `get_my_tasks`, `get_review_queue`. _Done when:_ pgTAP covers visibility and ordering.
 - [ ] **1.17** — Complete pgTAP suite per `05_Schema §9` (fill any gap). _Done when:_ `pnpm test:db` is green and every item in §9 maps to at least one test file.
@@ -138,6 +138,7 @@
 | 2026-10-29 | 1.11 | Migration `20261029044000_rls_helpers.sql`: 7 helper functions of `05_Schema §4`, execute revoked from public/anon and granted to authenticated. pgTAP `07_rls_helpers` (31) passes with owner/head/nested head/assignee/outsider/admin personas; `test:db` green (121 tests). | f3c60fc | Tests set `request.jwt.claims` as superuser rather than switching DB role (helpers are SECURITY DEFINER); grants checked via `has_function_privilege`. |
 | 2026-10-29 | 1.12 | Migration `20261029044500_rls_policies.sql`: RLS enabled on all 7 tables, base privileges revoked from anon/authenticated, column grants and all policies of `05_Schema §5`. pgTAP `08_rls_policies` (31) passes as the real `authenticated` role: org isolation, no client writes to status/progress_cached, forged created_by/org_id rejected, head scope, comment permission; `test:db` green (152 tests). | aa8f0c0, f29c9ba | First run failed on an apostrophe in a test description (SQL quoting), fixed in the test only. |
 | 2026-10-29 | 1.13 | Migration `20261029045000_rpc_orgs.sql`: `create_organization`, `join_org_by_code`, `rotate_join_code`, `set_org_member_role`, `remove_org_member` (SECURITY DEFINER, anon revoked). pgTAP `09_rpc_orgs` (34) passes: success paths and E_VALIDATION, E_SLUG_TAKEN, E_NOT_AUTHORIZED, E_INVALID_JOIN_CODE, E_NOT_FOUND, E_LAST_ADMIN, E_OWNS_EVENTS; `test:db` green (186 tests). | 89d68f4 | `set_org_member_role` / `remove_org_member` raise E_NOT_FOUND when the target row does not exist (not spelled out in the schema doc). |
+| 2026-10-29 | 1.14 | Migration `20261029045500_rpc_events.sql`: `create_event` (root + settings + event_members in one call), `create_node` (SECURITY INVOKER, maps RLS/check errors to E_NOT_AUTHORIZED/E_VALIDATION), `set_event_status` (lifecycle table of AppFlow §6, completed_at set/cleared). pgTAP `10_rpc_events` (33) passes; `test:db` green (219 tests). | eedcfd4 | `create_event` and `create_node` also raise E_VALIDATION for out-of-range title/description/location/weight (schema doc only says Validates). |
 
 ## Decisions & Deviations Log
 
