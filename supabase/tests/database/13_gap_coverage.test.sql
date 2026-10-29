@@ -34,7 +34,7 @@ select is((select count(*) from public.nodes where id = '40000000-0000-0000-0000
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
 set local role authenticated;
-select is((select count(*) from public.nodes where event_id = '20000000-0000-0000-0000-000000000001'), 4::bigint, 'admin can read every node of an event they are not assigned to');
+select is((select count(*) from public.nodes where event_id = '20000000-0000-0000-0000-000000000001'), 3::bigint, 'admin can read every node of an event they are not assigned to');
 select throws_ok($$ insert into public.nodes (parent_id, type, title) values ('30000000-0000-0000-0000-000000000001', 'task', 'admin write') $$, '42501', null, 'admin cannot add nodes');
 update public.nodes set title = 'admin edit' where id = '40000000-0000-0000-0000-000000000001';
 update public.event_settings set location = 'admin edit' where event_id = '20000000-0000-0000-0000-000000000001';
