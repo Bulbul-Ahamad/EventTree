@@ -38,12 +38,12 @@ select is((select count(*) from public.profiles), 1::bigint, 'non-member sees on
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000009"}', true);
 set local role authenticated;
-select is((select count(*) from public.nodes where org_id = '10000000-0000-0000-0000-000000000001'), 0::bigint, 'org isolation: other org's nodes are invisible');
+select is((select count(*) from public.nodes where org_id = '10000000-0000-0000-0000-000000000001'), 0::bigint, 'org isolation: nodes of another org are invisible');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000004"}', true);
 set local role authenticated;
 select is((select count(*) from public.nodes where event_id = '20000000-0000-0000-0000-000000000001'), 7::bigint, 'task assignee sees the whole event tree');
-select is((select count(*) from public.nodes where org_id = '10000000-0000-0000-0000-000000000002'), 0::bigint, 'task assignee cannot see another org's nodes');
+select is((select count(*) from public.nodes where org_id = '10000000-0000-0000-0000-000000000002'), 0::bigint, 'task assignee cannot see annodes of another org');
 select is((select count(*) from public.organizations), 1::bigint, 'member sees only their own organization');
 select is((select count(*) from public.org_members), 7::bigint, 'member sees members of their org only');
 select is((select count(*) from public.profiles where id = '00000000-0000-0000-0000-000000000009'), 0::bigint, 'no profile access across orgs');
