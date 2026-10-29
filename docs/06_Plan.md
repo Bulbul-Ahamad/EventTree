@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.20`**
+**Next up: `1.21`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -41,7 +41,7 @@
 - [x] **1.19** — Generate types `pnpm db:types` → `src/types/database.ts`. _Done when:_ file committed; typecheck passes; CI-style diff check is clean.
 
 **Auth plumbing**
-- [ ] **1.20** — `src/lib/supabase/{client,server,middleware}.ts` with `@supabase/ssr`. _Done when:_ unit test or manual check shows server client reads session cookie.
+- [x] **1.20** — `src/lib/supabase/{client,server,middleware}.ts` with `@supabase/ssr`. _Done when:_ unit test or manual check shows server client reads session cookie.
 - [ ] **1.21** — Design tokens: implement `globals.css` per `03_UI_Spec §9`, fonts (Inter, Noto Sans Bengali, JetBrains Mono), `next-themes`, shadcn init. _Done when:_ light/dark token swap visible on a test page; Bangla sample text renders.
 - [ ] **1.22** — Auth-needed primitives (Button, Input, Label, FormField, Card, Toast/Sonner, ThemeToggle) per `03_UI_Spec §8`. _Done when:_ all states (hover/focus/disabled/loading/error) verified in both themes.
 - [ ] **1.23** — `src/lib/errors.ts` (ErrorCode union + message map from `02_AppFlow §7`) and `action-result.ts`. Add missing codes to `02_AppFlow §7` if discovered. _Done when:_ unit tests map every code to a message and unknown → `E_UNKNOWN`.
@@ -144,6 +144,7 @@
 | 2026-10-29 | 1.17 | Added `13_gap_coverage.test.sql` (18 tests: org-isolation writes, admin read-only, protected columns, node_updates append-only for clients, completed/archived event writes) and `supabase/tests/COVERAGE.md` mapping every `05_Schema §9` item to test files. `test:db` green: 13 files, 293 tests. | 954a069, b00d18b | First run had a wrong expected node count in my test (3, not 4); fixed in the test only. |
 | 2026-10-29 | 1.18 | `scripts/seed.ts`: refuses non-localhost URL, needs `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`, creates 2 orgs, 6 users (owner, 2 heads, 2 assignees, 1 outsider), event "Tech Fest 2026" with 25 nodes (1 event, 4 segments, 20 tasks), activity rows, event set active. `tsx` 4.23.15 added as dev dependency (approved, TRD updated). `pnpm seed` run twice: second run changes nothing. SQL check: event 42.9%, segments avg 31.0%, tasks avg 35.0%. `pnpm check` green. | 88c20fe, dd17fb3 | First `tsc` run failed (nullable helper return type); fixed. `package.json` / lockfile for `tsx` committed from Bulbul's machine. Login password for demo users: `Passw0rd!demo`. |
 | 2026-10-30 | 1.19 | `src/types/database.ts` generated via `pnpm db:types` (public tables, enums, RPCs). Re-running leaves `git status` clean; `pnpm check` green (lint, tsc, 4 unit tests). | db86965 | CLI prints an unformatted-output hint; ignored (file is eslint-ignored, never hand-edited). |
+| 2026-10-30 | 1.20 | `src/lib/supabase/client.ts` (browser), `server.ts` (async, `next/headers` cookies, `server-only`), `middleware.ts` (`updateSession` refreshes session, returns user via `getUser()`); all typed with generated `Database`. 2 unit tests: server client reads the session from the cookie; no cookie gives null. `pnpm check` green (6 tests). | a9f7334 | `server-only` is not an npm dependency (not in locked stack): added `src/types/server-only.d.ts` and a vitest alias stub; Next resolves it at build. Test stderr warnings (getSession insecure, multiple GoTrueClient) are expected in the test. |
 
 ## Decisions & Deviations Log
 
