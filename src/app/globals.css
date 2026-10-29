@@ -1,26 +1,184 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* Design tokens: docs/03_UI_Spec.md §2 and §9. Components use semantic names only. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-muted: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --foreground: #0f172a;
+  --foreground-muted: #475569;
+  --foreground-subtle: #64748b;
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
+  --primary-active: #312e81;
+  --primary-soft: #eef2ff;
+  --primary-foreground: #ffffff;
+  --ring: #6366f1;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --danger-foreground: #ffffff;
+  --info: #1d4ed8;
+  --info-soft: #dbeafe;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --status-todo-bg: #f1f5f9;
+  --status-todo-fg: #475569;
+  --status-in_progress-bg: #dbeafe;
+  --status-in_progress-fg: #1d4ed8;
+  --status-submitted-bg: #fef3c7;
+  --status-submitted-fg: #92400e;
+  --status-verified-bg: #dcfce7;
+  --status-verified-fg: #166534;
+
+  --priority-low: #64748b;
+  --priority-medium: #1d4ed8;
+  --priority-high: #b45309;
+  --priority-urgent: #b91c1c;
+
+  --progress-track: #e2e8f0;
+
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(15 23 42 / 0.12);
+  --backdrop: rgb(15 23 42 / 0.5);
+}
+
+.dark {
+  --background: #0b1020;
+  --surface: #111827;
+  --surface-muted: #1f2937;
+  --border: #2a3547;
+  --border-strong: #3b475c;
+  --foreground: #f1f5f9;
+  --foreground-muted: #cbd5e1;
+  --foreground-subtle: #94a3b8;
+  --primary: #818cf8;
+  --primary-hover: #a5b4fc;
+  --primary-active: #c7d2fe;
+  --primary-soft: #1e1b4b;
+  --primary-foreground: #0b1020;
+  --ring: #a5b4fc;
+  --success: #4ade80;
+  --success-soft: #052e16;
+  --warning: #fbbf24;
+  --warning-soft: #422006;
+  --danger: #f87171;
+  --danger-soft: #450a0a;
+  --danger-foreground: #0b1020;
+  --info: #60a5fa;
+  --info-soft: #172554;
+
+  --status-todo-bg: #1f2937;
+  --status-todo-fg: #cbd5e1;
+  --status-in_progress-bg: #172554;
+  --status-in_progress-fg: #93c5fd;
+  --status-submitted-bg: #422006;
+  --status-submitted-fg: #fcd34d;
+  --status-verified-bg: #052e16;
+  --status-verified-fg: #86efac;
+
+  --priority-low: #94a3b8;
+  --priority-medium: #60a5fa;
+  --priority-high: #fbbf24;
+  --priority-urgent: #f87171;
+
+  --progress-track: #2a3547;
+
+  --shadow-sm: none;
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.55);
+  --backdrop: rgb(0 0 0 / 0.65);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --color-status-todo-bg: var(--status-todo-bg);
+  --color-status-todo-fg: var(--status-todo-fg);
+  --color-status-in_progress-bg: var(--status-in_progress-bg);
+  --color-status-in_progress-fg: var(--status-in_progress-fg);
+  --color-status-submitted-bg: var(--status-submitted-bg);
+  --color-status-submitted-fg: var(--status-submitted-fg);
+  --color-status-verified-bg: var(--status-verified-bg);
+  --color-status-verified-fg: var(--status-verified-fg);
+
+  --color-priority-low: var(--priority-low);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-high: var(--priority-high);
+  --color-priority-urgent: var(--priority-urgent);
+
+  --color-progress-track: var(--progress-track);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  --font-sans:
+    var(--font-inter), var(--font-bengali), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:lang(bn) {
+  line-height: 1.7;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Global focus ring (03_UI_Spec §8). */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
