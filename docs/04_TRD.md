@@ -40,7 +40,7 @@ Versions are locked at **major.minor**. Step 1.02 of `06_Plan.md` must verify ea
 | Unit/integration tests | vitest + @testing-library/react + jsdom | vitest 5.x | vitest 5.0.5, @testing-library/react 16.3.3, @testing-library/jest-dom 7.0.1, jsdom 30.1.3, @vitejs/plugin-react 6.1.2 |
 | E2E tests | @playwright/test | 1.6x (latest at install) | 1.64.1 |
 | DB tests | pgTAP via `supabase test db` | bundled | Bundled with Supabase CLI 2.122.0 |
-| Script runner | tsx (dev dependency, used only by `pnpm seed`) | latest at install | (fill after install) |
+| Script runner | tsx (dev dependency, used only by `pnpm seed`) | latest at install | 4.23.15 |
 | Lint/format | ESLint (next/core-web-vitals + typescript-eslint), Prettier + prettier-plugin-tailwindcss | latest at install | ESLint 9.39.5 + eslint-config-next 15.5.28; Prettier 3.9.10 + prettier-plugin-tailwindcss 0.8.1 |
 | CI | GitHub Actions | — | n/a (service) |
 | Hosting | Vercel (web) + Supabase Cloud (DB/Auth) | n/a (service) |
