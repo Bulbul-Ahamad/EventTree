@@ -1,5 +1,5 @@
 begin;
-select plan(19);
+select plan(21);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000001','own@example.com','{"full_name":"Olive Owner"}'),('00000000-0000-0000-0000-000000000002','head@example.com','{"full_name":"Hana Head"}'),
@@ -22,6 +22,11 @@ insert into public.nodes (id, type, parent_id, title, assignee_id, due_at, creat
   ('40000000-0000-0000-0000-000000000051','task','30000000-0000-0000-0000-000000000001','T_S1','00000000-0000-0000-0000-000000000003', null,                      '00000000-0000-0000-0000-000000000001'),
   ('40000000-0000-0000-0000-000000000052','task','30000000-0000-0000-0000-000000000002','T_S2','00000000-0000-0000-0000-000000000003', null,                      '00000000-0000-0000-0000-000000000001'),
   ('40000000-0000-0000-0000-000000000053','task','30000000-0000-0000-0000-000000000009','T_OLD','00000000-0000-0000-0000-000000000003', null, '00000000-0000-0000-0000-000000000001');
+insert into public.nodes (id, type, parent_id, title, assignee_id, created_by) values
+  ('40000000-0000-0000-0000-000000000054','task','30000000-0000-0000-0000-000000000001','T_SH','00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000001'),
+  ('40000000-0000-0000-0000-000000000055','task','30000000-0000-0000-0000-000000000002','T_SO','00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000001');
+update public.nodes set status = 'submitted', submitted_at = now() - interval '150 minutes' where title = 'T_SH';
+update public.nodes set status = 'submitted', submitted_at = now() - interval '30 minutes' where title = 'T_SO';
 update public.nodes set status = 'verified' where title = 'T_E';
 update public.nodes set status = 'submitted', submitted_at = now() - interval '3 hours' where title = 'T_S1';
 update public.nodes set status = 'submitted', submitted_at = now() - interval '1 hour'  where title = 'T_S2';
@@ -31,7 +36,7 @@ insert into public.event_settings (event_id, event_status) values ('20000000-000
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
 set local role authenticated;
-select is((select count(*) from public.get_event_tree('20000000-0000-0000-0000-000000000001')), 10::bigint, 'owner gets every node of the event');
+select is((select count(*) from public.get_event_tree('20000000-0000-0000-0000-000000000001')), 12::bigint, 'owner gets every node of the event');
 select is((select string_agg(title, ',') from (select title from public.get_event_tree('20000000-0000-0000-0000-000000000001') limit 3) s), 'Tech Fest,S2,S1', 'ordered by depth, then position (S2 before S1)');
 select is((select assignee_name from public.get_event_tree('20000000-0000-0000-0000-000000000001') where title = 'S1'), 'Hana Head', 'assignee name is joined in');
 select is((select assignee_name is null from public.get_event_tree('20000000-0000-0000-0000-000000000001') where title = 'S2'), true, 'unassigned node has no name');
@@ -39,7 +44,7 @@ select is((select count(*) from public.get_event_tree('20000000-0000-0000-0000-0
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000003"}', true);
 set local role authenticated;
-select is((select count(*) from public.get_event_tree('20000000-0000-0000-0000-000000000001')), 10::bigint, 'task assignee sees the whole tree');
+select is((select count(*) from public.get_event_tree('20000000-0000-0000-0000-000000000001')), 12::bigint, 'task assignee sees the whole tree');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000004"}', true);
 set local role authenticated;
@@ -63,11 +68,13 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
 set local role authenticated;
 select is((select string_agg(title, ',') from public.get_review_queue()), 'T_S1', 'head sees submitted tasks in their segment only');
+select is((select count(*) from public.get_review_queue() where title = 'T_SH'), 0::bigint, 'head does not see their own submitted task in their queue');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
 set local role authenticated;
-select is((select string_agg(title, ',') from (select title from public.get_review_queue() offset 0) s), 'T_S1,T_S2', 'owner sees all submitted, oldest first; completed event excluded');
+select is((select string_agg(title, ',') from (select title from public.get_review_queue() offset 0) s), 'T_S1,T_SH,T_S2,T_SO', 'owner sees all submitted including their own, oldest first; completed event excluded');
 select is((select assignee_name from public.get_review_queue() where title = 'T_S1'), 'Tariq Assignee', 'queue shows the assignee');
+select is((select count(*) from public.get_review_queue() where title = 'T_SO'), 1::bigint, 'owner still sees their own submitted task (owner may verify it)');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000003"}', true);
 set local role authenticated;
