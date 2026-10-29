@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.19`**
+**Next up: `1.20`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -38,7 +38,7 @@
 - [x] **1.16** — Migration `…_rpc_reads`: `get_event_tree`, `get_my_tasks`, `get_review_queue`. _Done when:_ pgTAP covers visibility and ordering.
 - [x] **1.17** — Complete pgTAP suite per `05_Schema §9` (fill any gap). _Done when:_ `pnpm test:db` is green and every item in §9 maps to at least one test file.
 - [x] **1.18** — `scripts/seed.ts` (refuses non-localhost URL): 2 orgs, 6 users (owner, 2 heads, 2 assignees, 1 outsider), one active event with ~25 nodes. _Done when:_ `pnpm seed` is idempotent and demo data visible via SQL.
-- [ ] **1.19** — Generate types `pnpm db:types` → `src/types/database.ts`. _Done when:_ file committed; typecheck passes; CI-style diff check is clean.
+- [x] **1.19** — Generate types `pnpm db:types` → `src/types/database.ts`. _Done when:_ file committed; typecheck passes; CI-style diff check is clean.
 
 **Auth plumbing**
 - [ ] **1.20** — `src/lib/supabase/{client,server,middleware}.ts` with `@supabase/ssr`. _Done when:_ unit test or manual check shows server client reads session cookie.
@@ -143,6 +143,7 @@
 | 2026-10-29 | 1.16 | Migration `20261029050500_rpc_reads.sql` (`get_event_tree`, `get_my_tasks`, `get_review_queue`, all SECURITY INVOKER) plus `20261029051000_review_queue_self_exclusion.sql`. pgTAP `12_rpc_reads` (21) covers visibility, ordering, overdue-first, completed events excluded, review queue scope, anon denied; `test:db` green (275 tests). | b245a58, 804ffe9, 7ee7c17 | Decision logged: own submitted tasks are excluded from a user's review queue unless they are the event owner; `05_Schema §6` updated. |
 | 2026-10-29 | 1.17 | Added `13_gap_coverage.test.sql` (18 tests: org-isolation writes, admin read-only, protected columns, node_updates append-only for clients, completed/archived event writes) and `supabase/tests/COVERAGE.md` mapping every `05_Schema §9` item to test files. `test:db` green: 13 files, 293 tests. | 954a069, b00d18b | First run had a wrong expected node count in my test (3, not 4); fixed in the test only. |
 | 2026-10-29 | 1.18 | `scripts/seed.ts`: refuses non-localhost URL, needs `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`, creates 2 orgs, 6 users (owner, 2 heads, 2 assignees, 1 outsider), event "Tech Fest 2026" with 25 nodes (1 event, 4 segments, 20 tasks), activity rows, event set active. `tsx` 4.23.15 added as dev dependency (approved, TRD updated). `pnpm seed` run twice: second run changes nothing. SQL check: event 42.9%, segments avg 31.0%, tasks avg 35.0%. `pnpm check` green. | 88c20fe, dd17fb3 | First `tsc` run failed (nullable helper return type); fixed. `package.json` / lockfile for `tsx` committed from Bulbul's machine. Login password for demo users: `Passw0rd!demo`. |
+| 2026-10-30 | 1.19 | `src/types/database.ts` generated via `pnpm db:types` (public tables, enums, RPCs). Re-running leaves `git status` clean; `pnpm check` green (lint, tsc, 4 unit tests). | db86965 | CLI prints an unformatted-output hint; ignored (file is eslint-ignored, never hand-edited). |
 
 ## Decisions & Deviations Log
 
