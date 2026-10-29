@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.17`**
+**Next up: `1.18`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -36,7 +36,7 @@
 - [x] **1.14** — Migration `…_rpc_events`: `create_event`, `create_node`, `set_event_status`. _Done when:_ pgTAP covers creation, permission failures, lifecycle table.
 - [x] **1.15** — Migration `…_rpc_status`: `transition_task_status` per `05_Schema §6.1`. _Done when:_ pgTAP covers T1–T7 × roles × modes, stale state, comment-required, self-verify rule, inactive event.
 - [x] **1.16** — Migration `…_rpc_reads`: `get_event_tree`, `get_my_tasks`, `get_review_queue`. _Done when:_ pgTAP covers visibility and ordering.
-- [ ] **1.17** — Complete pgTAP suite per `05_Schema §9` (fill any gap). _Done when:_ `pnpm test:db` is green and every item in §9 maps to at least one test file.
+- [x] **1.17** — Complete pgTAP suite per `05_Schema §9` (fill any gap). _Done when:_ `pnpm test:db` is green and every item in §9 maps to at least one test file.
 - [ ] **1.18** — `scripts/seed.ts` (refuses non-localhost URL): 2 orgs, 6 users (owner, 2 heads, 2 assignees, 1 outsider), one active event with ~25 nodes. _Done when:_ `pnpm seed` is idempotent and demo data visible via SQL.
 - [ ] **1.19** — Generate types `pnpm db:types` → `src/types/database.ts`. _Done when:_ file committed; typecheck passes; CI-style diff check is clean.
 
@@ -141,6 +141,7 @@
 | 2026-10-29 | 1.14 | Migration `20261029045500_rpc_events.sql`: `create_event` (root + settings + event_members in one call), `create_node` (SECURITY INVOKER, maps RLS/check errors to E_NOT_AUTHORIZED/E_VALIDATION), `set_event_status` (lifecycle table of AppFlow §6, completed_at set/cleared). pgTAP `10_rpc_events` (33) passes; `test:db` green (219 tests). | eedcfd4 | `create_event` and `create_node` also raise E_VALIDATION for out-of-range title/description/location/weight (schema doc only says Validates). |
 | 2026-10-29 | 1.15 | Migration `20261029050000_rpc_status.sql`: `transition_task_status` exactly per `05_Schema §6.1`. pgTAP `11_rpc_status` (35) covers T1-T7 by role (assignee/head/owner/unrelated) and both review modes, self-verify rule (head blocked, owner allowed), E_COMMENT_REQUIRED, E_STALE_STATE, E_EVENT_NOT_ACTIVE (draft, completed), E_NOT_FOUND, E_NOT_AUTHORIZED, audit rows, verified_by/at and progress; `test:db` green (254 tests). | d9706e0, 12feea7 | First run: test setup bug (user had no node so correctly got E_NOT_FOUND); fixed in the test only. |
 | 2026-10-29 | 1.16 | Migration `20261029050500_rpc_reads.sql` (`get_event_tree`, `get_my_tasks`, `get_review_queue`, all SECURITY INVOKER) plus `20261029051000_review_queue_self_exclusion.sql`. pgTAP `12_rpc_reads` (21) covers visibility, ordering, overdue-first, completed events excluded, review queue scope, anon denied; `test:db` green (275 tests). | b245a58, 804ffe9, 7ee7c17 | Decision logged: own submitted tasks are excluded from a user's review queue unless they are the event owner; `05_Schema §6` updated. |
+| 2026-10-29 | 1.17 | Added `13_gap_coverage.test.sql` (18 tests: org-isolation writes, admin read-only, protected columns, node_updates append-only for clients, completed/archived event writes) and `supabase/tests/COVERAGE.md` mapping every `05_Schema §9` item to test files. `test:db` green: 13 files, 293 tests. | 954a069, b00d18b | First run had a wrong expected node count in my test (3, not 4); fixed in the test only. |
 
 ## Decisions & Deviations Log
 
