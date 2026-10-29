@@ -1,11 +1,20 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import { useSyncExternalStore } from "react";
+
+const subscribe = () => () => {};
 
 const MODES = ["system", "light", "dark"] as const;
 
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
+  // The saved theme is only known in the browser; avoid a server/client mismatch.
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
   return (
     <div className="flex gap-2" role="group" aria-label="Theme">
       {MODES.map((mode) => (
@@ -13,7 +22,7 @@ export function ThemeSwitcher() {
           key={mode}
           type="button"
           onClick={() => setTheme(mode)}
-          aria-pressed={theme === mode}
+          aria-pressed={mounted && theme === mode}
           className="h-10 rounded-md border border-border-strong bg-surface px-4 text-sm font-medium text-foreground hover:bg-surface-muted aria-pressed:bg-primary aria-pressed:text-primary-foreground"
         >
           {mode}
