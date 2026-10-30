@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `2.02`**
+**Next up: `2.03`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -57,7 +57,7 @@
 ## Phase 2 — Core API (server data layer & logic)
 
 - [x] **2.01** — Zod schemas + inferred types for org, event, node, update (`features/*/schemas.ts`), `.strict()`. _Done when:_ unit tests cover boundaries (lengths, weight 1–10, URL scheme, dates).
-- [ ] **2.02** — `lib/permissions.ts`: pure functions mirroring RLS (canCreateChild, canEditNode, canComment, canTransition…) taking a minimal context (user id, ancestor chain, event settings). _Done when:_ unit tests reproduce the permission matrix in `01_PRD §7` row by row.
+- [x] **2.02** — `lib/permissions.ts`: pure functions mirroring RLS (canCreateChild, canEditNode, canComment, canTransition…) taking a minimal context (user id, ancestor chain, event settings). _Done when:_ unit tests reproduce the permission matrix in `01_PRD §7` row by row.
 - [ ] **2.03** — `lib/status.ts`: `allowedTransitions(context)` implementing T1–T7. _Done when:_ table-driven tests match `02_AppFlow §5` exactly (incl. Mode A/B, self-verify rule, comment-required flag).
 - [ ] **2.04** — `lib/progress.ts` (weighted roll-up) and `lib/tree.ts` (flat → nested, sibling sort, filters All/Mine/Overdue/Needs review, expansion helpers). _Done when:_ unit tests incl. empty segment, weights, 6-deep tree, filter breadcrumbs.
 - [ ] **2.05** — Org queries/actions: list my orgs, members, rotate code, set role, remove/leave. _Done when:_ integration tests (real RLS) pass for admin vs member.
@@ -155,6 +155,7 @@
 | 2026-10-30 | 1.28 | `/settings/profile` (S17): name edit (`updateProfile` action, RLS column grant, `ProfileForm`), email read-only, theme radios (`ThemeRadio`), Log out (`LogoutButton`, `signOut` then `/login`). Unit test for `updateProfileSchema`. Verified manually by Bulbul: name persists after reload, empty name error, dark theme persists, logout returns to `/login` and `/dashboard` redirects to `/login?next=...`. | 01ede4c | Profile photo upload is a Non-Goal (`01_PRD §9` #4): initials avatars only, idea added to Parking Lot (66baf77). |
 | 2026-10-30 | 1.29 | **Phase 1 gate.** Bulbul ran `pnpm check`, `pnpm db:reset`, `pnpm test:db`, `pnpm seed` and the manual flow (signup, Inbucket confirm, create organization, profile name edit, logout, login again to `/dashboard`): all reported as pass. Phase 1 is complete: database layer (13 migrations, 293 pgTAP tests at 1.17), seed, generated types, Supabase clients, tokens/theme, primitives, error catalogue, route guards, auth actions and pages, onboarding, profile. | 81ec6df | Exact test counts for this run were not pasted (last recorded: pgTAP 293, unit tests 44 at 1.25, more added since). Open items carried forward: production redirect URL, Google OAuth credentials and SMTP (4.13); `/dev/*` pages and `/dashboard`, `/o/[orgSlug]/events` placeholders to be replaced in Phase 3. |
 | 2026-10-30 | 2.01 | Zod `.strict()` schemas: `lib/zod-common.ts` (guid id, ISO datetime, nullable/required text, http(s) link, end-after-start), `features/events/schemas.ts`, `features/nodes/schemas.ts`, `features/updates/schemas.ts`, member schemas added to `features/orgs/schemas.ts`. ~40 new unit tests on boundaries (lengths, weight 1-10, URL scheme, dates). `pnpm check` green, 80 tests. | 7330906 | Ids use `z.guid()` because `z.uuid()` rejects valid Postgres uuids without RFC version bits (seed ids). Schemas do not judge status-transition legality or required comment: that is `lib/status.ts` (2.03) and the DB. |
+| 2026-10-30 | 2.02 | `src/lib/permissions.ts`: pure UI-gating mirror of RLS (roles, lifecycle gates, create/edit/reassign/delete node, toggle progress, submit, verify, send back/reopen, comment, event settings/status/delete). 26 unit tests reproduce `01_PRD §7` row by row on a fixture tree (owner, nested heads, assignee, org admin, outsider), plus BR-10 lifecycle and BR-13 org-admin read-only. `pnpm check` green, 106 tests. | 7055ad5 | Which exact status transition is legal is left to `lib/status.ts` (2.03). Comment gating follows `02_AppFlow` S12 (draft or active). |
 
 ## Decisions & Deviations Log
 
