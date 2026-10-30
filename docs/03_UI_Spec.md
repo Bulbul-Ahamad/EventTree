@@ -21,27 +21,27 @@ Defined as CSS variables on `:root` (light) and `.dark` (dark). Tailwind maps th
 
 | Token | Light | Dark | Usage |
 |---|---|---|---|
-| `--background` | `#F8FAFC` | `#0B1020` | App background |
-| `--surface` | `#FFFFFF` | `#111827` | Cards, dialogs, panels |
-| `--surface-muted` | `#F1F5F9` | `#1F2937` | Table headers, hovered rows, inputs bg (dark) |
-| `--border` | `#E2E8F0` | `#2A3547` | Default borders, dividers |
-| `--border-strong` | `#CBD5E1` | `#3B475C` | Input borders, emphasized dividers |
-| `--foreground` | `#0F172A` | `#F1F5F9` | Primary text |
-| `--foreground-muted` | `#475569` | `#CBD5E1` | Secondary text |
-| `--foreground-subtle` | `#64748B` | `#94A3B8` | Placeholder, captions, disabled text |
-| `--primary` | `#4338CA` | `#818CF8` | Primary buttons, links, focus accents |
-| `--primary-hover` | `#3730A3` | `#A5B4FC` | |
-| `--primary-active` | `#312E81` | `#C7D2FE` | |
-| `--primary-soft` | `#EEF2FF` | `#1E1B4B` | Selected row, subtle highlight |
-| `--primary-foreground` | `#FFFFFF` | `#0B1020` | Text on `--primary` |
-| `--ring` | `#6366F1` | `#A5B4FC` | Focus ring |
+| `--background` | `#F6FBF8` | `#08130F` | App background |
+| `--surface` | `#FFFFFF` | `#0F1D17` | Cards, dialogs, panels |
+| `--surface-muted` | `#EDF5F0` | `#17281F` | Table headers, hovered rows, inputs bg (dark) |
+| `--border` | `#D8E7DE` | `#223A2E` | Default borders, dividers |
+| `--border-strong` | `#BFD6C8` | `#2F4D3D` | Input borders, emphasized dividers |
+| `--foreground` | `#0F1F17` | `#F1F5F9` | Primary text |
+| `--foreground-muted` | `#3F5A4B` | `#CBD5E1` | Secondary text |
+| `--foreground-subtle` | `#5B7566` | `#94A3B8` | Placeholder, captions, disabled text |
+| `--primary` | `#047857` | `#34D399` | Primary buttons, links, focus accents |
+| `--primary-hover` | `#065F46` | `#6EE7B7` | |
+| `--primary-active` | `#064E3B` | `#A7F3D0` | |
+| `--primary-soft` | `#ECFDF5` | `#052E22` | Selected row, subtle highlight |
+| `--primary-foreground` | `#FFFFFF` | `#08130F` | Text on `--primary` |
+| `--ring` | `#10B981` | `#6EE7B7` | Focus ring |
 | `--success` | `#15803D` | `#4ADE80` | |
 | `--success-soft` | `#DCFCE7` | `#052E16` | |
 | `--warning` | `#B45309` | `#FBBF24` | |
 | `--warning-soft` | `#FEF3C7` | `#422006` | |
 | `--danger` | `#B91C1C` | `#F87171` | Destructive actions, errors, overdue |
 | `--danger-soft` | `#FEE2E2` | `#450A0A` | |
-| `--danger-foreground` | `#FFFFFF` | `#0B1020` | Text on solid `--danger` |
+| `--danger-foreground` | `#FFFFFF` | `#08130F` | Text on solid `--danger` |
 | `--info` | `#1D4ED8` | `#60A5FA` | |
 | `--info-soft` | `#DBEAFE` | `#172554` | |
 
@@ -49,7 +49,7 @@ Defined as CSS variables on `:root` (light) and `.dark` (dark). Tailwind maps th
 
 | Status | Light bg / fg | Dark bg / fg | Icon (lucide) | Label |
 |---|---|---|---|---|
-| `todo` | `#F1F5F9` / `#475569` | `#1F2937` / `#CBD5E1` | `Circle` | To do |
+| `todo` | `#EDF5F0` / `#3F5A4B` | `#17281F` / `#CBD5E1` | `Circle` | To do |
 | `in_progress` | `#DBEAFE` / `#1D4ED8` | `#172554` / `#93C5FD` | `Loader` | In progress |
 | `submitted` | `#FEF3C7` / `#92400E` | `#422006` / `#FCD34D` | `Hourglass` | Submitted |
 | `verified` | `#DCFCE7` / `#166534` | `#052E16` / `#86EFAC` | `CheckCircle2` | Verified |
@@ -69,7 +69,7 @@ Overdue: due-date text uses `--danger` + `AlertCircle` icon.
 
 | Part | Light | Dark |
 |---|---|---|
-| Track | `#E2E8F0` | `#2A3547` |
+| Track | `#D8E7DE` | `#223A2E` |
 | Fill (0–99%) | `--primary` | `--primary` |
 | Fill (100%) | `--success` | `--success` |
 
@@ -213,11 +213,11 @@ Focus ring (global): `outline: 2px solid var(--ring); outline-offset: 2px`. Neve
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background:#F8FAFC; --surface:#FFFFFF; --surface-muted:#F1F5F9;
-  --border:#E2E8F0; --border-strong:#CBD5E1;
-  --foreground:#0F172A; --foreground-muted:#475569; --foreground-subtle:#64748B;
-  --primary:#4338CA; --primary-hover:#3730A3; --primary-active:#312E81;
-  --primary-soft:#EEF2FF; --primary-foreground:#FFFFFF; --ring:#6366F1;
+  --background:#F6FBF8; --surface:#FFFFFF; --surface-muted:#EDF5F0;
+  --border:#D8E7DE; --border-strong:#BFD6C8;
+  --foreground:#0F1F17; --foreground-muted:#3F5A4B; --foreground-subtle:#5B7566;
+  --primary:#047857; --primary-hover:#065F46; --primary-active:#064E3B;
+  --primary-soft:#ECFDF5; --primary-foreground:#FFFFFF; --ring:#10B981;
   --success:#15803D; --success-soft:#DCFCE7;
   --warning:#B45309; --warning-soft:#FEF3C7;
   --danger:#B91C1C; --danger-soft:#FEE2E2; --danger-foreground:#FFFFFF;
@@ -225,14 +225,14 @@ Focus ring (global): `outline: 2px solid var(--ring); outline-offset: 2px`. Neve
   --radius-sm:6px; --radius-md:8px; --radius-lg:12px; --radius-xl:16px;
 }
 .dark {
-  --background:#0B1020; --surface:#111827; --surface-muted:#1F2937;
-  --border:#2A3547; --border-strong:#3B475C;
+  --background:#08130F; --surface:#0F1D17; --surface-muted:#17281F;
+  --border:#223A2E; --border-strong:#2F4D3D;
   --foreground:#F1F5F9; --foreground-muted:#CBD5E1; --foreground-subtle:#94A3B8;
-  --primary:#818CF8; --primary-hover:#A5B4FC; --primary-active:#C7D2FE;
-  --primary-soft:#1E1B4B; --primary-foreground:#0B1020; --ring:#A5B4FC;
+  --primary:#34D399; --primary-hover:#6EE7B7; --primary-active:#A7F3D0;
+  --primary-soft:#052E22; --primary-foreground:#08130F; --ring:#6EE7B7;
   --success:#4ADE80; --success-soft:#052E16;
   --warning:#FBBF24; --warning-soft:#422006;
-  --danger:#F87171; --danger-soft:#450A0A; --danger-foreground:#0B1020;
+  --danger:#F87171; --danger-soft:#450A0A; --danger-foreground:#08130F;
   --info:#60A5FA; --info-soft:#172554;
 }
 @theme inline {

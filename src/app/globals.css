@@ -3,20 +3,20 @@
 
 /* Design tokens: docs/03_UI_Spec.md §2 and §9. Components use semantic names only. */
 :root {
-  --background: #f8fafc;
+  --background: #F6FBF8;
   --surface: #ffffff;
-  --surface-muted: #f1f5f9;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --foreground: #0f172a;
-  --foreground-muted: #475569;
-  --foreground-subtle: #64748b;
-  --primary: #4338ca;
-  --primary-hover: #3730a3;
-  --primary-active: #312e81;
-  --primary-soft: #eef2ff;
+  --surface-muted: #EDF5F0;
+  --border: #D8E7DE;
+  --border-strong: #BFD6C8;
+  --foreground: #0F1F17;
+  --foreground-muted: #3F5A4B;
+  --foreground-subtle: #5B7566;
+  --primary: #047857;
+  --primary-hover: #065F46;
+  --primary-active: #064E3B;
+  --primary-soft: #ECFDF5;
   --primary-foreground: #ffffff;
-  --ring: #6366f1;
+  --ring: #10B981;
   --success: #15803d;
   --success-soft: #dcfce7;
   --warning: #b45309;
@@ -32,8 +32,8 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
 
-  --status-todo-bg: #f1f5f9;
-  --status-todo-fg: #475569;
+  --status-todo-bg: #EDF5F0;
+  --status-todo-fg: #3F5A4B;
   --status-in_progress-bg: #dbeafe;
   --status-in_progress-fg: #1d4ed8;
   --status-submitted-bg: #fef3c7;
@@ -46,7 +46,7 @@
   --priority-high: #b45309;
   --priority-urgent: #b91c1c;
 
-  --progress-track: #e2e8f0;
+  --progress-track: #D8E7DE;
 
   --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
   --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
@@ -55,31 +55,31 @@
 }
 
 .dark {
-  --background: #0b1020;
-  --surface: #111827;
-  --surface-muted: #1f2937;
-  --border: #2a3547;
-  --border-strong: #3b475c;
+  --background: #08130F;
+  --surface: #0F1D17;
+  --surface-muted: #17281F;
+  --border: #223A2E;
+  --border-strong: #2F4D3D;
   --foreground: #f1f5f9;
   --foreground-muted: #cbd5e1;
   --foreground-subtle: #94a3b8;
-  --primary: #818cf8;
-  --primary-hover: #a5b4fc;
-  --primary-active: #c7d2fe;
-  --primary-soft: #1e1b4b;
-  --primary-foreground: #0b1020;
-  --ring: #a5b4fc;
+  --primary: #34D399;
+  --primary-hover: #6EE7B7;
+  --primary-active: #A7F3D0;
+  --primary-soft: #052E22;
+  --primary-foreground: #08130F;
+  --ring: #6EE7B7;
   --success: #4ade80;
   --success-soft: #052e16;
   --warning: #fbbf24;
   --warning-soft: #422006;
   --danger: #f87171;
   --danger-soft: #450a0a;
-  --danger-foreground: #0b1020;
+  --danger-foreground: #08130F;
   --info: #60a5fa;
   --info-soft: #172554;
 
-  --status-todo-bg: #1f2937;
+  --status-todo-bg: #17281F;
   --status-todo-fg: #cbd5e1;
   --status-in_progress-bg: #172554;
   --status-in_progress-fg: #93c5fd;
@@ -93,7 +93,7 @@
   --priority-high: #fbbf24;
   --priority-urgent: #f87171;
 
-  --progress-track: #2a3547;
+  --progress-track: #223A2E;
 
   --shadow-sm: none;
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.4);

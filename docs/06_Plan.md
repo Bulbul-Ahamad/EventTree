@@ -157,6 +157,7 @@ Record here any approved change to the docs (what, why, who approved, date).
 | 2026-10-29 | 05_Schema §6 `get_review_queue` | Exclude tasks assigned to the caller from their own review queue unless caller is event owner (matches self-verify rule in `transition_task_status`) | Bulbul |
 | 2026-10-29 | 06_Plan 1.07/1.08 | Steps 1.07 and 1.08 done together: org guards `E_OWNS_EVENTS` and unassign-on-removal depend on `nodes` (created in 1.08) | Bulbul |
 | 2026-10-29 | 04_TRD §2 | Locked versions changed to installed latest: @supabase/ssr 0.7→0.12, @hookform/resolvers 5.x→6.x, react-hook-form 7.6x→7.9x, lucide-react 0.5xx→1.x, vitest 3.x→5.x, @playwright/test 1.5x→1.6x | Bulbul |
+| 2026-10-30 | 03_UI_Spec §2.1, §2.2 (todo), §2.4 (track), §9 | Theme changed from indigo to emerald green: primary, ring, backgrounds, surfaces, borders and foreground tokens now green-tinted in light and dark; status/priority colors (except todo), success, warning, danger, info unchanged; 100% progress fill still uses `--success` | Bulbul |
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
 
