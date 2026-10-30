@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.22`**
+**Next up: `1.23`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -43,7 +43,7 @@
 **Auth plumbing**
 - [x] **1.20** — `src/lib/supabase/{client,server,middleware}.ts` with `@supabase/ssr`. _Done when:_ unit test or manual check shows server client reads session cookie.
 - [x] **1.21** — Design tokens: implement `globals.css` per `03_UI_Spec §9`, fonts (Inter, Noto Sans Bengali, JetBrains Mono), `next-themes`, shadcn init. _Done when:_ light/dark token swap visible on a test page; Bangla sample text renders.
-- [ ] **1.22** — Auth-needed primitives (Button, Input, Label, FormField, Card, Toast/Sonner, ThemeToggle) per `03_UI_Spec §8`. _Done when:_ all states (hover/focus/disabled/loading/error) verified in both themes.
+- [x] **1.22** — Auth-needed primitives (Button, Input, Label, FormField, Card, Toast/Sonner, ThemeToggle) per `03_UI_Spec §8`. _Done when:_ all states (hover/focus/disabled/loading/error) verified in both themes.
 - [ ] **1.23** — `src/lib/errors.ts` (ErrorCode union + message map from `02_AppFlow §7`) and `action-result.ts`. Add missing codes to `02_AppFlow §7` if discovered. _Done when:_ unit tests map every code to a message and unknown → `E_UNKNOWN`.
 - [ ] **1.24** — `middleware.ts` route guards per `02_AppFlow §2` (session refresh, redirects, `next` sanitization). _Done when:_ unit tests for `sanitizeNext`; manual: guest → `/login?next=…`, authed → `/dashboard`.
 - [ ] **1.25** — Auth Server Actions + Zod schemas: signUp, signIn, signOut, forgotPassword, resetPassword, resend confirmation, Google OAuth start; `auth/callback` route. _Done when:_ schemas unit-tested; generic error wording per `02_AppFlow` verified.
@@ -146,6 +146,7 @@
 | 2026-10-30 | 1.19 | `src/types/database.ts` generated via `pnpm db:types` (public tables, enums, RPCs). Re-running leaves `git status` clean; `pnpm check` green (lint, tsc, 4 unit tests). | db86965 | CLI prints an unformatted-output hint; ignored (file is eslint-ignored, never hand-edited). |
 | 2026-10-30 | 1.20 | `src/lib/supabase/client.ts` (browser), `server.ts` (async, `next/headers` cookies, `server-only`), `middleware.ts` (`updateSession` refreshes session, returns user via `getUser()`); all typed with generated `Database`. 2 unit tests: server client reads the session from the cookie; no cookie gives null. `pnpm check` green (6 tests). | a9f7334 | `server-only` is not an npm dependency (not in locked stack): added `src/types/server-only.d.ts` and a vitest alias stub; Next resolves it at build. Test stderr warnings (getSession insecure, multiple GoTrueClient) are expected in the test. |
 | 2026-10-30 | 1.21 | `globals.css` with all tokens of `03_UI_Spec` (light/dark, status, priority, progress, shadows, radii, `:lang(bn)`, focus ring, reduced motion); Inter, Noto Sans Bengali, JetBrains Mono via `next/font`; `next-themes` ThemeProvider (class, system default); `components.json` + `src/lib/utils.ts` (`cn`); temporary `/dev/tokens` page (404 in production). Verified by Bulbul in the browser: theme swap, Bangla text, 360 px, dark mode. | e1b10f7, 5209fe5, 1ffb04f, c8d3df2 | Theme changed to emerald green (approved, see Decisions log); dark primary softened to `#10B981`. Hydration error in the theme switcher fixed. shadcn CLI not run (it would overwrite `globals.css`): config written by hand; shadcn color names (`--card`, `--muted`...) must be mapped to our tokens when components are added in 1.22. `/dev/tokens` to be removed with 3.03. |
+| 2026-10-30 | 1.22 | Primitives in `src/components/ui`: Button (4 variants, 4 sizes, loading, disabled), Input/Textarea, Label, FormField (label, hint, error, aria wiring), Card; `shell/theme-toggle.tsx` (system/light/dark); `ui/toaster.tsx` (sonner, token-styled) + `lib/toast.ts` (`notify`, 3 s / 6 s). 4 unit tests (Button loading/type, FormField aria). Temporary `/dev/primitives` page. Visually verified by Bulbul in light and dark. | 1158aa2, 6545392, 9ab8440, b89d321 | `sonner` 2.0.8 added with approval (TRD + Decisions log). First `pnpm check` failed: Testing Library did not clean the DOM between tests (vitest globals off); fixed with `afterEach(cleanup)` in `tests/setup.ts`. No Radix used yet (not needed). `pnpm check` output after the last commit was not pasted; Bulbul confirmed the page works. `/dev/primitives` to be removed with 3.03. |
 
 ## Decisions & Deviations Log
 
