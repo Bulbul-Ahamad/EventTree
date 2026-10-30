@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { id } from "@/lib/zod-common";
 
 // 02_AppFlow S07 and 05_Schema §3.2.
 export const ORG_KINDS = ["club", "organization", "university_program", "other"] as const;
@@ -34,3 +35,13 @@ export const joinOrganizationSchema = z
       .pipe(z.string().min(1, "Enter a code.").max(64, "Invalid or expired code.")),
   })
   .strict();
+
+// Member management (S15). Authority is enforced by the RPCs.
+const orgId = id;
+const userId = id;
+
+export const rotateJoinCodeSchema = z.object({ orgId }).strict();
+export const setMemberRoleSchema = z
+  .object({ orgId, userId, role: z.enum(["admin", "member"]) })
+  .strict();
+export const removeMemberSchema = z.object({ orgId, userId }).strict();
