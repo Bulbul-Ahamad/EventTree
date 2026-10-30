@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `2.11`**
+**Next up: `3.01`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -66,7 +66,7 @@
 - [x] **2.08** — Update/status actions: `transitionTask`, `addComment`, `addProofLink`, `getNodeActivity`. _Done when:_ integration tests cover T1–T7 through the action layer incl. `E_STALE_STATE`.
 - [x] **2.09** — Dashboard queries: `getMyTasks` (grouped), `getReviewQueue`, `getMyEvents`. _Done when:_ integration tests verify grouping and visibility.
 - [x] **2.10** — Error-mapping integration: every RPC error message maps to `ErrorCode`; unknown Postgres errors → `E_UNKNOWN` without leaking details. _Done when:_ tests assert no raw SQL text reaches `message`.
-- [ ] **2.11** — **Phase 2 gate:** `pnpm check`, `pnpm test:int`, `pnpm test:db` green. Log results. _Done when:_ logged.
+- [x] **2.11** — **Phase 2 gate:** `pnpm check`, `pnpm test:int`, `pnpm test:db` green. Log results. _Done when:_ logged.
 
 ---
 
@@ -164,6 +164,7 @@
 | 2026-10-30 | 2.08 | `features/updates/actions.ts` (`transitionTask` via RPC; `addComment`, `addProofLink` as RLS-guarded inserts) and `features/updates/queries.ts` (`getNodeActivity`, newest first with author). `tests/integration/updates.test.ts`: T1–T7 in both review modes, self-verify rule, `E_STALE_STATE` incl. concurrent race, `E_COMMENT_REQUIRED`, `E_EVENT_NOT_ACTIVE`, comment/proof-link validation and permissions, immutable log, no forged rows. `pnpm check` and `pnpm test:int` passed (user). | 0c40395, 67d2178 | First run failed: insert sent `event_id`, which is not a granted column (trigger sets it); removed. Org admin can view events, so tests now expect `E_INVALID_TRANSITION`/`E_NOT_AUTHORIZED` for admin. Open question: comments are allowed in completed events (RLS has no status check); spec not confirmed. |
 | 2026-10-31 | 2.09 | `features/dashboard/grouping.ts` (pure `groupMyTasks`, `pickEventRole`, `compareMyEvents`) and `features/dashboard/queries.ts` (`getMyTasks` grouped, `getReviewQueue`, `getMyEvents`). Unit tests for grouping; `tests/integration/dashboard.test.ts` covers grouping across events, BR-09 overdue, draft/completed handling, review queue scope/order/self-verify, my events roles and visibility. `pnpm check` and `pnpm test:int` passed (user). | 9bcfa49 | Decision: "Due this week" = next 7 days (user chose; spec gave no definition). Past-due tasks that are not overdue (verified, or event draft) show under Due this week. `getMyEvents` lists all statuses incl. archived (spec silent). |
 | 2026-10-31 | 2.10 | `toErrorCode` now maps SQLSTATE 42501 (RLS/privilege refusal) to `E_NOT_AUTHORIZED`; `addComment`/`addProofLink` special case removed. `tests/unit/db-error-codes.test.ts` (every `raise exception` code in migrations is in the catalogue, all P0001, 02_AppFlow §7 table equals `ERROR_MESSAGES`), extra cases in `errors.test.ts`, and `tests/integration/error-mapping.test.ts` (raw check/enum/uuid/FK/unknown-table errors, RLS and anon refusals: no SQL text in `message`, only catalogue messages). `pnpm check` and `pnpm test:int` passed (user). | 4b12bec | No doc change: 42501 mapping is an implementation detail beside the documented message mapping. |
+| 2026-10-31 | 2.11 | **Phase 2 gate.** After `pnpm db:reset`: `pnpm check`, `pnpm test:db` and `pnpm test:int` all reported passing by the user. Phase 2 (core API: orgs, events, nodes, updates, dashboard, error mapping) complete. | 8c6b84a | Exact test counts were not pasted for this run (last known: 293 pgTAP, int files orgs 15, events 25, nodes 31, updates 22 plus dashboard and error-mapping). |
 
 ## Decisions & Deviations Log
 
