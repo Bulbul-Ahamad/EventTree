@@ -36,6 +36,7 @@ Versions are locked at **major.minor**. Step 1.02 of `06_Plan.md` must verify ea
 | Validation | zod | 4.x | 4.6.7 |
 | Forms | react-hook-form + @hookform/resolvers | 7.9x + 6.x | react-hook-form 7.91.0 + @hookform/resolvers 6.0.1 |
 | Dates | date-fns | 4.x | 4.4.0 |
+| Toasts | sonner (shadcn toast) | latest at install | 2.0.8 |
 | Class utils | clsx, tailwind-merge, class-variance-authority | latest at install | clsx 2.1.1, tailwind-merge 3.7.0, class-variance-authority 0.7.1 |
 | Unit/integration tests | vitest + @testing-library/react + jsdom | vitest 5.x | vitest 5.0.5, @testing-library/react 16.3.3, @testing-library/jest-dom 7.0.1, jsdom 30.1.3, @vitejs/plugin-react 6.1.2 |
 | E2E tests | @playwright/test | 1.6x (latest at install) | 1.64.1 |

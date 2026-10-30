@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { FormField } from "@/components/ui/form-field";
 import { Input, Textarea } from "@/components/ui/input";
+import { ToastDemo } from "./toast-demo";
 
 // Temporary visual check for step 1.22. Dev only; remove with the landing page (3.03).
 export default function PrimitivesPage() {
@@ -83,6 +84,14 @@ export default function PrimitivesPage() {
           <Button variant="secondary">Cancel</Button>
           <Button>Save</Button>
         </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Toasts</CardTitle>
+          <CardDescription>Success and info close after 3 s, errors after 6 s. Hover to pause.</CardDescription>
+        </CardHeader>
+        <ToastDemo />
       </Card>
     </main>
   );
