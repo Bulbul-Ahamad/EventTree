@@ -8,14 +8,14 @@ import {
   toErrorCode,
 } from "@/lib/errors";
 
-// The 21 codes of docs/02_AppFlow.md §7.
+// The codes of docs/02_AppFlow.md §7.
 const CATALOGUE = [
   "E_NOT_AUTHORIZED", "E_NOT_FOUND", "E_INVALID_TRANSITION", "E_STALE_STATE",
   "E_COMMENT_REQUIRED", "E_EVENT_NOT_ACTIVE", "E_EVENT_READONLY",
   "E_ASSIGNEE_NOT_IN_ORG", "E_INVALID_JOIN_CODE", "E_SLUG_TAKEN", "E_LAST_ADMIN",
   "E_OWNS_EVENTS", "E_MAX_DEPTH", "E_PARENT_IS_TASK", "E_NODE_LIMIT",
   "E_ROOT_IMMUTABLE", "E_EMAIL_TAKEN", "E_VALIDATION", "E_RATE_LIMIT",
-  "E_NETWORK", "E_UNKNOWN",
+  "E_NETWORK", "E_UNKNOWN", "E_INVALID_CREDENTIALS", "E_EMAIL_NOT_CONFIRMED",
 ];
 
 describe("error catalogue", () => {

@@ -241,6 +241,8 @@ Database/RPC errors are raised as `raise exception 'E_CODE'`; the Server Action 
 | `E_NODE_LIMIT` | "This event reached the 1000-item limit." |
 | `E_ROOT_IMMUTABLE` | "The event owner can't be changed." |
 | `E_EMAIL_TAKEN` | "An account with this email may already exist. Try logging in." |
+| `E_INVALID_CREDENTIALS` | "Incorrect email or password." |
+| `E_EMAIL_NOT_CONFIRMED` | "Please confirm your email first." |
 | `E_VALIDATION` | Field-level messages from Zod |
 | `E_RATE_LIMIT` | "Too many attempts. Try again in a few minutes." |
 | `E_NETWORK` | "Can't reach the server. Check your connection and retry." |

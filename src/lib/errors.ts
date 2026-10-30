@@ -19,6 +19,8 @@ export const ERROR_MESSAGES = {
   E_NODE_LIMIT: "This event reached the 1000-item limit.",
   E_ROOT_IMMUTABLE: "The event owner can't be changed.",
   E_EMAIL_TAKEN: "An account with this email may already exist. Try logging in.",
+  E_INVALID_CREDENTIALS: "Incorrect email or password.",
+  E_EMAIL_NOT_CONFIRMED: "Please confirm your email first.",
   // The catalogue says "field-level messages from Zod"; this is the fallback
   // shown when no field message is available.
   E_VALIDATION: "Please check the highlighted fields.",
