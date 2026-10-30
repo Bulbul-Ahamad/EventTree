@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `2.06`**
+**Next up: `2.07`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -61,7 +61,7 @@
 - [x] **2.03** — `lib/status.ts`: `allowedTransitions(context)` implementing T1–T7. _Done when:_ table-driven tests match `02_AppFlow §5` exactly (incl. Mode A/B, self-verify rule, comment-required flag).
 - [x] **2.04** — `lib/progress.ts` (weighted roll-up) and `lib/tree.ts` (flat → nested, sibling sort, filters All/Mine/Overdue/Needs review, expansion helpers). _Done when:_ unit tests incl. empty segment, weights, 6-deep tree, filter breadcrumbs.
 - [x] **2.05** — Org queries/actions: list my orgs, members, rotate code, set role, remove/leave. _Done when:_ integration tests (real RLS) pass for admin vs member.
-- [ ] **2.06** — Event queries/actions: list events (tabs), get event + settings, `createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`. _Done when:_ integration tests pass for owner/outsider/admin.
+- [x] **2.06** — Event queries/actions: list events (tabs), get event + settings, `createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`. _Done when:_ integration tests pass for owner/outsider/admin.
 - [ ] **2.07** — Node queries/actions: `getEventTree` (RPC → nested), `createNode`, `updateNode`, `reassignNode`, `deleteNode`. _Done when:_ integration tests cover manager/strict-manager rules and all node error codes surfaced as `ActionResult`.
 - [ ] **2.08** — Update/status actions: `transitionTask`, `addComment`, `addProofLink`, `getNodeActivity`. _Done when:_ integration tests cover T1–T7 through the action layer incl. `E_STALE_STATE`.
 - [ ] **2.09** — Dashboard queries: `getMyTasks` (grouped), `getReviewQueue`, `getMyEvents`. _Done when:_ integration tests verify grouping and visibility.
@@ -159,6 +159,7 @@
 | 2026-10-30 | 2.03 | `src/lib/status.ts`: `allowedTransitions`, `findTransition`, `transitionError` (T1-T7, labels, comment-required flags, DB error order). 20+ table-driven unit tests: hand-written expected table from `02_AppFlow §5` over persona x review mode x from x to, for a plain assignee task and for a head's own task (self-verify rule), plus draft/completed/archived, non-task nodes, button lists, comment rules. Shared fixture `tests/unit/helpers/tree-fixture.ts`. `pnpm check` green. | 02078bd | T4 is allowed in both modes (matches the DB and `02_AppFlow` S14 note that submitted tasks stay verifiable after a mode change). `E_STALE_STATE` is server-only. |
 | 2026-10-30 | 2.04 | `src/lib/progress.ts` (`taskProgress`, `weightedProgress`, `computeProgress`, DB-style 2-decimal rounding per level) and `src/lib/tree.ts` (`buildTree`, `walk`, `subtreeSize`, filters Mine/Overdue/Needs review with segment breadcrumbs, `parseFilter`, `isOverdue` per BR-09, expansion helpers `defaultExpandedIds`, `toggleExpanded`, `ancestorIds`, `flattenVisible`). 28 unit tests: empty segment, weights, rounding parity, 6-deep tree, filter breadcrumbs, unreachable rows. `pnpm check` green, 149 tests. | 7160afa, 50a52b6 | "Needs review" filter = tasks with status `submitted` (doc gives no stricter definition). One lint warning in `status.ts` (unused destructured name) fixed afterwards. |
 | 2026-10-30 | 2.05 | `features/orgs/queries.ts` (`listMyOrgs`, `getOrgBySlug` with join code for admins only, `listOrgMembers`) and member actions `rotateJoinCode`, `setMemberRole`, `removeMember`, `leaveOrganization`. First integration test harness (`tests/integration/helpers`: real users via service role, signed in with anon key so RLS applies, mocked `createServerClient`, cleanup) and `tests/integration/orgs.test.ts`: 15 tests for admin vs member vs outsider, `E_NOT_AUTHORIZED`, `E_LAST_ADMIN`, `E_OWNS_EVENTS`, `E_NOT_FOUND`, `E_INVALID_JOIN_CODE`, `E_VALIDATION`. `pnpm test:int` green (15). | e16c40e | `supabase/config.toml` local `sign_in_sign_ups` 30 -> 1000 so integration tests do not hit the auth rate limit (local only). `setup.ts` now skips DOM cleanup in node-environment tests. Observation: RLS lets any org member read `organizations.join_code` through the API (docs allow it); the app only shows it to admins. `pnpm check` output was not pasted for this step; `pnpm test:int` was. |
+| 2026-10-30 | 2.06 | `features/events/queries.ts` (`listEvents` with Active/Completed/Archived tabs, `getEvent`, `getEventContext` for `lib/permissions.ts`) and `features/events/actions.ts` (`createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`); `lib/rpc.ts` `nullable()` bridge for generated RPC arg types. `tests/integration/events.test.ts`: create/validation, visibility (BR-03, 404 policy), settings edit (owner only, org admin read-only, completed is read-only), full lifecycle walk incl. completed_at, delete rules and subtree removal, tab movement. `pnpm check` and `pnpm test:int` green. | 4e625b4, 14ca9b2 | First `tsc` run failed on a tuple-destructuring type in the test; fixed in the test. `updateEventSettings` is two writes (nodes + event_settings), no single RPC exists: settings first so a bad date changes nothing. Exact test counts not pasted. |
 
 ## Decisions & Deviations Log
 
