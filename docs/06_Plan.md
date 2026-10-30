@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.25`**
+**Next up: `1.26`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -46,7 +46,7 @@
 - [x] **1.22** — Auth-needed primitives (Button, Input, Label, FormField, Card, Toast/Sonner, ThemeToggle) per `03_UI_Spec §8`. _Done when:_ all states (hover/focus/disabled/loading/error) verified in both themes.
 - [x] **1.23** — `src/lib/errors.ts` (ErrorCode union + message map from `02_AppFlow §7`) and `action-result.ts`. Add missing codes to `02_AppFlow §7` if discovered. _Done when:_ unit tests map every code to a message and unknown → `E_UNKNOWN`.
 - [x] **1.24** — `middleware.ts` route guards per `02_AppFlow §2` (session refresh, redirects, `next` sanitization). _Done when:_ unit tests for `sanitizeNext`; manual: guest → `/login?next=…`, authed → `/dashboard`.
-- [ ] **1.25** — Auth Server Actions + Zod schemas: signUp, signIn, signOut, forgotPassword, resetPassword, resend confirmation, Google OAuth start; `auth/callback` route. _Done when:_ schemas unit-tested; generic error wording per `02_AppFlow` verified.
+- [x] **1.25** — Auth Server Actions + Zod schemas: signUp, signIn, signOut, forgotPassword, resetPassword, resend confirmation, Google OAuth start; `auth/callback` route. _Done when:_ schemas unit-tested; generic error wording per `02_AppFlow` verified.
 - [ ] **1.26** — Pages S02–S06 (signup, check-email, login, forgot, reset) per `02_AppFlow §4`. _Done when:_ full email signup → confirm (Inbucket local) → login works; wrong password and unconfirmed states render correct messages.
 - [ ] **1.27** — Org Server Actions (`createOrganization`, `joinOrganization`) + S07 Onboarding page. _Done when:_ new user is forced to `/onboarding`, can create or join, lands on `/o/{slug}/events` (placeholder page ok).
 - [ ] **1.28** — Profile page S17 (name edit, theme, logout). _Done when:_ name change persists; logout returns to `/login`.
@@ -149,6 +149,7 @@
 | 2026-10-30 | 1.22 | Primitives in `src/components/ui`: Button (4 variants, 4 sizes, loading, disabled), Input/Textarea, Label, FormField (label, hint, error, aria wiring), Card; `shell/theme-toggle.tsx` (system/light/dark); `ui/toaster.tsx` (sonner, token-styled) + `lib/toast.ts` (`notify`, 3 s / 6 s). 4 unit tests (Button loading/type, FormField aria). Temporary `/dev/primitives` page. Visually verified by Bulbul in light and dark. | 1158aa2, 6545392, 9ab8440, b89d321 | `sonner` 2.0.8 added with approval (TRD + Decisions log). First `pnpm check` failed: Testing Library did not clean the DOM between tests (vitest globals off); fixed with `afterEach(cleanup)` in `tests/setup.ts`. No Radix used yet (not needed). `pnpm check` output after the last commit was not pasted; Bulbul confirmed the page works. `/dev/primitives` to be removed with 3.03. |
 | 2026-10-30 | 1.23 | `src/lib/errors.ts` (21 codes of `02_AppFlow §7` + messages, `toErrorCode`, unknown → `E_UNKNOWN`) and `src/lib/action-result.ts` (`ActionResult`, `ok`, `fail`, `failFrom`). 11 unit tests incl. catalogue-equals-doc check and no raw SQL text in `message`. `pnpm check` green. | 2c42554 | All `E_` codes raised in migrations are already in §7: no doc change. `E_VALIDATION` fallback text "Please check the highlighted fields." is mine (doc says field-level messages from Zod). |
 | 2026-10-30 | 1.24 | `src/lib/route-guards.ts` (`sanitizeNext`, `decideRoute`, `needsOrgCount`) and `src/middleware.ts` (session refresh, org count lookup only when needed, redirects keep refreshed cookies). Implements `02_AppFlow §2` rules 1-4 and 8. Unit tests for guests, signed-in with 0 / 1+ orgs, exempt pages, unknown org count, and open-redirect inputs. Manual: guest `/dashboard` goes to `/login?next=%2Fdashboard`. | 568540c | Rules 5-7 (404s inside `/o/[orgSlug]`) belong to server layouts (3.02), not middleware. `/dev/*` is reachable without login only when `NODE_ENV` is not production. Authed redirects need the login page (1.26) for a manual check; covered by unit tests now. `pnpm check` output not pasted; Bulbul confirmed it passed. |
+| 2026-10-30 | 1.25 | `src/features/auth/{schemas,map-error,actions}.ts` (signUp, signIn, signOut, forgotPassword, resetPassword, resendConfirmation, startGoogleOAuth; all Zod `.strict()` first) and `src/app/auth/callback/route.ts` (code exchange, sanitized `next`, failure to `/login?error=callback`). New helpers `fieldErrorsFrom` / `failValidation`. New catalogue codes `E_INVALID_CREDENTIALS`, `E_EMAIL_NOT_CONFIRMED` added to `02_AppFlow §7` and `errors.ts`. `pnpm check` green, 44 tests. | 5725e58 | Doc exception used (new error codes). `?error=callback` on `/login` is my naming, to be handled in 1.26. forgotPassword/resend always return ok (only rate limit differs) so email existence is not revealed. Google OAuth needs credentials in Supabase (plan 4.13); action only builds the URL. |
 
 ## Decisions & Deviations Log
 
