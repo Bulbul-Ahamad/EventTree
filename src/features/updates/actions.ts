@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { fail, failFrom, failValidation, ok, type ActionResult } from "@/lib/action-result";
 import { nullable } from "@/lib/rpc";
 import { createServerClient } from "@/lib/supabase/server";
+import type { TablesInsert } from "@/types/database";
 import { addCommentSchema, addProofLinkSchema, transitionTaskSchema } from "./schemas";
 
 // 02_AppFlow S13. Status changes go through the transition_task_status RPC only
@@ -37,10 +38,13 @@ async function insertUpdate(
   row: { kind: "comment"; body: string } | { kind: "proof_link"; link_url: string; body: string | null },
 ): Promise<ActionResult> {
   const supabase = await createServerClient();
-  const { data: node } = await supabase.from("nodes").select("id, event_id").eq("id", nodeId).maybeSingle();
+  const { data: node } = await supabase.from("nodes").select("id").eq("id", nodeId).maybeSingle();
   if (!node) return fail("E_NOT_FOUND");
 
-  const { error } = await supabase.from("node_updates").insert({ ...row, node_id: node.id, event_id: node.event_id });
+  // Only (node_id, kind, body, link_url) are insertable by clients; a trigger sets
+  // event_id and user_id. The generated Insert type lists event_id as required, so
+  // the cast documents that gap (the column is deliberately not granted).
+  const { error } = await supabase.from("node_updates").insert({ ...row, node_id: node.id } as TablesInsert<"node_updates">);
   if (error) return error.code === "42501" ? fail("E_NOT_AUTHORIZED") : failFrom(error); // 42501 = RLS refused
   revalidatePath(EVENT_PAGE, "page");
   return ok();

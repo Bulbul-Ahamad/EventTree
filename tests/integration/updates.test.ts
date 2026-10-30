@@ -18,6 +18,7 @@ import { createNode } from "@/features/nodes/actions";
 import { createOrganization, joinOrganization } from "@/features/orgs/actions";
 import { addComment, addProofLink, transitionTask } from "@/features/updates/actions";
 import { getNodeActivity } from "@/features/updates/queries";
+import type { TablesInsert } from "@/types/database";
 
 vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 });
 
@@ -175,7 +176,7 @@ describe("transitionTask: assignee_submits mode", () => {
   it("a sibling task's assignee, org admin and outsiders cannot change status", async () => {
     const f = await fixture("assignee_submits");
     await expectFail(go(b1, f.t1, "todo", "in_progress"), "E_INVALID_TRANSITION");
-    await expectFail(go(adm, f.t1, "todo", "in_progress"), "E_NOT_FOUND");
+    await expectFail(go(adm, f.t1, "todo", "in_progress"), "E_INVALID_TRANSITION"); // admin can view, not act
     await expectFail(go(member, f.t1, "todo", "in_progress"), "E_NOT_FOUND");
     await expectFail(go(xena, f.t1, "todo", "in_progress"), "E_NOT_FOUND");
     expect(await statusOf(f.t1)).toBe("todo");
@@ -261,11 +262,13 @@ describe("addComment and addProofLink", () => {
     expect(log[0]).toMatchObject({ kind: "comment", authorName: "Int uowner", authorId: owner.id });
   });
 
-  it("a sibling task's assignee, org admin and outsiders cannot comment", async () => {
+  it("a sibling task's assignee and the org admin cannot comment; outsiders cannot see the task", async () => {
     const f = await fixture("assignee_submits");
-    actAs(b1);
-    await expectFail(addComment({ nodeId: f.t1, body: "hi" }), "E_NOT_AUTHORIZED");
-    for (const who of [adm, member, xena]) {
+    for (const who of [b1, adm]) {
+      actAs(who);
+      await expectFail(addComment({ nodeId: f.t1, body: "hi" }), "E_NOT_AUTHORIZED");
+    }
+    for (const who of [member, xena]) {
       actAs(who);
       await expectFail(addComment({ nodeId: f.t1, body: "hi" }), "E_NOT_FOUND");
     }
@@ -335,12 +338,14 @@ describe("getNodeActivity: visibility and immutability", () => {
   it("clients cannot forge a status_change row or another author", async () => {
     const f = await fixture("assignee_submits");
     const forged = await a1.client.from("node_updates").insert({
-      node_id: f.t1, event_id: f.event, kind: "status_change", from_status: "todo", to_status: "verified",
-    });
+      node_id: f.t1, kind: "status_change", from_status: "todo", to_status: "verified",
+    } as TablesInsert<"node_updates">);
     expect(forged.error).not.toBeNull();
     const asOwner = await a1.client.from("node_updates").insert({
-      node_id: f.t1, event_id: f.event, kind: "comment", body: "as owner", user_id: owner.id,
-    });
+      node_id: f.t1, kind: "comment", body: "as owner", user_id: owner.id,
+    } as TablesInsert<"node_updates">);
     expect(asOwner.error).not.toBeNull();
+    const { count } = await admin.from("node_updates").select("id", { count: "exact", head: true }).eq("node_id", f.t1);
+    expect(count).toBe(0);
   });
 });
