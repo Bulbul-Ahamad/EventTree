@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `2.09`**
+**Next up: `2.10`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -64,7 +64,7 @@
 - [x] **2.06** — Event queries/actions: list events (tabs), get event + settings, `createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`. _Done when:_ integration tests pass for owner/outsider/admin.
 - [x] **2.07** — Node queries/actions: `getEventTree` (RPC → nested), `createNode`, `updateNode`, `reassignNode`, `deleteNode`. _Done when:_ integration tests cover manager/strict-manager rules and all node error codes surfaced as `ActionResult`.
 - [x] **2.08** — Update/status actions: `transitionTask`, `addComment`, `addProofLink`, `getNodeActivity`. _Done when:_ integration tests cover T1–T7 through the action layer incl. `E_STALE_STATE`.
-- [ ] **2.09** — Dashboard queries: `getMyTasks` (grouped), `getReviewQueue`, `getMyEvents`. _Done when:_ integration tests verify grouping and visibility.
+- [x] **2.09** — Dashboard queries: `getMyTasks` (grouped), `getReviewQueue`, `getMyEvents`. _Done when:_ integration tests verify grouping and visibility.
 - [ ] **2.10** — Error-mapping integration: every RPC error message maps to `ErrorCode`; unknown Postgres errors → `E_UNKNOWN` without leaking details. _Done when:_ tests assert no raw SQL text reaches `message`.
 - [ ] **2.11** — **Phase 2 gate:** `pnpm check`, `pnpm test:int`, `pnpm test:db` green. Log results. _Done when:_ logged.
 
@@ -162,6 +162,7 @@
 | 2026-10-30 | 2.06 | `features/events/queries.ts` (`listEvents` with Active/Completed/Archived tabs, `getEvent`, `getEventContext` for `lib/permissions.ts`) and `features/events/actions.ts` (`createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`); `lib/rpc.ts` `nullable()` bridge for generated RPC arg types. `tests/integration/events.test.ts`: create/validation, visibility (BR-03, 404 policy), settings edit (owner only, org admin read-only, completed is read-only), full lifecycle walk incl. completed_at, delete rules and subtree removal, tab movement. `pnpm check` and `pnpm test:int` green. | 4e625b4, 14ca9b2 | First `tsc` run failed on a tuple-destructuring type in the test; fixed in the test. `updateEventSettings` is two writes (nodes + event_settings), no single RPC exists: settings first so a bad date changes nothing. Exact test counts not pasted. |
 | 2026-10-30 | 2.07 | `features/nodes/queries.ts` (`getEventTree`: RPC `get_event_tree` → `buildTree`, null when invisible) and `features/nodes/actions.ts` (`createNode`, `updateNode`, `reassignNode`, `deleteNode`; visibility select → `E_NOT_FOUND`, 0 rows → `E_NOT_AUTHORIZED`). `tests/integration/nodes.test.ts`: create rules per role, `E_PARENT_IS_TASK`, `E_MAX_DEPTH`, `E_ASSIGNEE_NOT_IN_ORG`, `E_ROOT_IMMUTABLE`, `E_EVENT_READONLY`, strict-manager edit/reassign/delete, tree visibility and progress roll-up. `pnpm check` and `pnpm test:int` reported passing by user. | 800db81 | None. Test counts not pasted. |
 | 2026-10-30 | 2.08 | `features/updates/actions.ts` (`transitionTask` via RPC; `addComment`, `addProofLink` as RLS-guarded inserts) and `features/updates/queries.ts` (`getNodeActivity`, newest first with author). `tests/integration/updates.test.ts`: T1–T7 in both review modes, self-verify rule, `E_STALE_STATE` incl. concurrent race, `E_COMMENT_REQUIRED`, `E_EVENT_NOT_ACTIVE`, comment/proof-link validation and permissions, immutable log, no forged rows. `pnpm check` and `pnpm test:int` passed (user). | 0c40395, 67d2178 | First run failed: insert sent `event_id`, which is not a granted column (trigger sets it); removed. Org admin can view events, so tests now expect `E_INVALID_TRANSITION`/`E_NOT_AUTHORIZED` for admin. Open question: comments are allowed in completed events (RLS has no status check); spec not confirmed. |
+| 2026-10-31 | 2.09 | `features/dashboard/grouping.ts` (pure `groupMyTasks`, `pickEventRole`, `compareMyEvents`) and `features/dashboard/queries.ts` (`getMyTasks` grouped, `getReviewQueue`, `getMyEvents`). Unit tests for grouping; `tests/integration/dashboard.test.ts` covers grouping across events, BR-09 overdue, draft/completed handling, review queue scope/order/self-verify, my events roles and visibility. `pnpm check` and `pnpm test:int` passed (user). | 9bcfa49 | Decision: "Due this week" = next 7 days (user chose; spec gave no definition). Past-due tasks that are not overdue (verified, or event draft) show under Due this week. `getMyEvents` lists all statuses incl. archived (spec silent). |
 
 ## Decisions & Deviations Log
 
@@ -176,6 +177,7 @@ Record here any approved change to the docs (what, why, who approved, date).
 | 2026-10-29 | 04_TRD §2 | Locked versions changed to installed latest: @supabase/ssr 0.7→0.12, @hookform/resolvers 5.x→6.x, react-hook-form 7.6x→7.9x, lucide-react 0.5xx→1.x, vitest 3.x→5.x, @playwright/test 1.5x→1.6x | Bulbul |
 | 2026-10-30 | 03_UI_Spec §2.1, §2.2 (todo), §2.4 (track), §9 | Theme changed from indigo to emerald green: primary, ring, backgrounds, surfaces, borders and foreground tokens now green-tinted in light and dark; status/priority colors (except todo), success, warning, danger, info unchanged; 100% progress fill still uses `--success` | Bulbul |
 | 2026-10-30 | 04_TRD §2 | Added `sonner` (shadcn toast library) to the stack, resolved 2.0.8; used only through `src/components/ui/toaster.tsx` and `src/lib/toast.ts` | Bulbul |
+| 2026-10-31 | 02_AppFlow S08 / 01_PRD US-09 | Interpretation (docs give no definition): "Due this week" = due within the next 7 days from now (rolling), implemented in `features/dashboard/grouping.ts` | Bulbul |
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
 
