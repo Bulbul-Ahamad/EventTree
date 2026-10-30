@@ -43,9 +43,13 @@ async function newEvent(over: Record<string, unknown> = {}): Promise<string> {
 }
 
 beforeAll(async () => {
-  [adm, owner, head, member, xena] = await Promise.all(
-    ["adm", "owner", "head", "member", "xena"].map((n) => createPersona(n)),
-  );
+  [adm, owner, head, member, xena] = await Promise.all([
+    createPersona("adm"),
+    createPersona("owner"),
+    createPersona("head"),
+    createPersona("member"),
+    createPersona("xena"),
+  ]);
 
   actAs(adm);
   const slug = uniqueSlug();
