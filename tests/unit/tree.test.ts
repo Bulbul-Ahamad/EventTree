@@ -14,9 +14,7 @@ import {
   type TreeRow,
 } from "@/lib/tree";
 
-let counter = 0;
 function row(over: Partial<TreeRow> & Pick<TreeRow, "id" | "type" | "parent_id">): TreeRow {
-  counter += 1;
   return {
     title: over.id,
     description: null,
@@ -33,11 +31,10 @@ function row(over: Partial<TreeRow> & Pick<TreeRow, "id" | "type" | "parent_id">
     submitted_at: null,
     verified_at: null,
     ...over,
-    // keep a stable arrival order for tie tests
-    ...(over.position === undefined ? { position: 0 } : {}),
   };
 }
 
+// Tests may use `!` on values the fixture guarantees exist.
 // Event
 // |- Venue (seg, pos 1)
 // |  |- Hall (seg)        depth 2
