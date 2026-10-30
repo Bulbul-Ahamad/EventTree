@@ -29,12 +29,12 @@ Defined as CSS variables on `:root` (light) and `.dark` (dark). Tailwind maps th
 | `--foreground` | `#0F1F17` | `#F1F5F9` | Primary text |
 | `--foreground-muted` | `#3F5A4B` | `#CBD5E1` | Secondary text |
 | `--foreground-subtle` | `#5B7566` | `#94A3B8` | Placeholder, captions, disabled text |
-| `--primary` | `#047857` | `#34D399` | Primary buttons, links, focus accents |
-| `--primary-hover` | `#065F46` | `#6EE7B7` | |
-| `--primary-active` | `#064E3B` | `#A7F3D0` | |
+| `--primary` | `#047857` | `#10B981` | Primary buttons, links, focus accents |
+| `--primary-hover` | `#065F46` | `#34D399` | |
+| `--primary-active` | `#064E3B` | `#6EE7B7` | |
 | `--primary-soft` | `#ECFDF5` | `#052E22` | Selected row, subtle highlight |
 | `--primary-foreground` | `#FFFFFF` | `#08130F` | Text on `--primary` |
-| `--ring` | `#10B981` | `#6EE7B7` | Focus ring |
+| `--ring` | `#10B981` | `#34D399` | Focus ring |
 | `--success` | `#15803D` | `#4ADE80` | |
 | `--success-soft` | `#DCFCE7` | `#052E16` | |
 | `--warning` | `#B45309` | `#FBBF24` | |
@@ -228,8 +228,8 @@ Focus ring (global): `outline: 2px solid var(--ring); outline-offset: 2px`. Neve
   --background:#08130F; --surface:#0F1D17; --surface-muted:#17281F;
   --border:#223A2E; --border-strong:#2F4D3D;
   --foreground:#F1F5F9; --foreground-muted:#CBD5E1; --foreground-subtle:#94A3B8;
-  --primary:#34D399; --primary-hover:#6EE7B7; --primary-active:#A7F3D0;
-  --primary-soft:#052E22; --primary-foreground:#08130F; --ring:#6EE7B7;
+  --primary:#10B981; --primary-hover:#34D399; --primary-active:#6EE7B7;
+  --primary-soft:#052E22; --primary-foreground:#08130F; --ring:#34D399;
   --success:#4ADE80; --success-soft:#052E16;
   --warning:#FBBF24; --warning-soft:#422006;
   --danger:#F87171; --danger-soft:#450A0A; --danger-foreground:#08130F;

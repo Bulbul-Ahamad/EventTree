@@ -63,12 +63,12 @@
   --foreground: #f1f5f9;
   --foreground-muted: #cbd5e1;
   --foreground-subtle: #94a3b8;
-  --primary: #34D399;
-  --primary-hover: #6EE7B7;
-  --primary-active: #A7F3D0;
+  --primary: #10B981;
+  --primary-hover: #34D399;
+  --primary-active: #6EE7B7;
   --primary-soft: #052E22;
   --primary-foreground: #08130F;
-  --ring: #6EE7B7;
+  --ring: #34D399;
   --success: #4ade80;
   --success-soft: #052e16;
   --warning: #fbbf24;
