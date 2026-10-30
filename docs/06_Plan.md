@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `2.04`**
+**Next up: `2.05`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -59,7 +59,7 @@
 - [x] **2.01** — Zod schemas + inferred types for org, event, node, update (`features/*/schemas.ts`), `.strict()`. _Done when:_ unit tests cover boundaries (lengths, weight 1–10, URL scheme, dates).
 - [x] **2.02** — `lib/permissions.ts`: pure functions mirroring RLS (canCreateChild, canEditNode, canComment, canTransition…) taking a minimal context (user id, ancestor chain, event settings). _Done when:_ unit tests reproduce the permission matrix in `01_PRD §7` row by row.
 - [x] **2.03** — `lib/status.ts`: `allowedTransitions(context)` implementing T1–T7. _Done when:_ table-driven tests match `02_AppFlow §5` exactly (incl. Mode A/B, self-verify rule, comment-required flag).
-- [ ] **2.04** — `lib/progress.ts` (weighted roll-up) and `lib/tree.ts` (flat → nested, sibling sort, filters All/Mine/Overdue/Needs review, expansion helpers). _Done when:_ unit tests incl. empty segment, weights, 6-deep tree, filter breadcrumbs.
+- [x] **2.04** — `lib/progress.ts` (weighted roll-up) and `lib/tree.ts` (flat → nested, sibling sort, filters All/Mine/Overdue/Needs review, expansion helpers). _Done when:_ unit tests incl. empty segment, weights, 6-deep tree, filter breadcrumbs.
 - [ ] **2.05** — Org queries/actions: list my orgs, members, rotate code, set role, remove/leave. _Done when:_ integration tests (real RLS) pass for admin vs member.
 - [ ] **2.06** — Event queries/actions: list events (tabs), get event + settings, `createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`. _Done when:_ integration tests pass for owner/outsider/admin.
 - [ ] **2.07** — Node queries/actions: `getEventTree` (RPC → nested), `createNode`, `updateNode`, `reassignNode`, `deleteNode`. _Done when:_ integration tests cover manager/strict-manager rules and all node error codes surfaced as `ActionResult`.
@@ -157,6 +157,7 @@
 | 2026-10-30 | 2.01 | Zod `.strict()` schemas: `lib/zod-common.ts` (guid id, ISO datetime, nullable/required text, http(s) link, end-after-start), `features/events/schemas.ts`, `features/nodes/schemas.ts`, `features/updates/schemas.ts`, member schemas added to `features/orgs/schemas.ts`. ~40 new unit tests on boundaries (lengths, weight 1-10, URL scheme, dates). `pnpm check` green, 80 tests. | 7330906 | Ids use `z.guid()` because `z.uuid()` rejects valid Postgres uuids without RFC version bits (seed ids). Schemas do not judge status-transition legality or required comment: that is `lib/status.ts` (2.03) and the DB. |
 | 2026-10-30 | 2.02 | `src/lib/permissions.ts`: pure UI-gating mirror of RLS (roles, lifecycle gates, create/edit/reassign/delete node, toggle progress, submit, verify, send back/reopen, comment, event settings/status/delete). 26 unit tests reproduce `01_PRD §7` row by row on a fixture tree (owner, nested heads, assignee, org admin, outsider), plus BR-10 lifecycle and BR-13 org-admin read-only. `pnpm check` green, 106 tests. | 7055ad5 | Which exact status transition is legal is left to `lib/status.ts` (2.03). Comment gating follows `02_AppFlow` S12 (draft or active). |
 | 2026-10-30 | 2.03 | `src/lib/status.ts`: `allowedTransitions`, `findTransition`, `transitionError` (T1-T7, labels, comment-required flags, DB error order). 20+ table-driven unit tests: hand-written expected table from `02_AppFlow §5` over persona x review mode x from x to, for a plain assignee task and for a head's own task (self-verify rule), plus draft/completed/archived, non-task nodes, button lists, comment rules. Shared fixture `tests/unit/helpers/tree-fixture.ts`. `pnpm check` green. | 02078bd | T4 is allowed in both modes (matches the DB and `02_AppFlow` S14 note that submitted tasks stay verifiable after a mode change). `E_STALE_STATE` is server-only. |
+| 2026-10-30 | 2.04 | `src/lib/progress.ts` (`taskProgress`, `weightedProgress`, `computeProgress`, DB-style 2-decimal rounding per level) and `src/lib/tree.ts` (`buildTree`, `walk`, `subtreeSize`, filters Mine/Overdue/Needs review with segment breadcrumbs, `parseFilter`, `isOverdue` per BR-09, expansion helpers `defaultExpandedIds`, `toggleExpanded`, `ancestorIds`, `flattenVisible`). 28 unit tests: empty segment, weights, rounding parity, 6-deep tree, filter breadcrumbs, unreachable rows. `pnpm check` green, 149 tests. | 7160afa, 50a52b6 | "Needs review" filter = tasks with status `submitted` (doc gives no stricter definition). One lint warning in `status.ts` (unused destructured name) fixed afterwards. |
 
 ## Decisions & Deviations Log
 

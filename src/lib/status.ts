@@ -53,8 +53,14 @@ const RULES: readonly Rule[] = [
   { id: "T7", from: "verified", to: "in_progress", label: "Reopen", commentRequired: true, allowed: canSendBackOrReopen },
 ];
 
-function strip({ allowed: _allowed, ...transition }: Rule): Transition {
-  return transition;
+function strip(rule: Rule): Transition {
+  return {
+    id: rule.id,
+    from: rule.from,
+    to: rule.to,
+    label: rule.label,
+    commentRequired: rule.commentRequired,
+  };
 }
 
 // Transitions the viewer may perform on a task that is currently `status`.
