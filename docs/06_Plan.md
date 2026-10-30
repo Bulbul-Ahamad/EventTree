@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `2.10`**
+**Next up: `2.11`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -65,7 +65,7 @@
 - [x] **2.07** — Node queries/actions: `getEventTree` (RPC → nested), `createNode`, `updateNode`, `reassignNode`, `deleteNode`. _Done when:_ integration tests cover manager/strict-manager rules and all node error codes surfaced as `ActionResult`.
 - [x] **2.08** — Update/status actions: `transitionTask`, `addComment`, `addProofLink`, `getNodeActivity`. _Done when:_ integration tests cover T1–T7 through the action layer incl. `E_STALE_STATE`.
 - [x] **2.09** — Dashboard queries: `getMyTasks` (grouped), `getReviewQueue`, `getMyEvents`. _Done when:_ integration tests verify grouping and visibility.
-- [ ] **2.10** — Error-mapping integration: every RPC error message maps to `ErrorCode`; unknown Postgres errors → `E_UNKNOWN` without leaking details. _Done when:_ tests assert no raw SQL text reaches `message`.
+- [x] **2.10** — Error-mapping integration: every RPC error message maps to `ErrorCode`; unknown Postgres errors → `E_UNKNOWN` without leaking details. _Done when:_ tests assert no raw SQL text reaches `message`.
 - [ ] **2.11** — **Phase 2 gate:** `pnpm check`, `pnpm test:int`, `pnpm test:db` green. Log results. _Done when:_ logged.
 
 ---
@@ -163,6 +163,7 @@
 | 2026-10-30 | 2.07 | `features/nodes/queries.ts` (`getEventTree`: RPC `get_event_tree` → `buildTree`, null when invisible) and `features/nodes/actions.ts` (`createNode`, `updateNode`, `reassignNode`, `deleteNode`; visibility select → `E_NOT_FOUND`, 0 rows → `E_NOT_AUTHORIZED`). `tests/integration/nodes.test.ts`: create rules per role, `E_PARENT_IS_TASK`, `E_MAX_DEPTH`, `E_ASSIGNEE_NOT_IN_ORG`, `E_ROOT_IMMUTABLE`, `E_EVENT_READONLY`, strict-manager edit/reassign/delete, tree visibility and progress roll-up. `pnpm check` and `pnpm test:int` reported passing by user. | 800db81 | None. Test counts not pasted. |
 | 2026-10-30 | 2.08 | `features/updates/actions.ts` (`transitionTask` via RPC; `addComment`, `addProofLink` as RLS-guarded inserts) and `features/updates/queries.ts` (`getNodeActivity`, newest first with author). `tests/integration/updates.test.ts`: T1–T7 in both review modes, self-verify rule, `E_STALE_STATE` incl. concurrent race, `E_COMMENT_REQUIRED`, `E_EVENT_NOT_ACTIVE`, comment/proof-link validation and permissions, immutable log, no forged rows. `pnpm check` and `pnpm test:int` passed (user). | 0c40395, 67d2178 | First run failed: insert sent `event_id`, which is not a granted column (trigger sets it); removed. Org admin can view events, so tests now expect `E_INVALID_TRANSITION`/`E_NOT_AUTHORIZED` for admin. Open question: comments are allowed in completed events (RLS has no status check); spec not confirmed. |
 | 2026-10-31 | 2.09 | `features/dashboard/grouping.ts` (pure `groupMyTasks`, `pickEventRole`, `compareMyEvents`) and `features/dashboard/queries.ts` (`getMyTasks` grouped, `getReviewQueue`, `getMyEvents`). Unit tests for grouping; `tests/integration/dashboard.test.ts` covers grouping across events, BR-09 overdue, draft/completed handling, review queue scope/order/self-verify, my events roles and visibility. `pnpm check` and `pnpm test:int` passed (user). | 9bcfa49 | Decision: "Due this week" = next 7 days (user chose; spec gave no definition). Past-due tasks that are not overdue (verified, or event draft) show under Due this week. `getMyEvents` lists all statuses incl. archived (spec silent). |
+| 2026-10-31 | 2.10 | `toErrorCode` now maps SQLSTATE 42501 (RLS/privilege refusal) to `E_NOT_AUTHORIZED`; `addComment`/`addProofLink` special case removed. `tests/unit/db-error-codes.test.ts` (every `raise exception` code in migrations is in the catalogue, all P0001, 02_AppFlow §7 table equals `ERROR_MESSAGES`), extra cases in `errors.test.ts`, and `tests/integration/error-mapping.test.ts` (raw check/enum/uuid/FK/unknown-table errors, RLS and anon refusals: no SQL text in `message`, only catalogue messages). `pnpm check` and `pnpm test:int` passed (user). | 4b12bec | No doc change: 42501 mapping is an implementation detail beside the documented message mapping. |
 
 ## Decisions & Deviations Log
 
