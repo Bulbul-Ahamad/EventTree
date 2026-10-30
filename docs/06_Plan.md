@@ -169,4 +169,4 @@ Record here any approved change to the docs (what, why, who approved, date).
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
 
-- Mobile app (React Native / Flutter, or PWA), notifications, realtime, file proofs, dependencies, kanban/gantt, templates, event cloning, ownership transfer, Bangla UI, CSV/PDF export.
+- Mobile app (React Native / Flutter, or PWA), notifications, realtime, file proofs, dependencies, kanban/gantt, templates, event cloning, ownership transfer, Bangla UI, CSV/PDF export, profile photo upload or photo URL (initials avatars only in MVP; `profiles.avatar_url` exists but has no UI).
