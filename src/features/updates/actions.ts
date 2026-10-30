@@ -45,7 +45,7 @@ async function insertUpdate(
   // event_id and user_id. The generated Insert type lists event_id as required, so
   // the cast documents that gap (the column is deliberately not granted).
   const { error } = await supabase.from("node_updates").insert({ ...row, node_id: node.id } as TablesInsert<"node_updates">);
-  if (error) return error.code === "42501" ? fail("E_NOT_AUTHORIZED") : failFrom(error); // 42501 = RLS refused
+  if (error) return failFrom(error); // RLS refusal (42501) maps to E_NOT_AUTHORIZED
   revalidatePath(EVENT_PAGE, "page");
   return ok();
 }

@@ -41,9 +41,11 @@ export function errorMessage(code: ErrorCode): string {
   return ERROR_MESSAGES[code];
 }
 
-// Maps a raw error message (e.g. PostgREST `error.message`) to an ErrorCode.
-// Anything that is not an exact catalogue code becomes E_UNKNOWN, so raw SQL
-// text or stack traces never reach the user.
+// Maps a raw error (e.g. a PostgREST error) to an ErrorCode. Business-rule
+// errors arrive as the exact message `E_CODE` (see `raise exception` in the
+// migrations). One non-message case is mapped: SQLSTATE 42501 (RLS or a missing
+// privilege refused the statement) becomes E_NOT_AUTHORIZED. Anything else
+// becomes E_UNKNOWN, so raw SQL text or stack traces never reach the user.
 export function toErrorCode(raw: unknown): ErrorCode {
   const text =
     typeof raw === "string"
@@ -52,5 +54,7 @@ export function toErrorCode(raw: unknown): ErrorCode {
         ? raw.message
         : "";
   const code = text.trim();
-  return isErrorCode(code) ? code : "E_UNKNOWN";
+  if (isErrorCode(code)) return code;
+  if (raw && typeof raw === "object" && "code" in raw && raw.code === "42501") return "E_NOT_AUTHORIZED";
+  return "E_UNKNOWN";
 }

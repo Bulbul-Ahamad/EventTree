@@ -55,6 +55,20 @@ describe("toErrorCode", () => {
     expect(toErrorCode({})).toBe("E_UNKNOWN");
   });
 
+  it("maps an RLS/privilege refusal (SQLSTATE 42501) to E_NOT_AUTHORIZED", () => {
+    expect(toErrorCode({ code: "42501", message: 'new row violates row-level security policy for table "x"' })).toBe(
+      "E_NOT_AUTHORIZED",
+    );
+    expect(toErrorCode({ code: "42501", message: "permission denied for function foo" })).toBe("E_NOT_AUTHORIZED");
+  });
+
+  it("keeps other SQLSTATEs unknown, and the message code wins over the SQLSTATE", () => {
+    expect(toErrorCode({ code: "23505", message: "duplicate key value" })).toBe("E_UNKNOWN");
+    expect(toErrorCode({ code: "23514", message: "violates check constraint" })).toBe("E_UNKNOWN");
+    expect(toErrorCode({ code: "P0001", message: "E_STALE_STATE" })).toBe("E_STALE_STATE");
+    expect(toErrorCode({ code: "P0001", message: "E_MADE_UP" })).toBe("E_UNKNOWN");
+  });
+
   it("does not treat Object prototype keys as codes", () => {
     expect(isErrorCode("toString")).toBe(false);
     expect(toErrorCode("constructor")).toBe("E_UNKNOWN");
