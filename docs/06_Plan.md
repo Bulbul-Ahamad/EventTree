@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `1.27`**
+**Next up: `1.28`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -48,7 +48,7 @@
 - [x] **1.24** — `middleware.ts` route guards per `02_AppFlow §2` (session refresh, redirects, `next` sanitization). _Done when:_ unit tests for `sanitizeNext`; manual: guest → `/login?next=…`, authed → `/dashboard`.
 - [x] **1.25** — Auth Server Actions + Zod schemas: signUp, signIn, signOut, forgotPassword, resetPassword, resend confirmation, Google OAuth start; `auth/callback` route. _Done when:_ schemas unit-tested; generic error wording per `02_AppFlow` verified.
 - [x] **1.26** — Pages S02–S06 (signup, check-email, login, forgot, reset) per `02_AppFlow §4`. _Done when:_ full email signup → confirm (Inbucket local) → login works; wrong password and unconfirmed states render correct messages.
-- [ ] **1.27** — Org Server Actions (`createOrganization`, `joinOrganization`) + S07 Onboarding page. _Done when:_ new user is forced to `/onboarding`, can create or join, lands on `/o/{slug}/events` (placeholder page ok).
+- [x] **1.27** — Org Server Actions (`createOrganization`, `joinOrganization`) + S07 Onboarding page. _Done when:_ new user is forced to `/onboarding`, can create or join, lands on `/o/{slug}/events` (placeholder page ok).
 - [ ] **1.28** — Profile page S17 (name edit, theme, logout). _Done when:_ name change persists; logout returns to `/login`.
 - [ ] **1.29** — **Phase 1 gate:** run `pnpm check`, `pnpm test:db`; manually test signup→confirm→login→onboarding→logout. Log results in Progress Log. _Done when:_ all green and logged.
 
@@ -151,6 +151,7 @@
 | 2026-10-30 | 1.24 | `src/lib/route-guards.ts` (`sanitizeNext`, `decideRoute`, `needsOrgCount`) and `src/middleware.ts` (session refresh, org count lookup only when needed, redirects keep refreshed cookies). Implements `02_AppFlow §2` rules 1-4 and 8. Unit tests for guests, signed-in with 0 / 1+ orgs, exempt pages, unknown org count, and open-redirect inputs. Manual: guest `/dashboard` goes to `/login?next=%2Fdashboard`. | 568540c | Rules 5-7 (404s inside `/o/[orgSlug]`) belong to server layouts (3.02), not middleware. `/dev/*` is reachable without login only when `NODE_ENV` is not production. Authed redirects need the login page (1.26) for a manual check; covered by unit tests now. `pnpm check` output not pasted; Bulbul confirmed it passed. |
 | 2026-10-30 | 1.25 | `src/features/auth/{schemas,map-error,actions}.ts` (signUp, signIn, signOut, forgotPassword, resetPassword, resendConfirmation, startGoogleOAuth; all Zod `.strict()` first) and `src/app/auth/callback/route.ts` (code exchange, sanitized `next`, failure to `/login?error=callback`). New helpers `fieldErrorsFrom` / `failValidation`. New catalogue codes `E_INVALID_CREDENTIALS`, `E_EMAIL_NOT_CONFIRMED` added to `02_AppFlow §7` and `errors.ts`. `pnpm check` green, 44 tests. | 5725e58 | Doc exception used (new error codes). `?error=callback` on `/login` is my naming, to be handled in 1.26. forgotPassword/resend always return ok (only rate limit differs) so email existence is not revealed. Google OAuth needs credentials in Supabase (plan 4.13); action only builds the URL. |
 | 2026-10-30 | 1.26 | Pages S02-S06 under `src/app/(auth)/` (signup, check-email with 60 s resend countdown, login, forgot-password, reset-password) with forms in `src/features/auth/components/`; `PasswordInput`, `FormError`, `useFormAction`; temporary `/dashboard` placeholder. Verified manually by Bulbul: signup, Inbucket confirm email, login with seed user, wrong-password message, unconfirmed message. | 39dec3f | New user with 0 orgs is sent to `/onboarding` (rule 3), which is a 404 until 1.27: expected. No logout yet (1.28): use a private window to switch users. Forms use plain state + the shared Zod schemas rather than react-hook-form. `/dashboard` placeholder replaced in 3.05. |
+| 2026-10-30 | 1.27 | `src/features/orgs/{schemas,slug,actions}.ts` (`createOrganization`, `joinOrganization` via RPCs), `/onboarding` page (create card with auto slug, join card with upper-casing, tabs on mobile, "Back to dashboard" for users with orgs), `NativeSelect`, placeholder `/o/[orgSlug]/events` (404 for non-members via RLS). 14 unit tests. Verified manually by Bulbul: new user forced to onboarding, create, slug taken, join with code, invalid code. | dbb7e63 | `/o/[orgSlug]/events` placeholder replaced in 3.04; real membership layout in 3.02. `pnpm check` output not pasted this time; Bulbul confirmed pass. |
 
 ## Decisions & Deviations Log
 
