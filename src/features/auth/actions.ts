@@ -11,6 +11,7 @@ import {
   resetPasswordSchema,
   signInSchema,
   signUpSchema,
+  updateProfileSchema,
 } from "./schemas";
 
 // Auth Server Actions (02_AppFlow S02-S06). Validate with Zod first, then call
@@ -111,4 +112,26 @@ export async function startGoogleOAuth(input: unknown): Promise<ActionResult<{ u
   });
   if (error || !data.url) return fail(error ? mapAuthError(error) : "E_UNKNOWN");
   return ok({ url: data.url });
+}
+
+// S17: change the display name. RLS lets a user update only their own profile.
+export async function updateProfile(input: unknown): Promise<ActionResult<{ fullName: string }>> {
+  const parsed = updateProfileSchema.safeParse(input);
+  if (!parsed.success) return failValidation(parsed.error);
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return fail("E_NOT_AUTHORIZED");
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ full_name: parsed.data.fullName })
+    .eq("id", user.id)
+    .select("full_name")
+    .maybeSingle();
+  if (error) return failFrom(error);
+  if (!data) return fail("E_NOT_FOUND");
+  return ok({ fullName: data.full_name });
 }

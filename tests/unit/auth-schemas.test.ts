@@ -85,3 +85,14 @@ describe("mapAuthError (generic wording, no account enumeration)", () => {
     expect(mapAuthError(null)).toBe("E_UNKNOWN");
   });
 });
+
+describe("updateProfileSchema", () => {
+  it("trims and checks 1-100 characters", async () => {
+    const { updateProfileSchema } = await import("@/features/auth/schemas");
+    const r = updateProfileSchema.safeParse({ fullName: "  বুলবুল  " });
+    expect(r.success && r.data.fullName).toBe("বুলবুল");
+    expect(updateProfileSchema.safeParse({ fullName: " " }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ fullName: "a".repeat(101) }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ fullName: "ok", email: "x@y.co" }).success).toBe(false);
+  });
+});

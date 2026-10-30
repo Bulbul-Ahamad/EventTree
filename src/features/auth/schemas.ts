@@ -14,13 +14,17 @@ export const passwordRule = z
   .regex(/[A-Za-z]/, "Include at least one letter.")
   .regex(/\d/, "Include at least one number.");
 
+const fullName = z
+  .string()
+  .trim()
+  .min(1, "Enter your name.")
+  .max(100, "Use at most 100 characters.");
+
+export const updateProfileSchema = z.object({ fullName }).strict();
+
 export const signUpSchema = z
   .object({
-    fullName: z
-      .string()
-      .trim()
-      .min(1, "Enter your name.")
-      .max(100, "Use at most 100 characters."),
+    fullName,
     email,
     password: passwordRule,
   })
