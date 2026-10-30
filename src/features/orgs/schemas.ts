@@ -45,3 +45,5 @@ export const setMemberRoleSchema = z
   .object({ orgId, userId, role: z.enum(["admin", "member"]) })
   .strict();
 export const removeMemberSchema = z.object({ orgId, userId }).strict();
+
+export const leaveOrganizationSchema = z.object({ orgId }).strict();

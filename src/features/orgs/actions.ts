@@ -1,9 +1,17 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { fail, failFrom, failValidation, ok, type ActionResult } from "@/lib/action-result";
 import { toErrorCode } from "@/lib/errors";
 import { createServerClient } from "@/lib/supabase/server";
-import { createOrganizationSchema, joinOrganizationSchema } from "./schemas";
+import {
+  createOrganizationSchema,
+  joinOrganizationSchema,
+  leaveOrganizationSchema,
+  removeMemberSchema,
+  rotateJoinCodeSchema,
+  setMemberRoleSchema,
+} from "./schemas";
 
 // Org Server Actions (02_AppFlow S07). Rules live in the RPCs; this layer
 // validates input and maps errors.
@@ -39,4 +47,69 @@ export async function joinOrganization(input: unknown): Promise<ActionResult<{ s
     return failFrom(error);
   }
   return ok({ slug: data.slug });
+}
+
+// ---- member management (S15). Authority and guards are in the RPCs. --------
+
+const MEMBERS_PAGE = "/o/[orgSlug]/members";
+
+export async function rotateJoinCode(input: unknown): Promise<ActionResult<{ joinCode: string }>> {
+  const parsed = rotateJoinCodeSchema.safeParse(input);
+  if (!parsed.success) return failValidation(parsed.error);
+
+  const supabase = await createServerClient();
+  const { data, error } = await supabase.rpc("rotate_join_code", { p_org: parsed.data.orgId });
+  if (error) return failFrom(error);
+  revalidatePath(MEMBERS_PAGE, "page");
+  return ok({ joinCode: data });
+}
+
+export async function setMemberRole(input: unknown): Promise<ActionResult> {
+  const parsed = setMemberRoleSchema.safeParse(input);
+  if (!parsed.success) return failValidation(parsed.error);
+  const { orgId, userId, role } = parsed.data;
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.rpc("set_org_member_role", {
+    p_org: orgId,
+    p_user: userId,
+    p_role: role,
+  });
+  if (error) return failFrom(error);
+  revalidatePath(MEMBERS_PAGE, "page");
+  return ok();
+}
+
+export async function removeMember(input: unknown): Promise<ActionResult> {
+  const parsed = removeMemberSchema.safeParse(input);
+  if (!parsed.success) return failValidation(parsed.error);
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.rpc("remove_org_member", {
+    p_org: parsed.data.orgId,
+    p_user: parsed.data.userId,
+  });
+  if (error) return failFrom(error);
+  revalidatePath(MEMBERS_PAGE, "page");
+  return ok();
+}
+
+// Leave = remove myself (the RPC allows self-removal for any member).
+export async function leaveOrganization(input: unknown): Promise<ActionResult> {
+  const parsed = leaveOrganizationSchema.safeParse(input);
+  if (!parsed.success) return failValidation(parsed.error);
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return fail("E_NOT_AUTHORIZED");
+
+  const { error } = await supabase.rpc("remove_org_member", {
+    p_org: parsed.data.orgId,
+    p_user: user.id,
+  });
+  if (error) return failFrom(error);
+  revalidatePath("/", "layout");
+  return ok();
 }
