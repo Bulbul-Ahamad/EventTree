@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `2.07`**
+**Next up: `2.08`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -62,7 +62,7 @@
 - [x] **2.04** — `lib/progress.ts` (weighted roll-up) and `lib/tree.ts` (flat → nested, sibling sort, filters All/Mine/Overdue/Needs review, expansion helpers). _Done when:_ unit tests incl. empty segment, weights, 6-deep tree, filter breadcrumbs.
 - [x] **2.05** — Org queries/actions: list my orgs, members, rotate code, set role, remove/leave. _Done when:_ integration tests (real RLS) pass for admin vs member.
 - [x] **2.06** — Event queries/actions: list events (tabs), get event + settings, `createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`. _Done when:_ integration tests pass for owner/outsider/admin.
-- [ ] **2.07** — Node queries/actions: `getEventTree` (RPC → nested), `createNode`, `updateNode`, `reassignNode`, `deleteNode`. _Done when:_ integration tests cover manager/strict-manager rules and all node error codes surfaced as `ActionResult`.
+- [x] **2.07** — Node queries/actions: `getEventTree` (RPC → nested), `createNode`, `updateNode`, `reassignNode`, `deleteNode`. _Done when:_ integration tests cover manager/strict-manager rules and all node error codes surfaced as `ActionResult`.
 - [ ] **2.08** — Update/status actions: `transitionTask`, `addComment`, `addProofLink`, `getNodeActivity`. _Done when:_ integration tests cover T1–T7 through the action layer incl. `E_STALE_STATE`.
 - [ ] **2.09** — Dashboard queries: `getMyTasks` (grouped), `getReviewQueue`, `getMyEvents`. _Done when:_ integration tests verify grouping and visibility.
 - [ ] **2.10** — Error-mapping integration: every RPC error message maps to `ErrorCode`; unknown Postgres errors → `E_UNKNOWN` without leaking details. _Done when:_ tests assert no raw SQL text reaches `message`.
@@ -160,6 +160,7 @@
 | 2026-10-30 | 2.04 | `src/lib/progress.ts` (`taskProgress`, `weightedProgress`, `computeProgress`, DB-style 2-decimal rounding per level) and `src/lib/tree.ts` (`buildTree`, `walk`, `subtreeSize`, filters Mine/Overdue/Needs review with segment breadcrumbs, `parseFilter`, `isOverdue` per BR-09, expansion helpers `defaultExpandedIds`, `toggleExpanded`, `ancestorIds`, `flattenVisible`). 28 unit tests: empty segment, weights, rounding parity, 6-deep tree, filter breadcrumbs, unreachable rows. `pnpm check` green, 149 tests. | 7160afa, 50a52b6 | "Needs review" filter = tasks with status `submitted` (doc gives no stricter definition). One lint warning in `status.ts` (unused destructured name) fixed afterwards. |
 | 2026-10-30 | 2.05 | `features/orgs/queries.ts` (`listMyOrgs`, `getOrgBySlug` with join code for admins only, `listOrgMembers`) and member actions `rotateJoinCode`, `setMemberRole`, `removeMember`, `leaveOrganization`. First integration test harness (`tests/integration/helpers`: real users via service role, signed in with anon key so RLS applies, mocked `createServerClient`, cleanup) and `tests/integration/orgs.test.ts`: 15 tests for admin vs member vs outsider, `E_NOT_AUTHORIZED`, `E_LAST_ADMIN`, `E_OWNS_EVENTS`, `E_NOT_FOUND`, `E_INVALID_JOIN_CODE`, `E_VALIDATION`. `pnpm test:int` green (15). | e16c40e | `supabase/config.toml` local `sign_in_sign_ups` 30 -> 1000 so integration tests do not hit the auth rate limit (local only). `setup.ts` now skips DOM cleanup in node-environment tests. Observation: RLS lets any org member read `organizations.join_code` through the API (docs allow it); the app only shows it to admins. `pnpm check` output was not pasted for this step; `pnpm test:int` was. |
 | 2026-10-30 | 2.06 | `features/events/queries.ts` (`listEvents` with Active/Completed/Archived tabs, `getEvent`, `getEventContext` for `lib/permissions.ts`) and `features/events/actions.ts` (`createEvent`, `updateEventSettings`, `setEventStatus`, `deleteEvent`); `lib/rpc.ts` `nullable()` bridge for generated RPC arg types. `tests/integration/events.test.ts`: create/validation, visibility (BR-03, 404 policy), settings edit (owner only, org admin read-only, completed is read-only), full lifecycle walk incl. completed_at, delete rules and subtree removal, tab movement. `pnpm check` and `pnpm test:int` green. | 4e625b4, 14ca9b2 | First `tsc` run failed on a tuple-destructuring type in the test; fixed in the test. `updateEventSettings` is two writes (nodes + event_settings), no single RPC exists: settings first so a bad date changes nothing. Exact test counts not pasted. |
+| 2026-10-30 | 2.07 | `features/nodes/queries.ts` (`getEventTree`: RPC `get_event_tree` → `buildTree`, null when invisible) and `features/nodes/actions.ts` (`createNode`, `updateNode`, `reassignNode`, `deleteNode`; visibility select → `E_NOT_FOUND`, 0 rows → `E_NOT_AUTHORIZED`). `tests/integration/nodes.test.ts`: create rules per role, `E_PARENT_IS_TASK`, `E_MAX_DEPTH`, `E_ASSIGNEE_NOT_IN_ORG`, `E_ROOT_IMMUTABLE`, `E_EVENT_READONLY`, strict-manager edit/reassign/delete, tree visibility and progress roll-up. `pnpm check` and `pnpm test:int` reported passing by user. | 800db81 | None. Test counts not pasted. |
 
 ## Decisions & Deviations Log
 
