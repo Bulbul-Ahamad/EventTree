@@ -21,6 +21,17 @@ vi.mock("@/features/nodes/actions", () => ({
 const success = vi.fn();
 vi.mock("@/lib/toast", () => ({ notify: { success: (m: string) => success(m), error: vi.fn() } }));
 
+const ID = {
+  event: "00000000-0000-4000-8000-000000000001",
+  venue: "00000000-0000-4000-8000-000000000002",
+  task: "00000000-0000-4000-8000-000000000003",
+  u_owner: "00000000-0000-4000-8000-0000000000a1",
+  u_head: "00000000-0000-4000-8000-0000000000a2",
+  u_nila: "00000000-0000-4000-8000-0000000000a3",
+  u_rafi: "00000000-0000-4000-8000-0000000000a4",
+  u_admin: "00000000-0000-4000-8000-0000000000a5",
+} as const;
+
 function row(id: string, parent: string | null, type: TreeRow["type"], over: Partial<TreeRow> = {}): TreeRow {
   return {
     id, parent_id: parent, type, title: id, description: null, assignee_id: null, assignee_name: null,
@@ -33,10 +44,10 @@ function row(id: string, parent: string | null, type: TreeRow["type"], over: Par
 // event (owner u-owner) -> venue (head u-head) -> task (assignee u-nila)
 function tree(): TreeNode {
   const root = buildTree([
-    row("event", null, "event", { title: "Tech Fest", assignee_id: "u-owner" }),
-    row("venue", "event", "segment", { title: "Venue", assignee_id: "u-head" }),
-    row("task", "venue", "task", {
-      title: "Stage", description: "Build it", assignee_id: "u-nila", priority: "high", weight: 3,
+    row(ID.event, null, "event", { title: "Tech Fest", assignee_id: ID.u_owner }),
+    row(ID.venue, ID.event, "segment", { title: "Venue", assignee_id: ID.u_head }),
+    row(ID.task, ID.venue, "task", {
+      title: "Stage", description: "Build it", assignee_id: ID.u_nila, priority: "high", weight: 3,
       due_at: "2026-11-05T10:00:00.000Z",
     }),
   ]);
@@ -50,8 +61,8 @@ const find = (root: TreeNode, id: string): TreeNode => {
 };
 
 const MEMBERS = [
-  { value: "u-nila", label: "Nila Akter", description: "nila@demo.test" },
-  { value: "u-rafi", label: "Rafi Islam", description: "rafi@demo.test" },
+  { value: ID.u_nila, label: "Nila Akter", description: "nila@demo.test" },
+  { value: ID.u_rafi, label: "Rafi Islam", description: "rafi@demo.test" },
 ];
 
 function dialog(target: NodeDialogTarget) {
@@ -63,7 +74,7 @@ const type = (label: RegExp | string, value: string) =>
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
 const submit = (name: string) => fireEvent.click(screen.getByRole("button", { name }));
 async function pickAssignee(name: string) {
-  fireEvent.click(screen.getByRole("combobox"));
+  fireEvent.click(screen.getByRole("combobox", { name: /Assignee/ }));
   fireEvent.click(await screen.findByRole("option", { name: new RegExp(name) }));
 }
 
@@ -94,7 +105,7 @@ describe("NodeFormDialog: add", () => {
     submit("Add segment");
     await waitFor(() =>
       expect(createNode).toHaveBeenCalledWith({
-        parentId: "event", type: "segment", title: "Publicity", description: "", assigneeId: null, dueAt: null, weight: 1,
+        parentId: ID.event, type: "segment", title: "Publicity", description: "", assigneeId: null, dueAt: null, weight: 1,
       }),
     );
     await waitFor(() => expect(onClose).toHaveBeenCalled());
@@ -105,7 +116,7 @@ describe("NodeFormDialog: add", () => {
   it("adds a task with assignee, priority, weight and due date", async () => {
     createNode.mockResolvedValue(ok({ nodeId: "n2" }));
     const root = tree();
-    dialog({ kind: "create", parent: find(root, "venue"), type: "task" });
+    dialog({ kind: "create", parent: find(root, ID.venue), type: "task" });
     type(/^Title/, "Sound check");
     await pickAssignee("Rafi Islam");
     type("Priority", "urgent");
@@ -114,7 +125,7 @@ describe("NodeFormDialog: add", () => {
     submit("Add task");
     await waitFor(() => expect(createNode).toHaveBeenCalled());
     expect(createNode.mock.calls[0]?.[0]).toMatchObject({
-      parentId: "venue", type: "task", title: "Sound check", assigneeId: "u-rafi", priority: "urgent", weight: 4,
+      parentId: ID.venue, type: "task", title: "Sound check", assigneeId: ID.u_rafi, priority: "urgent", weight: 4,
       dueAt: new Date("2026-11-05T10:00").toISOString(),
     });
   });
@@ -165,7 +176,7 @@ describe("NodeFormDialog: error codes", () => {
     type(/^Title/, "x");
     submit("Add task");
     expect(await screen.findByText(ERROR_MESSAGES.E_ASSIGNEE_NOT_IN_ORG)).toBeInTheDocument();
-    expect(screen.getByRole("combobox")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("combobox", { name: /Assignee/ })).toHaveAttribute("aria-invalid", "true");
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
@@ -182,21 +193,21 @@ describe("NodeFormDialog: error codes", () => {
 
 describe("NodeFormDialog: edit", () => {
   it("starts from the current values", () => {
-    dialog({ kind: "edit", node: find(tree(), "task") });
+    dialog({ kind: "edit", node: find(tree(), ID.task) });
     expect(screen.getByLabelText(/^Title/)).toHaveValue("Stage");
     expect(screen.getByLabelText("Description")).toHaveValue("Build it");
     expect(screen.getByLabelText("Priority")).toHaveValue("high");
     expect(screen.getByLabelText(/^Weight/)).toHaveValue(3);
     expect(screen.getByLabelText("Due date")).toHaveValue(isoToLocalInput("2026-11-05T10:00:00.000Z"));
-    expect(screen.getByRole("combobox")).toHaveTextContent("Nila Akter");
+    expect(screen.getByRole("combobox", { name: /Assignee/ })).toHaveTextContent("Nila Akter");
   });
 
   it("sends only the fields that changed and does not reassign", async () => {
     updateNode.mockResolvedValue(ok());
-    const { onClose } = dialog({ kind: "edit", node: find(tree(), "task") });
+    const { onClose } = dialog({ kind: "edit", node: find(tree(), ID.task) });
     type(/^Title/, "Stage decoration");
     submit("Save");
-    await waitFor(() => expect(updateNode).toHaveBeenCalledWith({ nodeId: "task", title: "Stage decoration" }));
+    await waitFor(() => expect(updateNode).toHaveBeenCalledWith({ nodeId: ID.task, title: "Stage decoration" }));
     expect(reassignNode).not.toHaveBeenCalled();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(success).toHaveBeenCalledWith("Changes saved");
@@ -204,15 +215,15 @@ describe("NodeFormDialog: edit", () => {
 
   it("clears the description and due date by sending null", async () => {
     updateNode.mockResolvedValue(ok());
-    dialog({ kind: "edit", node: find(tree(), "task") });
+    dialog({ kind: "edit", node: find(tree(), ID.task) });
     type("Description", "");
     type("Due date", "");
     submit("Save");
-    await waitFor(() => expect(updateNode).toHaveBeenCalledWith({ nodeId: "task", description: "", dueAt: null }));
+    await waitFor(() => expect(updateNode).toHaveBeenCalledWith({ nodeId: ID.task, description: "", dueAt: null }));
   });
 
   it("closes without calling anything when nothing changed", () => {
-    const { onClose } = dialog({ kind: "edit", node: find(tree(), "task") });
+    const { onClose } = dialog({ kind: "edit", node: find(tree(), ID.task) });
     submit("Save");
     expect(onClose).toHaveBeenCalled();
     expect(updateNode).not.toHaveBeenCalled();
@@ -222,18 +233,18 @@ describe("NodeFormDialog: edit", () => {
   it("also reassigns when the assignee changed, after saving the other fields", async () => {
     updateNode.mockResolvedValue(ok());
     reassignNode.mockResolvedValue(ok());
-    dialog({ kind: "edit", node: find(tree(), "task") });
+    dialog({ kind: "edit", node: find(tree(), ID.task) });
     type(/^Title/, "New name");
     await pickAssignee("Rafi Islam");
     submit("Save");
-    await waitFor(() => expect(reassignNode).toHaveBeenCalledWith({ nodeId: "task", assigneeId: "u-rafi" }));
-    expect(updateNode).toHaveBeenCalledWith({ nodeId: "task", title: "New name" });
+    await waitFor(() => expect(reassignNode).toHaveBeenCalledWith({ nodeId: ID.task, assigneeId: ID.u_rafi }));
+    expect(updateNode).toHaveBeenCalledWith({ nodeId: ID.task, title: "New name" });
   });
 
   it("reports a failed reassignment and still refreshes because the other changes were saved", async () => {
     updateNode.mockResolvedValue(ok());
     reassignNode.mockResolvedValue(fail("E_ASSIGNEE_NOT_IN_ORG"));
-    dialog({ kind: "edit", node: find(tree(), "task") });
+    dialog({ kind: "edit", node: find(tree(), ID.task) });
     type(/^Title/, "New name");
     await pickAssignee("Rafi Islam");
     submit("Save");
@@ -242,7 +253,7 @@ describe("NodeFormDialog: edit", () => {
   });
 
   it("shows no priority field when editing a segment", () => {
-    dialog({ kind: "edit", node: find(tree(), "venue") });
+    dialog({ kind: "edit", node: find(tree(), ID.venue) });
     expect(screen.queryByLabelText("Priority")).toBeNull();
   });
 });
@@ -250,12 +261,12 @@ describe("NodeFormDialog: edit", () => {
 describe("NodeFormDialog: reassign", () => {
   it("shows only the assignee and can set it to Unassigned", async () => {
     reassignNode.mockResolvedValue(ok());
-    dialog({ kind: "reassign", node: find(tree(), "task") });
+    dialog({ kind: "reassign", node: find(tree(), ID.task) });
     expect(screen.queryByLabelText(/^Title/)).toBeNull();
-    fireEvent.click(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("combobox", { name: /Assignee/ }));
     fireEvent.click(await screen.findByRole("option", { name: "Unassigned" }));
     submit("Save");
-    await waitFor(() => expect(reassignNode).toHaveBeenCalledWith({ nodeId: "task", assigneeId: null }));
+    await waitFor(() => expect(reassignNode).toHaveBeenCalledWith({ nodeId: ID.task, assigneeId: null }));
     expect(success).toHaveBeenCalledWith("Assignee updated");
   });
 });
@@ -263,7 +274,7 @@ describe("NodeFormDialog: reassign", () => {
 describe("NodeActions (permission-gated row menu)", () => {
   function ctx(userId: string, over: Partial<EventContext> = {}): EventContext {
     return {
-      userId, ownerId: "u-owner", eventStatus: "active", reviewMode: "assignee_submits", isOrgAdmin: false,
+      userId, ownerId: ID.u_owner, eventStatus: "active", reviewMode: "assignee_submits", isOrgAdmin: false,
       isParticipant: true, ...over,
     };
   }
@@ -287,19 +298,19 @@ describe("NodeActions (permission-gated row menu)", () => {
   }
 
   it("owner: add on the root, everything on a segment", async () => {
-    expect(await menuFor("event", ctx("u-owner"))).toEqual(["Add segment", "Add task"]);
-    expect(await menuFor("venue", ctx("u-owner"))).toEqual(["Add segment", "Add task", "Edit", "Reassign"]);
+    expect(await menuFor(ID.event, ctx(ID.u_owner))).toEqual(["Add segment", "Add task"]);
+    expect(await menuFor(ID.venue, ctx(ID.u_owner))).toEqual(["Add segment", "Add task", "Edit", "Reassign"]);
   });
 
   it("head: add under own segment, edit and reassign below it, nothing on the root", async () => {
-    expect(await menuFor("venue", ctx("u-head"))).toEqual(["Add segment", "Add task"]);
-    expect(await menuFor("task", ctx("u-head"))).toEqual(["Edit", "Reassign"]);
-    expect(await menuFor("event", ctx("u-head"))).toBeNull();
+    expect(await menuFor(ID.venue, ctx(ID.u_head))).toEqual(["Add segment", "Add task"]);
+    expect(await menuFor(ID.task, ctx(ID.u_head))).toEqual(["Edit", "Reassign"]);
+    expect(await menuFor(ID.event, ctx(ID.u_head))).toBeNull();
   });
 
   it("a task assignee, an org admin and everyone in a completed event get no menu", async () => {
-    expect(await menuFor("task", ctx("u-nila"))).toBeNull();
-    expect(await menuFor("venue", ctx("u-admin", { isOrgAdmin: true, isParticipant: false }))).toBeNull();
-    expect(await menuFor("venue", ctx("u-owner", { eventStatus: "completed" }))).toBeNull();
+    expect(await menuFor(ID.task, ctx(ID.u_nila))).toBeNull();
+    expect(await menuFor(ID.venue, ctx(ID.u_admin, { isOrgAdmin: true, isParticipant: false }))).toBeNull();
+    expect(await menuFor(ID.venue, ctx(ID.u_owner, { eventStatus: "completed" }))).toBeNull();
   });
 });
