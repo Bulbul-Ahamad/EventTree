@@ -67,7 +67,7 @@ export function TreeView({
   }, [root]);
 
   // Overdue is decided once per render so every row agrees (BR-09).
-  const now = useMemo(() => new Date(), [root]);
+  const now = new Date();
 
   const tabbableId =
     (focusedId && rows.some((r) => r.node.id === focusedId) ? focusedId : null) ??

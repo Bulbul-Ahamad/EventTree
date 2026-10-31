@@ -48,12 +48,13 @@ function sample(): TreeNode {
 }
 
 function renderTree(over: Partial<React.ComponentProps<typeof TreeView>> = {}) {
+  const onOpenNode = vi.fn<(id: string) => void>();
   const props = {
     root: sample(),
     eventId: eventId(),
     eventStatus: "active" as const,
-    onOpenNode: vi.fn(),
     ...over,
+    onOpenNode,
   };
   return { ...render(<TreeView {...props} />), props };
 }
@@ -227,7 +228,8 @@ describe("TreeView interaction", () => {
 
   it("ignores keys that come from controls inside a row", () => {
     const { props } = renderTree({ renderActions: () => <button type="button">menu</button> });
-    const [button] = screen.getAllByRole("button", { name: "menu" });
+    const button = screen.getAllByRole("button", { name: "menu" })[0];
+    if (!button) throw new Error("no menu button");
     fireEvent.keyDown(button, { key: "Enter" });
     expect(props.onOpenNode).not.toHaveBeenCalled();
   });
