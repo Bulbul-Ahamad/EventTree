@@ -74,7 +74,7 @@ function panel(nodeId: string, c: EventContext, activity: ActivityItem[] | null 
   const root = tree();
   const onNavigate = vi.fn();
   const onClose = vi.fn();
-  render(
+  const { unmount } = render(
     <NodeDetailPanel
       root={root}
       node={nodeOf(root, nodeId)}
@@ -86,7 +86,7 @@ function panel(nodeId: string, c: EventContext, activity: ActivityItem[] | null 
       onClose={onClose}
     />,
   );
-  return { onNavigate, onClose };
+  return { onNavigate, onClose, unmount };
 }
 
 beforeEach(() => {
@@ -193,18 +193,16 @@ describe("Comment composer", () => {
       [ID.owner, {}],
       [ID.owner, { eventStatus: "draft" as const }],
     ] as const) {
-      const { unmount } = render(<div />);
-      unmount();
-      panel(ID.hall, ctx(who, over));
+      const { unmount } = panel(ID.hall, ctx(who, over));
       expect(screen.getByRole("button", { name: "Post" })).toBeInTheDocument();
-      document.body.innerHTML = "";
+      unmount();
     }
   });
 
   it("is hidden from other people, and in a completed event", () => {
-    panel(ID.hall, ctx(ID.sumon));
+    const first = panel(ID.hall, ctx(ID.sumon));
     expect(screen.queryByRole("button", { name: "Post" })).toBeNull();
-    document.body.innerHTML = "";
+    first.unmount();
     panel(ID.hall, ctx(ID.owner, { eventStatus: "completed" }));
     expect(screen.queryByRole("button", { name: "Post" })).toBeNull();
   });
