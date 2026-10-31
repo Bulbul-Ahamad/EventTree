@@ -249,11 +249,13 @@ describe("TreeView filtered list", () => {
     const items = filterTasks(root, "review", { userId: "u1", eventStatus: "active", now: new Date() });
     renderTree({ root, flatItems: items });
     expect(screen.getAllByRole("treeitem")).toHaveLength(1);
-    expect(item("t3")).toHaveAttribute("aria-level", "1");
-    expect(within(item("t3")).getByText("publicity")).toBeInTheDocument(); // breadcrumb caption
-    item("t3").focus();
-    fireEvent.keyDown(item("t3"), { key: "ArrowLeft" });
-    expect(item("t3")).toHaveFocus();
+    // The breadcrumb caption comes first in the accessible name, so match anywhere.
+    const t3 = screen.getByRole("treeitem", { name: /t3/ });
+    expect(t3).toHaveAttribute("aria-level", "1");
+    expect(within(t3).getByText("publicity")).toBeInTheDocument();
+    t3.focus();
+    fireEvent.keyDown(t3, { key: "ArrowLeft" });
+    expect(t3).toHaveFocus();
   });
 });
 
