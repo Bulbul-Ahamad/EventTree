@@ -26,3 +26,28 @@ export function localInputToIso(value: string): string | null {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
+
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+// "in 2 days", "tomorrow", "3 hours ago", "just now" (02_AppFlow §1: relative text,
+// the absolute date goes in a tooltip). `now` is a parameter so it can be tested.
+export function formatRelative(iso: string, now: Date): string {
+  const diff = new Date(iso).getTime() - now.getTime();
+  const abs = Math.abs(diff);
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  if (abs < MINUTE) return "just now";
+  if (abs < HOUR) return rtf.format(Math.round(diff / MINUTE), "minute");
+  if (abs < DAY) return rtf.format(Math.round(diff / HOUR), "hour");
+  return rtf.format(Math.round(diff / DAY), "day");
+}
+
+// "3 days overdue", "5 hours overdue", or "Overdue" when it just passed.
+export function formatOverdue(iso: string, now: Date): string {
+  const late = now.getTime() - new Date(iso).getTime();
+  const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"} overdue`;
+  if (late >= DAY) return plural(Math.floor(late / DAY), "day");
+  if (late >= HOUR) return plural(Math.floor(late / HOUR), "hour");
+  return "Overdue";
+}
