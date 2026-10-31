@@ -2,14 +2,18 @@
 
 import { SearchX } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { ComboboxOption } from "@/components/ui/combobox";
 import { SegmentedControl } from "@/components/ui/segmented-control";
+import type { ActivityItem } from "@/features/updates/queries";
+import { errorMessage } from "@/lib/errors";
 import { canCreateChild, isEventOwner, type EventContext } from "@/lib/permissions";
-import { buildNodeContexts, filterTasks, parseFilter, type TreeFilter, type TreeNode } from "@/lib/tree";
+import { notify } from "@/lib/toast";
+import { buildNodeContexts, filterTasks, isOverdue, parseFilter, walk, type TreeFilter, type TreeNode } from "@/lib/tree";
 import { NodeActions } from "./node-actions";
+import { NodeDetailPanel } from "./node-detail-panel";
 import { NodeFormDialog, type NodeDialogTarget } from "./node-form-dialog";
 import { TreeView } from "./tree-view";
 
@@ -26,10 +30,14 @@ export function EventTree({
   root,
   ctx,
   members,
+  activity,
+  activityFor,
 }: {
   root: TreeNode;
   ctx: EventContext; // who I am in this event, for the permission mirror
   members: ReadonlyArray<ComboboxOption>; // org members, for the assignee select
+  activity: ActivityItem[]; // activity of the node named by `activityFor`
+  activityFor: string | null;
 }) {
   const { eventStatus, userId } = ctx;
   const router = useRouter();
@@ -46,6 +54,18 @@ export function EventTree({
     },
     [params, pathname, router],
   );
+
+  const selectedId = params.get("node");
+  const nodeById = useMemo(() => new Map(walk(root).map((n) => [n.id, n])), [root]);
+  const selectedNode = selectedId ? (nodeById.get(selectedId) ?? null) : null;
+
+  // A ?node= that does not exist (or I cannot see): drop it and say so (S12).
+  useEffect(() => {
+    if (selectedId && !nodeById.has(selectedId)) {
+      notify.error(errorMessage("E_NOT_FOUND"));
+      go((q) => q.delete("node"));
+    }
+  }, [selectedId, nodeById, go]);
 
   const onOpenNode = useCallback((id: string) => go((q) => q.set("node", id)), [go]);
   const setFilter = useCallback(
@@ -126,7 +146,7 @@ export function EventTree({
           root={root}
           eventId={root.id}
           eventStatus={eventStatus}
-          selectedId={params.get("node")}
+          selectedId={selectedId}
           flatItems={items}
           onOpenNode={onOpenNode}
           renderActions={renderActions}
@@ -134,6 +154,18 @@ export function EventTree({
           className="overflow-hidden rounded-lg border border-border bg-surface shadow-sm"
         />
       )}
+      {selectedNode && nodeContexts.get(selectedNode.id) ? (
+        <NodeDetailPanel
+          root={root}
+          node={selectedNode}
+          ctx={ctx}
+          nodeCtx={nodeContexts.get(selectedNode.id)!} // checked just above
+          activity={activityFor === selectedNode.id ? activity : null}
+          overdue={isOverdue(selectedNode, { userId, eventStatus, now: new Date() })}
+          onNavigate={onOpenNode}
+          onClose={() => go((q) => q.delete("node"))}
+        />
+      ) : null}
       {dialog ? (
         <NodeFormDialog
           key={dialog.kind === "create" ? `create-${dialog.parent.id}-${dialog.type}` : `${dialog.kind}-${dialog.node.id}`}

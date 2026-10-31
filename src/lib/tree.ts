@@ -175,3 +175,38 @@ export function buildNodeContexts(root: TreeNode): Map<string, NodeContext> {
   visit(root, []);
   return map;
 }
+
+// ---- detail panel ---------------------------------------------------------
+
+// Proper ancestors of a node, event first, as nodes (for the breadcrumb).
+export function breadcrumbOf(root: TreeNode, id: string): TreeNode[] {
+  const byId = new Map(walk(root).map((n) => [n.id, n]));
+  return ancestorIds(root, id).flatMap((a) => {
+    const n = byId.get(a);
+    return n ? [n] : [];
+  });
+}
+
+export type SubtreeSummary = {
+  segments: number; // segments below the node
+  tasks: number; // tasks below the node
+  byStatus: Record<TaskStatus, number>;
+};
+
+// Counts below a node (not the node itself): what a segment or event contains.
+export function subtreeSummary(node: TreeNode): SubtreeSummary {
+  const out: SubtreeSummary = {
+    segments: 0,
+    tasks: 0,
+    byStatus: { todo: 0, in_progress: 0, submitted: 0, verified: 0 },
+  };
+  for (const n of walk(node)) {
+    if (n.id === node.id) continue;
+    if (n.type === "segment") out.segments += 1;
+    if (n.type === "task") {
+      out.tasks += 1;
+      if (n.status) out.byStatus[n.status] += 1;
+    }
+  }
+  return out;
+}
