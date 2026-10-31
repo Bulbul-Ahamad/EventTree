@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useOptimistic, useState, useTransition } from "react";
 import { transitionTask } from "@/features/updates/actions";
 import { errorMessage } from "@/lib/errors";
 import type { EventContext, NodeContext, TaskStatus } from "@/lib/permissions";
@@ -18,6 +18,8 @@ const DONE: Record<TransitionId, string> = {
   T6: "Task verified",
   T7: "Task reopened",
 };
+
+const NO_IDS: ReadonlySet<string> = new Set();
 
 type Options = {
   ctx: EventContext;
@@ -39,16 +41,12 @@ type RunOptions = {
 export function useTaskTransitions({ ctx, nodeContexts, apply }: Options) {
   const router = useRouter();
   const [, startTransition] = useTransition();
-  const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(() => new Set());
+  // "Saving" is also optimistic: state set inside a transition only shows once the
+  // transition ends, which is too late for a spinner. This one reverts by itself.
+  const [pendingIds, addPending] = useOptimistic<ReadonlySet<string>, string>(NO_IDS, (current, id) =>
+    new Set(current).add(id),
+  );
   const [error, setError] = useState<{ nodeId: string; message: string } | null>(null);
-
-  const setPending = (id: string, on: boolean) =>
-    setPendingIds((prev) => {
-      const next = new Set(prev);
-      if (on) next.add(id);
-      else next.delete(id);
-      return next;
-    });
 
   const transitionsFor = useCallback(
     (node: TreeNode): Transition[] => {
@@ -73,10 +71,9 @@ export function useTaskTransitions({ ctx, nodeContexts, apply }: Options) {
 
       startTransition(async () => {
         apply({ id: node.id, status: t.to });
-        setPending(node.id, true);
+        addPending(node.id);
         const comment = opts.comment?.trim();
         const result = await transitionTask({ nodeId: node.id, from: t.from, to: t.to, comment: comment || null });
-        setPending(node.id, false);
         if (result.ok) {
           notify.success(DONE[t.id]);
           router.refresh();
@@ -91,7 +88,7 @@ export function useTaskTransitions({ ctx, nodeContexts, apply }: Options) {
         fail(result.message);
       });
     },
-    [ctx, nodeContexts, apply, router],
+    [ctx, nodeContexts, apply, addPending, router],
   );
 
   const clearError = useCallback(() => setError(null), []);

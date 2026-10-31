@@ -83,6 +83,7 @@ export function EventTree({
   const [dialog, setDialog] = useState<NodeDialogTarget | null>(null);
   const nodeContexts = useMemo(() => buildNodeContexts(serverRoot), [serverRoot]);
   const tx = useTaskTransitions({ ctx, nodeContexts, apply: applyOptimistic });
+  const { transitionsFor, run: runTransition } = tx;
   const [commentFor, setCommentFor] = useState<{ node: TreeNode; transition: Transition } | null>(null);
 
   const renderActions = useCallback(
@@ -95,12 +96,12 @@ export function EventTree({
           ctx={ctx}
           nodeCtx={nodeCtx}
           onOpenDialog={setDialog}
-          transitions={tx.transitionsFor(node)}
-          onTransition={(t) => (t.commentRequired ? setCommentFor({ node, transition: t }) : tx.run(node, t))}
+          transitions={transitionsFor(node)}
+          onTransition={(t) => (t.commentRequired ? setCommentFor({ node, transition: t }) : runTransition(node, t))}
         />
       );
     },
-    [nodeContexts, ctx, tx.transitionsFor, tx.run],
+    [nodeContexts, ctx, transitionsFor, runTransition],
   );
 
   // Empty containers: a short note, with an add button for those who may add.
