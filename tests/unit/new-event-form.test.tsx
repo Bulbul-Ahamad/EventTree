@@ -70,6 +70,17 @@ describe("NewEventForm", () => {
     expect(createEvent).not.toHaveBeenCalled();
   });
 
+  it("catches a half-filled date even when no change event ever fired", () => {
+    setup();
+    type("Title", "Fest");
+    const start = screen.getByLabelText("Start") as HTMLInputElement;
+    // Firefox: only the date part typed, value stays "" and badInput is true.
+    Object.defineProperty(start, "validity", { value: { badInput: true }, configurable: true });
+    fireEvent.click(screen.getByRole("button", { name: "Create event" }));
+    expect(screen.getByText("Enter a complete date and time.")).toBeInTheDocument();
+    expect(createEvent).not.toHaveBeenCalled();
+  });
+
   it("creates the event, toasts 'Event created as draft' and opens it", async () => {
     createEvent.mockResolvedValue({ ok: true, data: { eventId: EVENT } });
     setup();

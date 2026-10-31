@@ -31,13 +31,18 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
   const [endsAt, setEndsAt] = useState("");
   // A datetime-local that is only partly filled (for example a date without a time)
   // reports value "" and validity.badInput; without this it would be saved as "no date".
-  const [startsIncomplete, setStartsIncomplete] = useState(false);
-  const [endsIncomplete, setEndsIncomplete] = useState(false);
   const [location, setLocation] = useState("");
   const [reviewMode, setReviewMode] = useState<(typeof REVIEW_OPTIONS)[number]["value"]>("assignee_submits");
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+    // Read at submit time: a half-filled field never fires onChange (its value stays "").
+    const incomplete = (name: string) => {
+      const el = e.currentTarget.elements.namedItem(name);
+      return el instanceof HTMLInputElement && el.validity.badInput;
+    };
+    const startsIncomplete = incomplete("startsAt");
+    const endsIncomplete = incomplete("endsAt");
     const input = {
       orgId,
       title,
@@ -80,10 +85,8 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
               {...p}
               type="datetime-local"
               value={startsAt}
-              onChange={(e) => {
-                setStartsAt(e.target.value);
-                setStartsIncomplete(e.target.validity.badInput);
-              }}
+              name="startsAt"
+              onChange={(e) => setStartsAt(e.target.value)}
             />
           )}
         </FormField>
@@ -93,10 +96,8 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
               {...p}
               type="datetime-local"
               value={endsAt}
-              onChange={(e) => {
-                setEndsAt(e.target.value);
-                setEndsIncomplete(e.target.validity.badInput);
-              }}
+              name="endsAt"
+              onChange={(e) => setEndsAt(e.target.value)}
             />
           )}
         </FormField>
