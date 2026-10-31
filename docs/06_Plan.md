@@ -189,6 +189,7 @@ Record here any approved change to the docs (what, why, who approved, date).
 | 2026-10-31 | 04_TRD §2 | Radix UI resolved as the single `radix-ui` package, 1.8.1 (shadcn's current style; the TRD already lists Radix via shadcn). Used for Dialog, Sheet, DropdownMenu, Tooltip and the Popover behind the searchable Combobox. `cmdk` is not added; the Combobox is built on Popover | Bulbul |
 | 2026-10-31 | 03_UI_Spec §8 (focus ring) | Inputs, textareas, selects and the combobox trigger use `outline-offset: 0` (ring touches the green border) instead of the global 2 px offset, which looked like a double ring. All other controls keep the 2 px offset | Bulbul |
 | 2026-10-31 | 02_AppFlow S08 / 01_PRD US-09 | Interpretation (docs give no definition): "Due this week" = due within the next 7 days from now (rolling), implemented in `features/dashboard/grouping.ts` | Bulbul |
+| 2026-10-31 | 01_PRD BR-03 / §7 | Confirmed, no change: visibility stays at event level. Anyone assigned to any node of an event sees the whole tree and its history; write rights stay per subtree. | Bulbul |
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
 
