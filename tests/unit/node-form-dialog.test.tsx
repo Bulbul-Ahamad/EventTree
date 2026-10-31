@@ -292,7 +292,7 @@ describe("NodeActions (permission-gated row menu)", () => {
   });
 
   it("head: add under own segment, edit and reassign below it, nothing on the root", async () => {
-    expect(await menuFor("venue", ctx("u-head"))).toEqual(["Add segment", "Add task", "Edit", "Reassign"].slice(0, 2));
+    expect(await menuFor("venue", ctx("u-head"))).toEqual(["Add segment", "Add task"]);
     expect(await menuFor("task", ctx("u-head"))).toEqual(["Edit", "Reassign"]);
     expect(await menuFor("event", ctx("u-head"))).toBeNull();
   });
