@@ -86,6 +86,8 @@ function TreeNodeRowImpl(p: TreeNodeRowProps) {
   const TypeIcon = TYPE_ICON[node.type];
 
   function onClick(e: MouseEvent<HTMLDivElement>) {
+    // Menus and dialogs are portalled: their clicks still bubble here through React.
+    if (!e.currentTarget.contains(e.target as Node)) return;
     if ((e.target as Element).closest("[data-row-control]")) return;
     p.onOpen(node.id);
   }

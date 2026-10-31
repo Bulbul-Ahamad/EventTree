@@ -1,4 +1,4 @@
-import type { EventStatus, NodeType, TaskStatus } from "@/lib/permissions";
+import type { EventStatus, NodeContext, NodeType, TaskStatus } from "@/lib/permissions";
 
 // Flat rows (from the get_event_tree RPC) -> nested tree, plus filters and
 // expansion helpers for the tree view. Pure functions.
@@ -159,4 +159,19 @@ export function flattenVisible(root: TreeNode, expanded: ReadonlySet<string>): V
   };
   visit(root, 0);
   return out;
+}
+
+// ---- permissions ----------------------------------------------------------
+
+// NodeContext (lib/permissions.ts) for every node, built in one pass: the
+// assignees of all proper ancestors, event first.
+export function buildNodeContexts(root: TreeNode): Map<string, NodeContext> {
+  const map = new Map<string, NodeContext>();
+  const visit = (n: TreeNode, trail: ReadonlyArray<string | null>) => {
+    map.set(n.id, { type: n.type, assigneeId: n.assignee_id, ancestorAssigneeIds: trail });
+    const next = [...trail, n.assignee_id];
+    n.children.forEach((c) => visit(c, next));
+  };
+  visit(root, []);
+  return map;
 }
