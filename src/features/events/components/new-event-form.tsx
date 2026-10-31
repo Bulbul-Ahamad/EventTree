@@ -13,6 +13,8 @@ import { fieldErrorsFrom } from "@/lib/action-result";
 import { localInputToIso } from "@/lib/format-date";
 import { notify } from "@/lib/toast";
 
+const INCOMPLETE_DATE = "Enter a complete date and time.";
+
 const REVIEW_OPTIONS = [
   { value: "assignee_submits", label: "Assignees submit, managers verify (recommended)" },
   { value: "head_only", label: "Managers tick tasks directly" },
@@ -27,6 +29,10 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
   const [description, setDescription] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  // A datetime-local that is only partly filled (for example a date without a time)
+  // reports value "" and validity.badInput; without this it would be saved as "no date".
+  const [startsIncomplete, setStartsIncomplete] = useState(false);
+  const [endsIncomplete, setEndsIncomplete] = useState(false);
   const [location, setLocation] = useState("");
   const [reviewMode, setReviewMode] = useState<(typeof REVIEW_OPTIONS)[number]["value"]>("assignee_submits");
 
@@ -42,9 +48,12 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
       reviewMode,
     };
     const parsed = createEventSchema.safeParse(input);
-    if (!parsed.success) {
+    const errors = parsed.success ? {} : fieldErrorsFrom(parsed.error);
+    if (startsIncomplete) errors.startsAt = INCOMPLETE_DATE;
+    if (endsIncomplete) errors.endsAt = INCOMPLETE_DATE;
+    if (!parsed.success || startsIncomplete || endsIncomplete) {
       form.reset();
-      form.setFieldErrors(fieldErrorsFrom(parsed.error));
+      form.setFieldErrors(errors);
       return;
     }
     form.run(
@@ -66,10 +75,30 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
       </FormField>
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField label="Start" error={form.fieldErrors.startsAt}>
-          {(p) => <Input {...p} type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />}
+          {(p) => (
+            <Input
+              {...p}
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => {
+                setStartsAt(e.target.value);
+                setStartsIncomplete(e.target.validity.badInput);
+              }}
+            />
+          )}
         </FormField>
         <FormField label="End" error={form.fieldErrors.endsAt}>
-          {(p) => <Input {...p} type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />}
+          {(p) => (
+            <Input
+              {...p}
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => {
+                setEndsAt(e.target.value);
+                setEndsIncomplete(e.target.validity.badInput);
+              }}
+            />
+          )}
         </FormField>
       </div>
       <FormField label="Location" error={form.fieldErrors.location}>

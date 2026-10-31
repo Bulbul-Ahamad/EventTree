@@ -55,6 +55,19 @@ describe("NewEventForm", () => {
     expect(createEvent).not.toHaveBeenCalled();
   });
 
+  it("refuses a date without a time instead of silently saving no date", () => {
+    setup();
+    type("Title", "Fest");
+    const start = screen.getByLabelText("Start") as HTMLInputElement;
+    // jsdom never reports badInput, so simulate what Firefox does for a half-filled field.
+    Object.defineProperty(start, "validity", { value: { badInput: true }, configurable: true });
+    fireEvent.change(start, { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create event" }));
+    expect(screen.getByText("Enter a complete date and time.")).toBeInTheDocument();
+    expect(start).toHaveAttribute("aria-invalid", "true");
+    expect(createEvent).not.toHaveBeenCalled();
+  });
+
   it("creates the event, toasts 'Event created as draft' and opens it", async () => {
     createEvent.mockResolvedValue({ ok: true, data: { eventId: EVENT } });
     setup();
