@@ -59,7 +59,9 @@ describe("NewEventForm", () => {
     setup();
     type("Title", "Fest");
     const start = screen.getByLabelText("Start") as HTMLInputElement;
-    // jsdom never reports badInput, so simulate what Firefox does for a half-filled field.
+    // The user had a full value, then clears the time part: the browser reports "" with
+    // badInput. (React ignores a change to the same value, so start from a real one.)
+    fireEvent.change(start, { target: { value: "2026-11-01T10:00" } });
     Object.defineProperty(start, "validity", { value: { badInput: true }, configurable: true });
     fireEvent.change(start, { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Create event" }));
