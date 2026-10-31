@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `3.02`**
+**Next up: `3.03`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -74,7 +74,7 @@
 
 **Shell & primitives**
 - [x] **3.01** — Remaining primitives per `03_UI_Spec §8`: Badge/StatusBadge/RoleChip, ProgressBar, Dialog, Sheet/Drawer, DropdownMenu, Select (searchable), Tabs/Segmented, Avatar, Skeleton, EmptyState, Banner, ConfirmDialog, Tooltip. _Done when:_ each has all states; checked in light + dark at 360 px and 1280 px.
-- [ ] **3.02** — App shell: TopBar, LeftNav / mobile nav, OrgSwitcher, UserMenu, skip link, landmarks. Org layout enforces membership (404 otherwise). _Done when:_ navigation works at all breakpoints; non-member `/o/x` → 404.
+- [x] **3.02** — App shell: TopBar, LeftNav / mobile nav, OrgSwitcher, UserMenu, skip link, landmarks. Org layout enforces membership (404 otherwise). _Done when:_ navigation works at all breakpoints; non-member `/o/x` → 404.
 - [ ] **3.03** — S01 Landing + S18 `not-found`/`error`/`global-error`. _Done when:_ authed `/` redirects to `/dashboard`.
 - [ ] **3.04** — S09 Events list (tabs, cards, empty states) and S10 New event form. _Done when:_ creating an event redirects to the tree page with "draft" toast.
 - [ ] **3.05** — S08 Dashboard (review queue, my tasks groups, my events) with empty/loading states. _Done when:_ seeded users see correct sections; empty user sees EmptyStates.
@@ -166,6 +166,7 @@
 | 2026-10-31 | 2.10 | `toErrorCode` now maps SQLSTATE 42501 (RLS/privilege refusal) to `E_NOT_AUTHORIZED`; `addComment`/`addProofLink` special case removed. `tests/unit/db-error-codes.test.ts` (every `raise exception` code in migrations is in the catalogue, all P0001, 02_AppFlow §7 table equals `ERROR_MESSAGES`), extra cases in `errors.test.ts`, and `tests/integration/error-mapping.test.ts` (raw check/enum/uuid/FK/unknown-table errors, RLS and anon refusals: no SQL text in `message`, only catalogue messages). `pnpm check` and `pnpm test:int` passed (user). | 4b12bec | No doc change: 42501 mapping is an implementation detail beside the documented message mapping. |
 | 2026-10-31 | 2.11 | **Phase 2 gate.** After `pnpm db:reset`: `pnpm check`, `pnpm test:db` and `pnpm test:int` all reported passing by the user. Phase 2 (core API: orgs, events, nodes, updates, dashboard, error mapping) complete. | 8c6b84a | Exact test counts were not pasted for this run (last known: 293 pgTAP, int files orgs 15, events 25, nodes 31, updates 22 plus dashboard and error-mapping). |
 | 2026-10-31 | 3.01 | Remaining primitives in `src/components/ui`: `badge` (StatusBadge, EventStatusBadge, RoleChip, PriorityLabel), `progress-bar`, `avatar` (initials, Bangla-safe), `skeleton` (+TreeSkeleton), `empty-state`, `banner`, `segmented-control`, `dialog`, `sheet`, `dropdown-menu`, `tooltip`, `confirm-dialog`, `combobox` (searchable select on Radix Popover). `radix-ui@1.8.1` added. Unit tests in `display-primitives.test.tsx` and `overlay-primitives.test.tsx`; `/dev/primitives` sections for visual checks. `pnpm check` passed and visuals approved by the user in light and dark. | 7390b98, 582b37b, 4d7e032, dd60078 | Two visual fixes after review: combobox search box now draws its own focus line (`data-own-focus`), and form controls use `outline-offset: 0` so border and ring read as one ring (deviation from the global 2 px offset in 03_UI_Spec §8; form controls only). Avatar is initials only (photos are in the parking lot). |
+| 2026-10-31 | 3.02 | App shell in `src/components/shell`: `app-shell` (top bar 56 px, left nav 240 px from lg, bottom nav below lg, skip link, header/nav/main landmarks), `org-switcher` (also stores last org in cookie `et_last_org`), `user-menu` (Profile, Log out), `nav-links`, pure `nav-items` and `shell-data`. `o/[orgSlug]/layout.tsx` returns 404 for non-members; dashboard and settings layouts reuse the shell. Placeholder pages for Members and Org settings (admin only, else 404) so nav links work. Unit tests in `nav-items.test.ts`. `pnpm check` passed and shell visuals approved by the user. | f501684, cb31c9a | First run failed: lucide icon components were passed from a Server to a Client Component; nav items are now plain data and the icon is chosen on the client. Placeholders for Members and Org settings are replaced by their own steps. |
 
 ## Decisions & Deviations Log
 
