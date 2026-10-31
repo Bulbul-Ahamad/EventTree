@@ -1,13 +1,13 @@
 import "server-only";
 import type { EventContext, EventStatus, ReviewMode } from "@/lib/permissions";
 import { createServerClient } from "@/lib/supabase/server";
+import type { EventTab } from "./tabs";
+
+export { EVENT_TABS, parseEventTab, type EventTab } from "./tabs";
 
 // Event reads for Server Components (TRD §6). RLS decides visibility (BR-03):
 // org admins see all events of their org, everyone else only events they are
 // assigned in. A missing result means "not found" (never 403, 02_AppFlow §1).
-
-export const EVENT_TABS = ["active", "completed", "archived"] as const;
-export type EventTab = (typeof EVENT_TABS)[number];
 
 // "Active" tab = draft + active (02_AppFlow S09).
 const TAB_STATUSES: Record<EventTab, EventStatus[]> = {
@@ -15,10 +15,6 @@ const TAB_STATUSES: Record<EventTab, EventStatus[]> = {
   completed: ["completed"],
   archived: ["archived"],
 };
-
-export function parseEventTab(value: string | null | undefined): EventTab {
-  return (EVENT_TABS as readonly string[]).includes(value ?? "") ? (value as EventTab) : "active";
-}
 
 export type EventSummary = {
   id: string;
