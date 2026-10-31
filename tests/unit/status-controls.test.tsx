@@ -102,7 +102,7 @@ describe("verify tick on a row", () => {
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Task verified"));
   });
 
-  it("is not offered on a task that is still to do in Mode A, nor to the task's own assignee", () => {
+  it("is not offered on a task that is still to do in Mode A", () => {
     view(ctx(ID.owner));
     expect(screen.queryByRole("button", { name: "Mark Seating verified" })).toBeNull();
   });
@@ -193,8 +193,17 @@ describe("Actions in the detail panel", () => {
     expect(panel.getByRole("button", { name: "Verify" })).toBeInTheDocument();
 
     fireEvent.click(panel.getByRole("button", { name: "Send back" }));
-    fireEvent.click(panel.getByRole("button", { name: "Send back", hidden: false }));
+    // The form is open now: the second "Send back" is its confirm button.
+    const confirm = () => panel.getAllByRole("button", { name: "Send back" }).at(-1)!; // two buttons exist at this point
+    fireEvent.click(confirm());
+    expect(await panel.findByRole("alert")).toHaveTextContent("Please add a comment explaining why.");
     expect(transitionTask).not.toHaveBeenCalled();
+
+    fireEvent.change(panel.getByLabelText(/^Why\?/), { target: { value: "Wrong date" } });
+    fireEvent.click(confirm());
+    await waitFor(() =>
+      expect(transitionTask).toHaveBeenCalledWith({ nodeId: ID.hall, from: "submitted", to: "in_progress", comment: "Wrong date" }),
+    );
   });
 
   it("shows an inline error from the server in the panel", async () => {
