@@ -8,9 +8,9 @@ export default async function DashboardPlaceholder() {
   } = await supabase.auth.getUser();
 
   return (
-    <main className="mx-auto max-w-3xl p-4 md:p-6">
+    <div className="mx-auto max-w-3xl p-4 md:p-6">
       <h1 className="text-2xl font-bold md:text-3xl">Dashboard</h1>
       <p className="mt-2 text-sm text-foreground-muted">Signed in as {user?.email}</p>
-    </main>
+    </div>
   );
 }
