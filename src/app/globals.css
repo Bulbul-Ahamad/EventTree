@@ -182,3 +182,23 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Skeleton shimmer (03_UI_Spec §8.11). Disabled by the reduced-motion rule above. */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-muted);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--foreground) 6%, transparent), transparent);
+  animation: shimmer 1.4s infinite;
+}
