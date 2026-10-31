@@ -13,6 +13,7 @@ import {
 import { FormField } from "@/components/ui/form-field";
 import { Input, Textarea } from "@/components/ui/input";
 import { DisplayDemo } from "./display-demo";
+import { OverlayDemo } from "./overlay-demo";
 import { ToastDemo } from "./toast-demo";
 
 // Temporary visual check for step 1.22. Dev only; remove with the landing page (3.03).
@@ -101,6 +102,14 @@ export default function PrimitivesPage() {
           <CardDescription>Badges, progress, avatars, tabs, banners, skeletons, empty state.</CardDescription>
         </CardHeader>
         <DisplayDemo />
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Overlay primitives (3.01)</CardTitle>
+          <CardDescription>Dialog, sheet, confirm, menu, tooltip, searchable select.</CardDescription>
+        </CardHeader>
+        <OverlayDemo />
       </Card>
     </main>
   );

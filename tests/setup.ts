@@ -8,3 +8,17 @@ afterEach(async () => {
   const { cleanup } = await import("@testing-library/react");
   cleanup();
 });
+
+// jsdom lacks a few browser APIs that Radix (popper, menus) calls.
+if (typeof window !== "undefined") {
+  class ResizeObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  window.ResizeObserver ??= ResizeObserverStub;
+  Element.prototype.hasPointerCapture ??= () => false;
+  Element.prototype.setPointerCapture ??= () => {};
+  Element.prototype.releasePointerCapture ??= () => {};
+  Element.prototype.scrollIntoView ??= () => {};
+}
