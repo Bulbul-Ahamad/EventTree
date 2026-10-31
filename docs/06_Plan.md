@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `3.01`**
+**Next up: `3.02`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -73,7 +73,7 @@
 ## Phase 3 — UI Integration
 
 **Shell & primitives**
-- [ ] **3.01** — Remaining primitives per `03_UI_Spec §8`: Badge/StatusBadge/RoleChip, ProgressBar, Dialog, Sheet/Drawer, DropdownMenu, Select (searchable), Tabs/Segmented, Avatar, Skeleton, EmptyState, Banner, ConfirmDialog, Tooltip. _Done when:_ each has all states; checked in light + dark at 360 px and 1280 px.
+- [x] **3.01** — Remaining primitives per `03_UI_Spec §8`: Badge/StatusBadge/RoleChip, ProgressBar, Dialog, Sheet/Drawer, DropdownMenu, Select (searchable), Tabs/Segmented, Avatar, Skeleton, EmptyState, Banner, ConfirmDialog, Tooltip. _Done when:_ each has all states; checked in light + dark at 360 px and 1280 px.
 - [ ] **3.02** — App shell: TopBar, LeftNav / mobile nav, OrgSwitcher, UserMenu, skip link, landmarks. Org layout enforces membership (404 otherwise). _Done when:_ navigation works at all breakpoints; non-member `/o/x` → 404.
 - [ ] **3.03** — S01 Landing + S18 `not-found`/`error`/`global-error`. _Done when:_ authed `/` redirects to `/dashboard`.
 - [ ] **3.04** — S09 Events list (tabs, cards, empty states) and S10 New event form. _Done when:_ creating an event redirects to the tree page with "draft" toast.
@@ -165,6 +165,7 @@
 | 2026-10-31 | 2.09 | `features/dashboard/grouping.ts` (pure `groupMyTasks`, `pickEventRole`, `compareMyEvents`) and `features/dashboard/queries.ts` (`getMyTasks` grouped, `getReviewQueue`, `getMyEvents`). Unit tests for grouping; `tests/integration/dashboard.test.ts` covers grouping across events, BR-09 overdue, draft/completed handling, review queue scope/order/self-verify, my events roles and visibility. `pnpm check` and `pnpm test:int` passed (user). | 9bcfa49 | Decision: "Due this week" = next 7 days (user chose; spec gave no definition). Past-due tasks that are not overdue (verified, or event draft) show under Due this week. `getMyEvents` lists all statuses incl. archived (spec silent). |
 | 2026-10-31 | 2.10 | `toErrorCode` now maps SQLSTATE 42501 (RLS/privilege refusal) to `E_NOT_AUTHORIZED`; `addComment`/`addProofLink` special case removed. `tests/unit/db-error-codes.test.ts` (every `raise exception` code in migrations is in the catalogue, all P0001, 02_AppFlow §7 table equals `ERROR_MESSAGES`), extra cases in `errors.test.ts`, and `tests/integration/error-mapping.test.ts` (raw check/enum/uuid/FK/unknown-table errors, RLS and anon refusals: no SQL text in `message`, only catalogue messages). `pnpm check` and `pnpm test:int` passed (user). | 4b12bec | No doc change: 42501 mapping is an implementation detail beside the documented message mapping. |
 | 2026-10-31 | 2.11 | **Phase 2 gate.** After `pnpm db:reset`: `pnpm check`, `pnpm test:db` and `pnpm test:int` all reported passing by the user. Phase 2 (core API: orgs, events, nodes, updates, dashboard, error mapping) complete. | 8c6b84a | Exact test counts were not pasted for this run (last known: 293 pgTAP, int files orgs 15, events 25, nodes 31, updates 22 plus dashboard and error-mapping). |
+| 2026-10-31 | 3.01 | Remaining primitives in `src/components/ui`: `badge` (StatusBadge, EventStatusBadge, RoleChip, PriorityLabel), `progress-bar`, `avatar` (initials, Bangla-safe), `skeleton` (+TreeSkeleton), `empty-state`, `banner`, `segmented-control`, `dialog`, `sheet`, `dropdown-menu`, `tooltip`, `confirm-dialog`, `combobox` (searchable select on Radix Popover). `radix-ui@1.8.1` added. Unit tests in `display-primitives.test.tsx` and `overlay-primitives.test.tsx`; `/dev/primitives` sections for visual checks. `pnpm check` passed and visuals approved by the user in light and dark. | 7390b98, 582b37b, 4d7e032, dd60078 | Two visual fixes after review: combobox search box now draws its own focus line (`data-own-focus`), and form controls use `outline-offset: 0` so border and ring read as one ring (deviation from the global 2 px offset in 03_UI_Spec §8; form controls only). Avatar is initials only (photos are in the parking lot). |
 
 ## Decisions & Deviations Log
 
@@ -180,6 +181,7 @@ Record here any approved change to the docs (what, why, who approved, date).
 | 2026-10-30 | 03_UI_Spec §2.1, §2.2 (todo), §2.4 (track), §9 | Theme changed from indigo to emerald green: primary, ring, backgrounds, surfaces, borders and foreground tokens now green-tinted in light and dark; status/priority colors (except todo), success, warning, danger, info unchanged; 100% progress fill still uses `--success` | Bulbul |
 | 2026-10-30 | 04_TRD §2 | Added `sonner` (shadcn toast library) to the stack, resolved 2.0.8; used only through `src/components/ui/toaster.tsx` and `src/lib/toast.ts` | Bulbul |
 | 2026-10-31 | 04_TRD §2 | Radix UI resolved as the single `radix-ui` package, 1.8.1 (shadcn's current style; the TRD already lists Radix via shadcn). Used for Dialog, Sheet, DropdownMenu, Tooltip and the Popover behind the searchable Combobox. `cmdk` is not added; the Combobox is built on Popover | Bulbul |
+| 2026-10-31 | 03_UI_Spec §8 (focus ring) | Inputs, textareas, selects and the combobox trigger use `outline-offset: 0` (ring touches the green border) instead of the global 2 px offset, which looked like a double ring. All other controls keep the 2 px offset | Bulbul |
 | 2026-10-31 | 02_AppFlow S08 / 01_PRD US-09 | Interpretation (docs give no definition): "Due this week" = due within the next 7 days from now (rolling), implemented in `features/dashboard/grouping.ts` | Bulbul |
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
