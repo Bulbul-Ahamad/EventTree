@@ -39,8 +39,8 @@ export default async function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1">
-        <section className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-10 md:px-6 md:py-16 lg:grid-cols-2 lg:gap-14">
+      <main className="flex flex-1 flex-col">
+        <section className="mx-auto grid w-full max-w-6xl flex-1 content-center items-center gap-10 px-4 py-10 md:px-6 md:py-16 lg:grid-cols-2 lg:gap-14">
           <div className="flex flex-col items-start gap-5">
             <p className="rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
               For clubs, organizations and university programs
@@ -64,7 +64,7 @@ export default async function LandingPage() {
         </section>
 
         <section className="border-t border-border bg-surface">
-          <ul className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 md:grid-cols-3 md:gap-10 md:px-6">
+          <ul className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 md:py-10 md:grid-cols-3 md:gap-10 md:px-6">
             <Point title="One owner per item">
               Every segment has a head and every task has an assignee. No more vague group-chat assignments.
             </Point>
