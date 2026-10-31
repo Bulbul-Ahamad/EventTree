@@ -82,11 +82,10 @@ describe("MyTasks", () => {
     expect(screen.getByText("3 days overdue")).toBeInTheDocument();
   });
 
-  it("shows relative due text with the absolute date as title", () => {
+  it("shows relative due text as a time element", () => {
     const due = ahead(2 * D + H);
     render(<MyTasks groups={{ ...EMPTY, dueThisWeek: [task("u", { dueAt: due })] }} />);
     const time = screen.getByText("Due in 2 days");
-    expect(time.getAttribute("title")).toBeTruthy();
     expect(time).toHaveAttribute("datetime", due);
   });
 

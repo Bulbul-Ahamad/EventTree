@@ -3,6 +3,7 @@
 import { AlertCircle } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { formatDateTime, formatOverdue, formatRelative } from "@/lib/format-date";
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 const subscribe = () => () => {};
@@ -22,13 +23,16 @@ export function RelativeTime({ iso, prefix, overdue = false, className }: Props)
   const now = new Date();
   const text = overdue ? formatOverdue(iso, now) : `${prefix ? `${prefix} ` : ""}${formatRelative(iso, now)}`;
   return (
-    <time
-      dateTime={iso}
-      title={formatDateTime(iso)}
-      className={cn("inline-flex items-center gap-1", overdue && "font-medium text-danger", className)}
-    >
-      {overdue ? <AlertCircle aria-hidden className="size-3.5 shrink-0" /> : null}
-      {text}
-    </time>
+    <TooltipProvider delayDuration={150}>
+      <Tooltip content={formatDateTime(iso)}>
+        <time
+          dateTime={iso}
+          className={cn("inline-flex items-center gap-1", overdue && "font-medium text-danger", className)}
+        >
+          {overdue ? <AlertCircle aria-hidden className="size-3.5 shrink-0" /> : null}
+          {text}
+        </time>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
