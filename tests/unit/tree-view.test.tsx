@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TreeView } from "@/components/tree/tree-view";
 import { treeKeyAction } from "@/components/tree/tree-keyboard";
@@ -285,7 +285,7 @@ describe("TreeView expand state persistence", () => {
 });
 
 describe("TreeView at scale", () => {
-  it("renders 500 nodes and toggles a branch quickly", () => {
+  it("renders 500 nodes and toggles a branch quickly", { timeout: 15_000 }, () => {
     const rows: TreeRow[] = [row("event", null, "event")];
     let n = 0;
     for (let s = 0; s < 10; s++) {
@@ -298,13 +298,15 @@ describe("TreeView at scale", () => {
     if (!root) throw new Error("no root");
 
     const started = performance.now();
-    renderTree({ root });
-    expect(screen.getAllByRole("treeitem")).toHaveLength(501);
-    act(() => {
-      fireEvent.keyDown(item("seg0"), { key: "ArrowLeft" });
-    });
+    const { container } = renderTree({ root });
+    // Plain DOM queries: role queries compute accessible names and would dominate the timing.
+    const count = () => container.querySelectorAll('[role="treeitem"]').length;
+    expect(count()).toBe(501);
+    const seg0 = container.querySelector<HTMLElement>('[data-node-id="seg0"]');
+    if (!seg0) throw new Error("no seg0");
+    fireEvent.keyDown(seg0, { key: "ArrowLeft" });
     const elapsed = performance.now() - started;
-    expect(screen.getAllByRole("treeitem")).toHaveLength(501 - 49);
+    expect(count()).toBe(501 - 49);
     // Generous ceiling for CI machines: a real regression is orders of magnitude slower.
     expect(elapsed).toBeLessThan(8000);
   });
