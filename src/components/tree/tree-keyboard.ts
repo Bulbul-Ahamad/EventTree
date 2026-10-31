@@ -32,7 +32,9 @@ export function treeKeyAction(rows: readonly VisibleRow[], index: number, key: s
       return expanded ? at(index + 1) : { type: "toggle", id: node.id, open: true };
     case "ArrowLeft":
       if (hasChildren && expanded) return { type: "toggle", id: node.id, open: false };
-      return node.parent_id ? { type: "focus", id: node.parent_id } : null;
+      return node.parent_id && rows.some((r) => r.node.id === node.parent_id)
+        ? { type: "focus", id: node.parent_id }
+        : null;
     case "Enter":
       return { type: "open", id: node.id };
     case " ":

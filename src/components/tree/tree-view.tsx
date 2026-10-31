@@ -2,7 +2,16 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import type { EventStatus } from "@/lib/permissions";
-import { ancestorIds, flattenVisible, isOverdue, toggleExpanded, walk, type TreeNode } from "@/lib/tree";
+import {
+  ancestorIds,
+  flattenVisible,
+  isOverdue,
+  toggleExpanded,
+  walk,
+  type FilteredItem,
+  type TreeNode,
+  type VisibleRow,
+} from "@/lib/tree";
 import { cn } from "@/lib/utils";
 import { treeKeyAction } from "./tree-keyboard";
 import { TreeNodeRow } from "./tree-node-row";
@@ -16,6 +25,8 @@ type TreeViewProps = {
   eventId: string;
   eventStatus: EventStatus;
   selectedId?: string | null;
+  // A filtered view: matching tasks as a flat list, each with its breadcrumb as caption.
+  flatItems?: readonly FilteredItem[];
   pendingIds?: ReadonlySet<string>;
   onOpenNode: (id: string) => void;
   // Slots for later steps: the row ⋮ menu / verify tick, and the empty-container row.
@@ -35,6 +46,7 @@ export function TreeView({
   eventId,
   eventStatus,
   selectedId = null,
+  flatItems,
   pendingIds = NO_PENDING,
   onOpenNode,
   renderActions,
@@ -54,7 +66,17 @@ export function TreeView({
     if (missing.length > 0) setExpanded(new Set([...expanded, ...missing]));
   }, [selectedId, root, expanded, setExpanded]);
 
-  const rows = useMemo(() => flattenVisible(root, expanded), [root, expanded]);
+  const rows = useMemo<VisibleRow[]>(
+    () =>
+      flatItems
+        ? flatItems.map(({ node }) => ({ node, level: 0, hasChildren: false, expanded: false }))
+        : flattenVisible(root, expanded),
+    [root, expanded, flatItems],
+  );
+  const captions = useMemo(
+    () => new Map(flatItems?.map((i) => [i.node.id, i.breadcrumb.map((b) => b.title).join(" › ")])),
+    [flatItems],
+  );
   const rowsRef = useRef(rows);
   useEffect(() => {
     rowsRef.current = rows;
@@ -62,9 +84,13 @@ export function TreeView({
 
   const positions = useMemo(() => {
     const map = new Map<string, { pos: number; size: number }>([[root.id, { pos: 1, size: 1 }]]);
+    if (flatItems) {
+      flatItems.forEach((i, idx) => map.set(i.node.id, { pos: idx + 1, size: flatItems.length }));
+      return map;
+    }
     for (const n of walk(root)) n.children.forEach((c, i) => map.set(c.id, { pos: i + 1, size: n.children.length }));
     return map;
-  }, [root]);
+  }, [root, flatItems]);
 
   // Overdue is decided once per render so every row agrees (BR-09).
   const now = new Date();
@@ -127,6 +153,7 @@ export function TreeView({
               tabbable={node.id === tabbableId}
               pending={pendingIds.has(node.id)}
               overdue={isOverdue(node, { userId: "", eventStatus, now })}
+              caption={captions.get(node.id) || undefined}
               posInSet={pos.pos}
               setSize={pos.size}
               rowRef={refFor(node.id)}

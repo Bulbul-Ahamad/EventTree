@@ -23,6 +23,7 @@ export type TreeNodeRowProps = {
   tabbable: boolean;
   pending: boolean;
   overdue: boolean;
+  caption?: string; // e.g. the breadcrumb in a filtered list
   posInSet: number;
   setSize: number;
   rowRef: Ref<HTMLDivElement>;
@@ -128,6 +129,7 @@ function TreeNodeRowImpl(p: TreeNodeRowProps) {
       )}
       <TypeIcon aria-hidden className="size-5 shrink-0 text-foreground-muted" />
       <span className="flex min-w-0 flex-1 flex-col">
+        {p.caption ? <span className="truncate text-xs text-foreground-muted">{p.caption}</span> : null}
         <span className={cn("truncate", node.type !== "task" && "font-semibold")}>{node.title}</span>
         {node.type === "task" && node.due_at ? (
           <RelativeTime

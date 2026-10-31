@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TreeView } from "@/components/tree/tree-view";
 import { treeKeyAction } from "@/components/tree/tree-keyboard";
 import { parseStoredIds } from "@/components/tree/use-tree-expanded";
-import { buildTree, flattenVisible, type TreeNode, type TreeRow } from "@/lib/tree";
+import { buildTree, filterTasks, flattenVisible, type TreeNode, type TreeRow } from "@/lib/tree";
 
 const D = 24 * 3600_000;
 let seq = 0;
@@ -240,6 +240,20 @@ describe("TreeView interaction", () => {
     renderTree({ eventId: id, selectedId: "t1" });
     expect(item("venue")).toHaveAttribute("aria-expanded", "true");
     expect(item("t1")).toBeInTheDocument();
+  });
+});
+
+describe("TreeView filtered list", () => {
+  it("shows matching tasks flat with their breadcrumb, and left arrow stays put", () => {
+    const root = sample();
+    const items = filterTasks(root, "review", { userId: "u1", eventStatus: "active", now: new Date() });
+    renderTree({ root, flatItems: items });
+    expect(screen.getAllByRole("treeitem")).toHaveLength(1);
+    expect(item("t3")).toHaveAttribute("aria-level", "1");
+    expect(within(item("t3")).getByText("publicity")).toBeInTheDocument(); // breadcrumb caption
+    item("t3").focus();
+    fireEvent.keyDown(item("t3"), { key: "ArrowLeft" });
+    expect(item("t3")).toHaveFocus();
   });
 });
 
