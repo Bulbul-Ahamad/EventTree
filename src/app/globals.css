@@ -171,6 +171,14 @@ body {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+/* Form controls also turn their border to --ring on focus (03_UI_Spec §8.2), so the
+   outline hugs the border instead of floating 2 px away (that read as a double ring). */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="combobox"]:focus-visible {
+  outline-offset: 0;
+}
 /* Opt-out for controls that draw their own focus indicator on a wrapper
    (e.g. the Combobox search box, which lives inside a bordered panel). */
 [data-own-focus]:focus-visible {
