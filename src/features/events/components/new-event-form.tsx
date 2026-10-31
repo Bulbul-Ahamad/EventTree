@@ -34,7 +34,7 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
   const [location, setLocation] = useState("");
   const [reviewMode, setReviewMode] = useState<(typeof REVIEW_OPTIONS)[number]["value"]>("assignee_submits");
 
-  function onSubmit(e: FormEvent) {
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // Read at submit time: a half-filled field never fires onChange (its value stays "").
     const incomplete = (name: string) => {
