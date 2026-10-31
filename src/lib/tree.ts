@@ -210,3 +210,22 @@ export function subtreeSummary(node: TreeNode): SubtreeSummary {
   }
   return out;
 }
+
+// ---- optimistic updates ---------------------------------------------------
+
+// A copy of the tree where one task has another status. Only the nodes on the
+// path to it are copied, so unchanged rows keep their identity (memoised rows
+// do not re-render). Used by useOptimistic for status buttons.
+export function withTaskStatus(root: TreeNode, id: string, status: TaskStatus): TreeNode {
+  const visit = (n: TreeNode): TreeNode => {
+    if (n.id === id) return { ...n, status };
+    let changed = false;
+    const children = n.children.map((c) => {
+      const next = visit(c);
+      if (next !== c) changed = true;
+      return next;
+    });
+    return changed ? { ...n, children } : n;
+  };
+  return visit(root);
+}

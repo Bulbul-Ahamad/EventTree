@@ -82,6 +82,10 @@ function panel(nodeId: string, c: EventContext, activity: ActivityItem[] | null 
       nodeCtx={buildNodeContexts(root).get(nodeId)!} // the id comes from the fixture above
       activity={activity}
       overdue={false}
+      transitions={[]}
+      transitionPending={false}
+      transitionError={null}
+      onTransition={vi.fn()}
       onNavigate={onNavigate}
       onClose={onClose}
     />,

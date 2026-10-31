@@ -11,8 +11,10 @@ import type { ActivityItem } from "@/features/updates/queries";
 import { formatDateTime } from "@/lib/format-date";
 import { canComment, type EventContext, type NodeContext } from "@/lib/permissions";
 import { breadcrumbOf, subtreeSummary, type TreeNode } from "@/lib/tree";
+import type { Transition } from "@/lib/status";
 import { ActivityTimeline } from "./activity-timeline";
 import { CommentComposer } from "./comment-composer";
+import { StatusControls } from "./status-controls";
 
 // S12 (02_AppFlow): right drawer on desktop, full-screen sheet on mobile. Opens
 // from `?node=`; closing removes it. Status actions arrive in 3.10.
@@ -27,6 +29,10 @@ type Props = {
   nodeCtx: NodeContext;
   activity: ActivityItem[] | null; // null while loading
   overdue: boolean;
+  transitions: Transition[]; // status changes I may make (empty for segments)
+  transitionPending: boolean;
+  transitionError: string | null;
+  onTransition: (t: Transition, comment?: string) => void;
   onNavigate: (id: string) => void;
   onClose: () => void;
 };
@@ -40,7 +46,9 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function NodeDetailPanel({ root, node, ctx, nodeCtx, activity, overdue, onNavigate, onClose }: Props) {
+export function NodeDetailPanel({
+  root, node, ctx, nodeCtx, activity, overdue, transitions, transitionPending, transitionError, onTransition, onNavigate, onClose,
+}: Props) {
   const crumbs = breadcrumbOf(root, node.id);
   const isTask = node.type === "task";
   const summary = isTask ? null : subtreeSummary(node);
@@ -136,6 +144,14 @@ export function NodeDetailPanel({ root, node, ctx, nodeCtx, activity, overdue, o
               ) : null}
             </section>
           ) : null}
+
+          <StatusControls
+            key={node.status ?? "none"}
+            transitions={transitions}
+            pending={transitionPending}
+            error={transitionError}
+            onRun={onTransition}
+          />
 
           <section aria-labelledby="panel-activity" className="flex flex-col gap-3">
             <h3 id="panel-activity" className="text-sm font-semibold">

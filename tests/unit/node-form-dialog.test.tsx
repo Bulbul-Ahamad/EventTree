@@ -283,7 +283,7 @@ describe("NodeActions (permission-gated row menu)", () => {
     const nodeCtx = buildNodeContexts(root).get(id);
     if (!nodeCtx) throw new Error(id);
     const { container, unmount } = render(
-      <NodeActions node={find(root, id)} ctx={c} nodeCtx={nodeCtx} onOpenDialog={vi.fn()} />,
+      <NodeActions node={find(root, id)} ctx={c} nodeCtx={nodeCtx} onOpenDialog={vi.fn()} transitions={[]} onTransition={vi.fn()} />,
     );
     const trigger = within(container).queryByRole("button");
     if (!trigger) {

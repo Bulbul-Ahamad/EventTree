@@ -2,19 +2,22 @@
 
 import { SearchX } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useOptimistic, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { ComboboxOption } from "@/components/ui/combobox";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import type { ActivityItem } from "@/features/updates/queries";
 import { errorMessage } from "@/lib/errors";
-import { canCreateChild, isEventOwner, type EventContext } from "@/lib/permissions";
+import { canCreateChild, isEventOwner, type EventContext, type TaskStatus } from "@/lib/permissions";
+import type { Transition } from "@/lib/status";
 import { notify } from "@/lib/toast";
-import { buildNodeContexts, filterTasks, isOverdue, parseFilter, walk, type TreeFilter, type TreeNode } from "@/lib/tree";
+import { buildNodeContexts, filterTasks, isOverdue, parseFilter, walk, withTaskStatus, type TreeFilter, type TreeNode } from "@/lib/tree";
 import { NodeActions } from "./node-actions";
 import { NodeDetailPanel } from "./node-detail-panel";
 import { NodeFormDialog, type NodeDialogTarget } from "./node-form-dialog";
+import { TransitionCommentDialog } from "./transition-comment-dialog";
+import { useTaskTransitions } from "./use-task-transitions";
 import { TreeView } from "./tree-view";
 
 const FILTER_OPTIONS: ReadonlyArray<{ value: TreeFilter; label: string }> = [
@@ -27,7 +30,7 @@ const FILTER_OPTIONS: ReadonlyArray<{ value: TreeFilter; label: string }> = [
 // The tree wired to the URL (02_AppFlow S11): the selected row is `?node=<id>`
 // (S12 reads the same parameter) and the filter is `?filter=`.
 export function EventTree({
-  root,
+  root: serverRoot,
   ctx,
   members,
   activity,
@@ -40,6 +43,10 @@ export function EventTree({
   activityFor: string | null;
 }) {
   const { eventStatus, userId } = ctx;
+  // Status changes show at once and roll back by themselves if the request fails.
+  const [root, applyOptimistic] = useOptimistic(serverRoot, (current: TreeNode, change: { id: string; status: TaskStatus }) =>
+    withTaskStatus(current, change.id, change.status),
+  );
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -74,14 +81,26 @@ export function EventTree({
   );
 
   const [dialog, setDialog] = useState<NodeDialogTarget | null>(null);
-  const nodeContexts = useMemo(() => buildNodeContexts(root), [root]);
+  const nodeContexts = useMemo(() => buildNodeContexts(serverRoot), [serverRoot]);
+  const tx = useTaskTransitions({ ctx, nodeContexts, apply: applyOptimistic });
+  const [commentFor, setCommentFor] = useState<{ node: TreeNode; transition: Transition } | null>(null);
 
   const renderActions = useCallback(
     (node: TreeNode) => {
       const nodeCtx = nodeContexts.get(node.id);
-      return nodeCtx ? <NodeActions node={node} ctx={ctx} nodeCtx={nodeCtx} onOpenDialog={setDialog} /> : null;
+      if (!nodeCtx) return null;
+      return (
+        <NodeActions
+          node={node}
+          ctx={ctx}
+          nodeCtx={nodeCtx}
+          onOpenDialog={setDialog}
+          transitions={tx.transitionsFor(node)}
+          onTransition={(t) => (t.commentRequired ? setCommentFor({ node, transition: t }) : tx.run(node, t))}
+        />
+      );
     },
-    [nodeContexts, ctx],
+    [nodeContexts, ctx, tx.transitionsFor, tx.run],
   );
 
   // Empty containers: a short note, with an add button for those who may add.
@@ -149,6 +168,7 @@ export function EventTree({
           selectedId={selectedId}
           flatItems={items}
           onOpenNode={onOpenNode}
+          pendingIds={tx.pendingIds}
           renderActions={renderActions}
           renderEmpty={renderEmpty}
           className="overflow-hidden rounded-lg border border-border bg-surface shadow-sm"
@@ -161,9 +181,28 @@ export function EventTree({
           ctx={ctx}
           nodeCtx={nodeContexts.get(selectedNode.id)!} // checked just above
           activity={activityFor === selectedNode.id ? activity : null}
+          transitions={tx.transitionsFor(selectedNode)}
+          transitionPending={tx.pendingIds.has(selectedNode.id)}
+          transitionError={tx.error?.nodeId === selectedNode.id ? tx.error.message : null}
+          onTransition={(t, comment) => tx.run(selectedNode, t, { inline: true, ...(comment !== undefined ? { comment } : {}) })}
           overdue={isOverdue(selectedNode, { userId, eventStatus, now: new Date() })}
           onNavigate={onOpenNode}
           onClose={() => go((q) => q.delete("node"))}
+        />
+      ) : null}
+      {commentFor ? (
+        <TransitionCommentDialog
+          taskTitle={commentFor.node.title}
+          transition={commentFor.transition}
+          pending={tx.pendingIds.has(commentFor.node.id)}
+          error={tx.error?.nodeId === commentFor.node.id ? tx.error.message : null}
+          onConfirm={(comment) =>
+            tx.run(commentFor.node, commentFor.transition, { comment, inline: true, onSuccess: () => setCommentFor(null) })
+          }
+          onClose={() => {
+            tx.clearError();
+            setCommentFor(null);
+          }}
         />
       ) : null}
       {dialog ? (
