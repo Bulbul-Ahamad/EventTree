@@ -171,6 +171,11 @@ body {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+/* Opt-out for controls that draw their own focus indicator on a wrapper
+   (e.g. the Combobox search box, which lives inside a bordered panel). */
+[data-own-focus]:focus-visible {
+  outline: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

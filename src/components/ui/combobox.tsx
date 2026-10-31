@@ -123,7 +123,7 @@ export function Combobox({
           sideOffset={4}
           className="anim-menu z-50 flex w-[var(--radix-popover-trigger-width)] min-w-56 flex-col overflow-hidden rounded-md border border-border bg-surface shadow-md"
         >
-          <div className="flex items-center gap-2 border-b border-border px-3">
+          <div className="flex items-center gap-2 border-b border-border px-3 focus-within:shadow-[inset_0_-2px_0_var(--ring)]">
             <Search aria-hidden className="size-4 shrink-0 text-foreground-subtle" />
             <input
               type="text"
@@ -132,6 +132,7 @@ export function Combobox({
               aria-controls={listId}
               aria-activedescendant={activeId}
               autoComplete="off"
+              data-own-focus
               placeholder={searchPlaceholder}
               value={query}
               onChange={(e) => {
