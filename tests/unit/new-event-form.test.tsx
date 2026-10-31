@@ -31,7 +31,7 @@ describe("NewEventForm", () => {
     for (const label of ["Title", "Description", "Start", "End", "Location"]) {
       expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeInTheDocument();
     }
-    expect(screen.getByLabelText("Title *")).toHaveAttribute("aria-required", "true");
+    expect(screen.getByLabelText(/^Title/)).toHaveAttribute("aria-required", "true");
     expect(screen.getByRole("radio", { name: "Assignees submit, managers verify (recommended)" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "Managers tick tasks directly" })).not.toBeChecked();
   });
@@ -40,7 +40,7 @@ describe("NewEventForm", () => {
     setup();
     fireEvent.click(screen.getByRole("button", { name: "Create event" }));
     expect(screen.getByText("Enter a title.")).toBeInTheDocument();
-    expect(screen.getByLabelText("Title *")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText(/^Title/)).toHaveAttribute("aria-invalid", "true");
     expect(createEvent).not.toHaveBeenCalled();
   });
 
