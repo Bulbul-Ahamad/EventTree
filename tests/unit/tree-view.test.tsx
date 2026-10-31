@@ -59,7 +59,7 @@ function renderTree(over: Partial<React.ComponentProps<typeof TreeView>> = {}) {
   return { ...render(<TreeView {...props} />), props };
 }
 
-const item = (name: string) => screen.getByRole("treeitem", { name: new RegExp(`^${name}\\b`) });
+const item = (name: string) => screen.getByRole("treeitem", { name: new RegExp(`^${name}`) });
 
 beforeEach(() => window.localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
