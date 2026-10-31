@@ -1,19 +1,20 @@
-import { CalendarDays, LayoutDashboard, Settings, Users, type LucideIcon } from "lucide-react";
-
 // Primary navigation (02_AppFlow §8): Dashboard, Events, Members, Org settings
-// (admins only). Pure functions so the rules are unit tested.
+// (admins only). Pure functions so the rules are unit tested. Items hold plain
+// data only (no icon components) because they cross from a Server Component to
+// a Client Component; nav-links.tsx maps `key` to an icon.
 
-export type NavItem = { key: "dashboard" | "events" | "members" | "settings"; label: string; href: string; icon: LucideIcon };
+export type NavKey = "dashboard" | "events" | "members" | "settings";
+export type NavItem = { key: NavKey; label: string; href: string };
 
 export function navItemsFor(orgSlug: string | null, isAdmin: boolean): NavItem[] {
-  const items: NavItem[] = [{ key: "dashboard", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }];
+  const items: NavItem[] = [{ key: "dashboard", label: "Dashboard", href: "/dashboard" }];
   if (orgSlug) {
     const base = `/o/${encodeURIComponent(orgSlug)}`;
     items.push(
-      { key: "events", label: "Events", href: `${base}/events`, icon: CalendarDays },
-      { key: "members", label: "Members", href: `${base}/members`, icon: Users },
+      { key: "events", label: "Events", href: `${base}/events` },
+      { key: "members", label: "Members", href: `${base}/members` },
     );
-    if (isAdmin) items.push({ key: "settings", label: "Org settings", href: `${base}/settings`, icon: Settings });
+    if (isAdmin) items.push({ key: "settings", label: "Org settings", href: `${base}/settings` });
   }
   return items;
 }

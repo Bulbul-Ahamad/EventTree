@@ -1,9 +1,17 @@
 "use client";
 
+import { CalendarDays, LayoutDashboard, Settings, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { isActivePath, type NavItem } from "./nav-items";
+import { isActivePath, type NavItem, type NavKey } from "./nav-items";
+
+const ICONS: Record<NavKey, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  events: CalendarDays,
+  members: Users,
+  settings: Settings,
+};
 
 // Left nav (>= lg) and bottom nav (< lg) share the same items (02_AppFlow §8).
 type Props = { items: NavItem[]; variant: "side" | "bottom" };
@@ -13,8 +21,9 @@ export function NavLinks({ items, variant }: Props) {
 
   return (
     <ul className={cn(variant === "side" ? "flex flex-col gap-1" : "flex h-full items-stretch")}>
-      {items.map(({ key, label, href, icon: Icon }) => {
+      {items.map(({ key, label, href }) => {
         const active = isActivePath(pathname, href);
+        const Icon = ICONS[key];
         return (
           <li key={key} className={variant === "bottom" ? "flex-1" : undefined}>
             <Link
