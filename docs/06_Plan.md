@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `3.04`**
+**Next up: `3.05`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -76,7 +76,7 @@
 - [x] **3.01** — Remaining primitives per `03_UI_Spec §8`: Badge/StatusBadge/RoleChip, ProgressBar, Dialog, Sheet/Drawer, DropdownMenu, Select (searchable), Tabs/Segmented, Avatar, Skeleton, EmptyState, Banner, ConfirmDialog, Tooltip. _Done when:_ each has all states; checked in light + dark at 360 px and 1280 px.
 - [x] **3.02** — App shell: TopBar, LeftNav / mobile nav, OrgSwitcher, UserMenu, skip link, landmarks. Org layout enforces membership (404 otherwise). _Done when:_ navigation works at all breakpoints; non-member `/o/x` → 404.
 - [x] **3.03** — S01 Landing + S18 `not-found`/`error`/`global-error`. _Done when:_ authed `/` redirects to `/dashboard`.
-- [ ] **3.04** — S09 Events list (tabs, cards, empty states) and S10 New event form. _Done when:_ creating an event redirects to the tree page with "draft" toast.
+- [x] **3.04** — S09 Events list (tabs, cards, empty states) and S10 New event form. _Done when:_ creating an event redirects to the tree page with "draft" toast.
 - [ ] **3.05** — S08 Dashboard (review queue, my tasks groups, my events) with empty/loading states. _Done when:_ seeded users see correct sections; empty user sees EmptyStates.
 
 **Tree experience**
@@ -168,6 +168,7 @@
 | 2026-10-31 | 3.01 | Remaining primitives in `src/components/ui`: `badge` (StatusBadge, EventStatusBadge, RoleChip, PriorityLabel), `progress-bar`, `avatar` (initials, Bangla-safe), `skeleton` (+TreeSkeleton), `empty-state`, `banner`, `segmented-control`, `dialog`, `sheet`, `dropdown-menu`, `tooltip`, `confirm-dialog`, `combobox` (searchable select on Radix Popover). `radix-ui@1.8.1` added. Unit tests in `display-primitives.test.tsx` and `overlay-primitives.test.tsx`; `/dev/primitives` sections for visual checks. `pnpm check` passed and visuals approved by the user in light and dark. | 7390b98, 582b37b, 4d7e032, dd60078 | Two visual fixes after review: combobox search box now draws its own focus line (`data-own-focus`), and form controls use `outline-offset: 0` so border and ring read as one ring (deviation from the global 2 px offset in 03_UI_Spec §8; form controls only). Avatar is initials only (photos are in the parking lot). |
 | 2026-10-31 | 3.02 | App shell in `src/components/shell`: `app-shell` (top bar 56 px, left nav 240 px from lg, bottom nav below lg, skip link, header/nav/main landmarks), `org-switcher` (also stores last org in cookie `et_last_org`), `user-menu` (Profile, Log out), `nav-links`, pure `nav-items` and `shell-data`. `o/[orgSlug]/layout.tsx` returns 404 for non-members; dashboard and settings layouts reuse the shell. Placeholder pages for Members and Org settings (admin only, else 404) so nav links work. Unit tests in `nav-items.test.ts`. `pnpm check` passed and shell visuals approved by the user. | f501684, cb31c9a | First run failed: lucide icon components were passed from a Server to a Client Component; nav items are now plain data and the icon is chosen on the client. Placeholders for Members and Org settings are replaced by their own steps. |
 | 2026-10-31 | 3.03 | S01 landing (`src/app/page.tsx`): top bar with theme toggle, Log in, Sign up; audience line, heading, value prop, two buttons; static tree preview card built from real primitives (Bangla title); three key points pinned to the bottom; signed-in users redirect to `/dashboard`. S18: `not-found.tsx`, `error.tsx` (never shows error text, logs digest only), `global-error.tsx`. `/dev/tokens`, `/dev/primitives` and the unused Next template SVGs removed. `tests/unit/error-pages.test.tsx`. `pnpm check` passed and visuals approved by the user. | f74008e, 30a270c, 777f879 | First `pnpm check` failed only because the stale `.next/types` still referenced the deleted `/dev` pages; fixed locally with `rm -rf .next`. Landing redesigned twice after review (user supplied the reference layout; extra content logged in Decisions). |
+| 2026-10-31 | 3.04 | S09 events list (`o/[orgSlug]/events`: header, URL-backed tabs Active/Completed/Archived, `EventCard`, empty states, `loading.tsx`) and S10 new event form (`events/new`, same Zod schema as the action, review-mode radios, draft toast and redirect). Placeholder `events/[eventId]/page.tsx` so the redirect lands (404 if not visible) until the tree page in 3.06. New: `lib/format-date.ts`, `ui/event-dates.tsx` (browser time zone, rendered after mount), `features/events/tabs.ts`. Unit tests: format-date, new-event-form, events-list-components. `pnpm check` passed and the flow was verified by the user in the browser. | aa9918b, de10c08, 8198fcf, 6bc631a | Bugs found on the way: tab constants lived in a server-only module imported by a client component (moved to `tabs.ts`); a date without a time in Firefox gave value "" and was saved as no date, so the form now shows "Enter a complete date and time." Two test-only fixes (label text, React ignoring an unchanged value). |
 
 ## Decisions & Deviations Log
 
