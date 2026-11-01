@@ -8,6 +8,7 @@ import { World } from "./helpers/world";
 // owner completes the event and it is read-only afterwards.
 
 const world = new World();
+let org: { id: string; slug: string; name: string };
 const EVENT = `Happy Event ${world.runId}`;
 const SEGMENT = "Venue";
 const TASK = "Hang the banner";
@@ -16,7 +17,7 @@ test.beforeAll(async () => {
   const owner = await world.person("owner", "Owen Owner");
   const head = await world.person("head", "Hana Head");
   const worker = await world.person("worker", "Wasi Worker");
-  await world.org("Happy Club", [owner, head, worker]);
+  org = await world.org("Happy Club", [owner, head, worker]);
 });
 
 test.afterAll(async () => {
@@ -35,13 +36,7 @@ async function pickAssignee(page: Page, name: string) {
 test("Mode A from an empty event to a completed, read-only one", async ({ browser, baseURL }, testInfo) => {
   const base = baseURL ?? "http://localhost:3000";
   const { owner, head, worker } = world.people;
-  const orgSlug = (await import("./helpers/world")).admin
-    .from("organizations")
-    .select("slug")
-    .like("slug", `e2e-${world.runId}-%`)
-    .single();
-  const slug = (await orgSlug).data?.slug;
-  expect(slug).toBeTruthy();
+  const slug = org.slug;
 
   const o = await pageFor(browser, testInfo, base, owner);
   const h = await pageFor(browser, testInfo, base, head);
