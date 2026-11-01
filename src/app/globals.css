@@ -160,6 +160,14 @@
   line-height: 1.7;
 }
 
+/* Bangla vowel signs reach above and below the line box, and the Tailwind text sizes
+   use tight line heights. An element that clips its text (truncate) would cut them.
+   The padding gives the clip box room; the negative margin keeps the layout unchanged. */
+.truncate {
+  padding-block: 0.2em;
+  margin-block: -0.2em;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

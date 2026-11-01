@@ -122,7 +122,8 @@ function MemberRow({
 
   return (
     <tr aria-busy={pending || undefined}>
-      <td className="px-3 py-3 md:px-4">
+      {/* w-full + max-w-0: this column takes the free width and lets long names truncate instead of widening the table. */}
+      <td className="w-full max-w-0 px-3 py-3 md:px-4">
         <div className="flex min-w-0 items-center gap-3">
           <Avatar id={member.userId} name={member.fullName} size="md" />
           <div className="flex min-w-0 flex-col">

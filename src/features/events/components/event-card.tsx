@@ -11,7 +11,7 @@ export function EventCard({ event, orgSlug }: { event: EventSummary; orgSlug: st
   return (
     <li className="relative flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-sm transition-colors duration-150 hover:bg-surface-muted md:p-6">
       <div className="flex items-start justify-between gap-3">
-        <h2 className="text-balance text-lg font-semibold">
+        <h2 className="min-w-0 text-balance break-words text-lg font-semibold">
           <Link
             href={`/o/${encodeURIComponent(orgSlug)}/events/${event.id}`}
             className="rounded-sm after:absolute after:inset-0 after:content-['']"

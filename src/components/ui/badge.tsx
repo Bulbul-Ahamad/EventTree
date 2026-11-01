@@ -48,20 +48,23 @@ const STATUS_ICONS: Record<TaskStatus, LucideIcon> = {
 
 // Task status. Colour is never the only signal: icon and label always show.
 // `iconOnly` keeps the label for screen readers and shows just the icon (small screens).
+// `compact` does the same only below md and shows icon and label from md up (tree rows).
 export function StatusBadge({
   status,
   iconOnly = false,
+  compact = false,
   className,
 }: {
   status: TaskStatus;
   iconOnly?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   const Icon = STATUS_ICONS[status];
   return (
-    <Badge className={cn(PALETTE[status], iconOnly && "px-1.5", className)}>
+    <Badge className={cn(PALETTE[status], iconOnly && "px-1.5", compact && "px-1.5 md:px-2", className)}>
       <Icon aria-hidden />
-      <span className={iconOnly ? "sr-only" : undefined}>{STATUS_LABELS[status]}</span>
+      <span className={iconOnly ? "sr-only" : compact ? "sr-only md:not-sr-only" : undefined}>{STATUS_LABELS[status]}</span>
     </Badge>
   );
 }

@@ -64,7 +64,7 @@ function RightMeta({ node, overdue, pending }: { node: TreeNode; overdue: boolea
             className={cn("hidden text-xs md:inline-flex", !overdue && "text-foreground-muted")}
           />
         ) : null}
-        {node.status ? <StatusBadge status={node.status} /> : null}
+        {node.status ? <StatusBadge status={node.status} compact /> : null}
         {pending ? <Loader2 aria-hidden className="size-4 animate-spin text-foreground-muted" /> : null}
       </span>
     );
@@ -112,7 +112,7 @@ function TreeNodeRowImpl(p: TreeNodeRowProps) {
       }}
       onKeyDown={(e) => p.onKey(e, node.id)}
       className={cn(
-        "flex min-h-11 cursor-pointer items-center gap-2 border-l-2 border-transparent py-1 pr-2 pl-[calc(var(--lvl)*1.25rem+0.5rem)] transition-colors duration-150 hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+        "flex min-h-11 cursor-pointer items-center gap-2 border-l-2 border-transparent py-1 pr-2 [--indent:0.75rem] pl-[calc(var(--lvl)*var(--indent)+0.5rem)] md:[--indent:1.25rem] transition-colors duration-150 hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
         selected && "border-primary bg-primary-soft hover:bg-primary-soft",
         pending && "opacity-60",
       )}

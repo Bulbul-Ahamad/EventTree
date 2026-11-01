@@ -27,7 +27,7 @@ export function EventHeader({ event, isOwner, unassignedCount, settingsHref }: P
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-balance text-2xl font-bold md:text-3xl">{event.title}</h1>
+              <h1 className="text-balance break-words text-2xl font-bold md:text-3xl">{event.title}</h1>
               <EventStatusBadge status={event.status} />
             </div>
             <EventDates startsAt={event.startsAt} endsAt={event.endsAt} className="text-sm text-foreground-muted" />
