@@ -1,5 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+// The boundary refetches through the router before it re-renders.
+const refresh = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh, push: vi.fn() }) }));
+
 import ErrorPage from "@/app/error";
 import NotFound from "@/app/not-found";
 
@@ -19,12 +23,13 @@ describe("error boundary", () => {
     vi.restoreAllMocks();
   });
 
-  it("offers Try again and Go to dashboard", () => {
+  it("offers Try again and Go to dashboard", async () => {
     const reset = vi.fn();
     render(<ErrorPage error={new Error("boom")} reset={reset} />);
     expect(screen.getByRole("heading", { name: "Something went wrong." })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(reset).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(reset).toHaveBeenCalledTimes(1));
+    expect(refresh).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("link", { name: "Go to dashboard" })).toHaveAttribute("href", "/dashboard");
   });
 
