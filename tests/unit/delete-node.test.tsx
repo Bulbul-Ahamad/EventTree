@@ -144,9 +144,11 @@ describe("Delete in the row menu", () => {
     expect(within(screen.getByRole("menu")).queryByRole("menuitem", { name: /Delete/ })).toBeNull();
   });
 
-  it("is hidden from an assignee, and when the event is completed", () => {
+  it("is hidden from an assignee, and nothing is offered when the event is completed", () => {
+    // An assignee may still have status items in the menu, but never Delete.
     const a = view(ctx(ID.nila));
-    expect(screen.queryByRole("button", { name: /^Actions for/ })).toBeNull();
+    fireEvent.keyDown(screen.getByRole("button", { name: "Actions for Seating" }), { key: "Enter" });
+    expect(within(screen.getByRole("menu")).queryByRole("menuitem", { name: /Delete/ })).toBeNull();
     a.unmount();
     view(ctx(ID.owner, { eventStatus: "completed" }));
     expect(screen.queryByRole("button", { name: /^Actions for/ })).toBeNull();
@@ -166,12 +168,13 @@ describe("Delete in the row menu", () => {
     const d = deferred();
     deleteNode.mockReturnValue(d.promise);
     view(ctx(ID.owner));
-    expect(within(rowOf(/Tech Fest/)).getByText(/75/)).toBeInTheDocument();
+    const eventProgress = () => within(rowOf(/Tech Fest/)).getByRole("progressbar");
+    expect(eventProgress()).toHaveAttribute("aria-valuenow", "75");
     openDelete("Food");
     fireEvent.click(within(confirmDialog()).getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(screen.queryByRole("treeitem", { name: /Food/ })).toBeNull());
     expect(deleteNode).toHaveBeenCalledWith({ nodeId: ID.food });
-    expect(within(rowOf(/Tech Fest/)).getByText(/50/)).toBeInTheDocument();
+    expect(eventProgress()).toHaveAttribute("aria-valuenow", "50");
 
     await waitFor(() => d.resolve(ok()));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Segment deleted"));
