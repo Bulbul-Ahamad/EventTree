@@ -41,43 +41,43 @@ select is((select count(*) from public.nodes where progress_cached is distinct f
           0::bigint, 'parity after inserts (empty segment S2 is 0)');
 
 update public.nodes set status = 'verified' where id = '40000000-0000-0000-0000-00000000000a';
-select is((select progress_cached from public.nodes where title = 'S1'), 25.00::numeric, 'S1 = 1/4 after verifying a');
+select is((select progress_cached from public.nodes where id = '30000000-0000-0000-0000-000000000001'), 25.00::numeric, 'S1 = 1/4 after verifying a');
 select is((select count(*) from public.nodes where progress_cached is distinct from pg_temp.expected_progress(id)),
           0::bigint, 'parity after verifying a');
 
 update public.nodes set status = 'verified' where id = '40000000-0000-0000-0000-00000000000b';
-select is((select progress_cached from public.nodes where title = 'S1'), 100.00::numeric, 'S1 = 100 after verifying b');
-select is((select progress_cached from public.nodes where title = 'EV'), 50.00::numeric, 'event rolls up weighted by segment weight');
+select is((select progress_cached from public.nodes where id = '30000000-0000-0000-0000-000000000001'), 100.00::numeric, 'S1 = 100 after verifying b');
+select is((select progress_cached from public.nodes where id = '20000000-0000-0000-0000-000000000001'), 50.00::numeric, 'event rolls up weighted by segment weight');
 select is((select count(*) from public.nodes where progress_cached is distinct from pg_temp.expected_progress(id)),
           0::bigint, 'parity after verifying b');
 
 update public.nodes set status = 'todo' where id = '40000000-0000-0000-0000-00000000000b';
 update public.nodes set weight = 3 where id = '40000000-0000-0000-0000-00000000000a';
-select is((select progress_cached from public.nodes where title = 'S1'), 50.00::numeric, 'weight change re-weights the segment');
+select is((select progress_cached from public.nodes where id = '30000000-0000-0000-0000-000000000001'), 50.00::numeric, 'weight change re-weights the segment');
 select is((select count(*) from public.nodes where progress_cached is distinct from pg_temp.expected_progress(id)),
           0::bigint, 'parity after weight change');
 
 insert into public.nodes (id, type, parent_id, title, created_by)
 values ('40000000-0000-0000-0000-00000000000e', 'task', '30000000-0000-0000-0000-000000000002', 'e', '00000000-0000-0000-0000-0000000000a1');
 update public.nodes set status = 'verified' where id = '40000000-0000-0000-0000-00000000000e';
-select is((select progress_cached from public.nodes where title = 'S2'), 100.00::numeric, 'formerly empty segment now 100');
-select is((select progress_cached from public.nodes where title = 'EV'), 50.00::numeric, 'event after S2 completes');
+select is((select progress_cached from public.nodes where id = '30000000-0000-0000-0000-000000000002'), 100.00::numeric, 'formerly empty segment now 100');
+select is((select progress_cached from public.nodes where id = '20000000-0000-0000-0000-000000000001'), 50.00::numeric, 'event after S2 completes');
 select is((select count(*) from public.nodes where progress_cached is distinct from pg_temp.expected_progress(id)),
           0::bigint, 'parity after inserting into empty segment');
 
 delete from public.nodes where id = '40000000-0000-0000-0000-00000000000e';
-select is((select progress_cached from public.nodes where title = 'S2'), 0.00::numeric, 'segment back to 0 when its last task is deleted');
-select is((select progress_cached from public.nodes where title = 'EV'), 25.00::numeric, 'event after deleting e');
+select is((select progress_cached from public.nodes where id = '30000000-0000-0000-0000-000000000002'), 0.00::numeric, 'segment back to 0 when its last task is deleted');
+select is((select progress_cached from public.nodes where id = '20000000-0000-0000-0000-000000000001'), 25.00::numeric, 'event after deleting e');
 select is((select count(*) from public.nodes where progress_cached is distinct from pg_temp.expected_progress(id)),
           0::bigint, 'parity after delete');
 
 delete from public.nodes where id = '30000000-0000-0000-0000-000000000003';
-select is((select progress_cached from public.nodes where title = 'EV'), 33.33::numeric, 'event after deleting a whole subtree');
+select is((select progress_cached from public.nodes where id = '20000000-0000-0000-0000-000000000001'), 33.33::numeric, 'event after deleting a whole subtree');
 select is((select count(*) from public.nodes where progress_cached is distinct from pg_temp.expected_progress(id)),
           0::bigint, 'parity after subtree delete');
 
 update public.nodes set status = 'submitted' where id = '40000000-0000-0000-0000-00000000000a';
-select is((select progress_cached from public.nodes where title = 'S1'), 0.00::numeric, 'submitted does not count until verified');
+select is((select progress_cached from public.nodes where id = '30000000-0000-0000-0000-000000000001'), 0.00::numeric, 'submitted does not count until verified');
 select is((select count(*) from public.nodes where progress_cached is distinct from pg_temp.expected_progress(id)),
           0::bigint, 'parity after status goes back from verified');
 
