@@ -50,6 +50,41 @@ export class World {
     return { id: created.data.id, slug, name };
   }
 
+  // An event built directly in the database (set-up only): one segment with the given
+  // head and the given tasks, already active. Returns the event id for the URL.
+  async activeEvent(args: {
+    orgId: string;
+    owner: Person;
+    title: string;
+    reviewMode: "assignee_submits" | "head_only";
+    segment: { title: string; head: Person; tasks: { title: string; assignee: Person }[] };
+  }): Promise<string> {
+    const { orgId, owner, title, reviewMode, segment } = args;
+    const event = await admin
+      .from("nodes")
+      .insert({ org_id: orgId, type: "event", title, assignee_id: owner.id, created_by: owner.id })
+      .select("id")
+      .single();
+    if (event.error) throw new Error(`create event: ${event.error.message}`);
+    const settings = await admin.from("event_settings").insert({ event_id: event.data.id, review_mode: reviewMode, event_status: "draft" });
+    if (settings.error) throw new Error(`event settings: ${settings.error.message}`);
+    const seg = await admin
+      .from("nodes")
+      .insert({ parent_id: event.data.id, type: "segment", title: segment.title, assignee_id: segment.head.id, created_by: owner.id })
+      .select("id")
+      .single();
+    if (seg.error) throw new Error(`create segment: ${seg.error.message}`);
+    for (const t of segment.tasks) {
+      const task = await admin
+        .from("nodes")
+        .insert({ parent_id: seg.data.id, type: "task", title: t.title, assignee_id: t.assignee.id, created_by: owner.id });
+      if (task.error) throw new Error(`create task: ${task.error.message}`);
+    }
+    const active = await admin.from("event_settings").update({ event_status: "active" }).eq("event_id", event.data.id);
+    if (active.error) throw new Error(`activate: ${active.error.message}`);
+    return event.data.id;
+  }
+
   // Children first: nodes restrict organization deletes.
   async cleanup() {
     if (this.orgIds.length > 0) {
