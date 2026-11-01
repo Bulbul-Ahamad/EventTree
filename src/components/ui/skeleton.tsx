@@ -23,3 +23,28 @@ export function TreeSkeleton({ className }: { className?: string }) {
     </div>
   );
 }
+
+// A page with a title and a few cards or fields (forms, settings, members).
+// Same outer spacing as the real pages so nothing jumps when the content arrives.
+export function PageSkeleton({
+  label,
+  blocks = [96, 160],
+  className,
+}: {
+  label: string;
+  blocks?: ReadonlyArray<number>; // heights in px of the blocks under the title
+  className?: string;
+}) {
+  return (
+    <div
+      role="status"
+      aria-label={label}
+      className={cn("mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 md:p-6", className)}
+    >
+      <Skeleton className="h-8 w-48" />
+      {blocks.map((h, i) => (
+        <Skeleton key={i} className="w-full rounded-lg" style={{ height: h }} />
+      ))}
+    </div>
+  );
+}
