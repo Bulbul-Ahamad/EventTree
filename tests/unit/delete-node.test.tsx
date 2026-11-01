@@ -72,8 +72,11 @@ function view(c: EventContext) {
 }
 const rowOf = (name: RegExp) => screen.getByRole("treeitem", { name });
 
+// The detail panel is a dialog too, so the confirmation is found by its title.
+const confirmDialog = () => screen.getByRole("dialog", { name: /^Delete (segment|task)\?/ });
+
 function openDelete(title: string) {
-  fireEvent.keyDown(screen.getByRole("button", { name: `Actions for ${title}` }), { key: "Enter" });
+  fireEvent.keyDown(screen.getByRole("button", { name: `Actions for ${title}`, hidden: true }), { key: "Enter" });
   const item = within(screen.getByRole("menu")).getByRole("menuitem", { name: /Delete/ });
   fireEvent.click(item);
 }
@@ -152,7 +155,7 @@ describe("Delete in the row menu", () => {
   it("asks first, says how many items go, and Cancel changes nothing", () => {
     view(ctx(ID.owner));
     openDelete("Venue");
-    const dialog = screen.getByRole("dialog");
+    const dialog = confirmDialog();
     expect(within(dialog).getByText(/2 tasks/)).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
     expect(deleteNode).not.toHaveBeenCalled();
@@ -165,7 +168,7 @@ describe("Delete in the row menu", () => {
     view(ctx(ID.owner));
     expect(within(rowOf(/Tech Fest/)).getByText(/75/)).toBeInTheDocument();
     openDelete("Food");
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete" }));
+    fireEvent.click(within(confirmDialog()).getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(screen.queryByRole("treeitem", { name: /Food/ })).toBeNull());
     expect(deleteNode).toHaveBeenCalledWith({ nodeId: ID.food });
     expect(within(rowOf(/Tech Fest/)).getByText(/50/)).toBeInTheDocument();
@@ -179,7 +182,7 @@ describe("Delete in the row menu", () => {
     deleteNode.mockResolvedValue(fail("E_EVENT_READONLY"));
     view(ctx(ID.owner));
     openDelete("Food");
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete" }));
+    fireEvent.click(within(confirmDialog()).getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("This event is read-only."));
     await waitFor(() => expect(rowOf(/Food/)).toBeInTheDocument());
     expect(toast.success).not.toHaveBeenCalled();
@@ -190,7 +193,7 @@ describe("Delete in the row menu", () => {
     deleteNode.mockResolvedValue(ok());
     view(ctx(ID.owner));
     openDelete("Venue");
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete" }));
+    fireEvent.click(within(confirmDialog()).getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/o/acme/events/e1", { scroll: false }));
     expect(toast.error).not.toHaveBeenCalled();
   });
