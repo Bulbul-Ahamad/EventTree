@@ -33,7 +33,7 @@ export default async function EventsPage({
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-balance text-2xl font-bold md:text-3xl">{org.name}</h1>
+        <h1 className="text-balance break-words text-2xl font-bold md:text-3xl">{org.name}</h1>
         <Link href={newHref} className={buttonVariants()}>
           <Plus aria-hidden /> New event
         </Link>

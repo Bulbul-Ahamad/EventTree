@@ -35,7 +35,7 @@ export function MyEvents({ events, createHref }: { events: MyEvent[]; createHref
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-col">
-                  <h3 className="text-balance text-base font-semibold">
+                  <h3 className="text-balance break-words text-base font-semibold">
                     <Link
                       href={`/o/${encodeURIComponent(e.orgSlug)}/events/${e.id}`}
                       className="rounded-sm after:absolute after:inset-0 after:content-['']"

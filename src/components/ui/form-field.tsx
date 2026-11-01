@@ -43,7 +43,7 @@ export function FormField({
         "aria-required": required ? true : undefined,
       })}
       {hint ? (
-        <p id={hintId} className="text-xs text-foreground-subtle">
+        <p id={hintId} className="break-words text-xs text-foreground-subtle">
           {hint}
         </p>
       ) : null}

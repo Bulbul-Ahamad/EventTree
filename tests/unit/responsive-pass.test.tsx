@@ -56,3 +56,22 @@ describe("design tokens only (CLAUDE.md §2): nothing is hard-coded, so dark mod
     expect(bad).toEqual([]);
   });
 });
+
+// A name with no spaces must wrap inside its box instead of pushing the page sideways.
+// Every place that prints user text as a heading or label needs `break-words` or `truncate`.
+describe("long unbroken user text", () => {
+  const read = (rel: string) => readFileSync(join(SRC, rel), "utf8");
+  const cases: Array<[string, string, RegExp]> = [
+    ["dashboard event title", "features/dashboard/components/my-events.tsx", /break-words[^"]*font-semibold">\s*<Link/],
+    ["events list card title", "features/events/components/event-card.tsx", /break-words[^"]*font-semibold">\s*<Link/],
+    ["event header title", "features/events/components/event-header.tsx", /break-words[^"]*font-bold[^"]*">\{event\.title\}/],
+    ["dialog title", "components/ui/dialog.tsx", /break-words text-lg font-semibold/],
+    ["dialog description", "components/ui/dialog.tsx", /break-words text-sm text-foreground-muted/],
+    ["form hint", "components/ui/form-field.tsx", /break-words text-xs text-foreground-subtle/],
+    ["panel breadcrumb", "components/tree/node-detail-panel.tsx", /break-words rounded-sm text-left/],
+    ["organization name heading", "app/o/[orgSlug]/events/page.tsx", /break-words[^"]*">\{org\.name\}/],
+  ];
+  it.each(cases)("%s wraps", (_name, file, pattern) => {
+    expect(read(file)).toMatch(pattern);
+  });
+});

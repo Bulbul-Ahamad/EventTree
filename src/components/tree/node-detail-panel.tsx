@@ -67,9 +67,9 @@ export function NodeDetailPanel({
             <nav aria-label="Breadcrumb">
               <ol className="flex flex-wrap items-center gap-1 text-xs text-foreground-muted">
                 {crumbs.map((c, i) => (
-                  <li key={c.id} className="flex items-center gap-1">
+                  <li key={c.id} className="flex min-w-0 max-w-full items-center gap-1">
                     {i > 0 ? <span aria-hidden>›</span> : null}
-                    <button type="button" onClick={() => onNavigate(c.id)} className="cursor-pointer rounded-sm underline-offset-2 hover:underline">
+                    <button type="button" onClick={() => onNavigate(c.id)} className="min-w-0 cursor-pointer break-words rounded-sm text-left underline-offset-2 hover:underline">
                       {c.title}
                     </button>
                   </li>

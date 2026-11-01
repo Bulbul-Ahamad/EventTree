@@ -18,7 +18,7 @@ export default async function MembersPage({ params }: { params: Promise<{ orgSlu
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 md:p-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-balance text-2xl font-bold md:text-3xl">Members</h1>
-        <p className="text-sm text-foreground-muted">
+        <p className="break-words text-sm text-foreground-muted">
           {members.length} {members.length === 1 ? "person" : "people"} in {org.name}
         </p>
       </div>
