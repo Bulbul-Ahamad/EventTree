@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import type { BrowserContext } from "@playwright/test";
+import type { Browser, BrowserContext, Page, TestInfo } from "@playwright/test";
 import { ANON_KEY, SUPABASE_URL } from "./env";
 import { PASSWORD, type Person } from "./world";
 
@@ -30,4 +30,18 @@ export async function sessionCookies(person: Person): Promise<Cookie[]> {
 // second user at the same time, make another context with browser.newContext(testInfo.project.use).
 export async function loginAs(context: BrowserContext, baseURL: string, person: Person): Promise<void> {
   await context.addCookies((await sessionCookies(person)).map((c) => ({ ...c, url: baseURL })));
+}
+
+// A new, separate browser (own cookies) logged in as `person`, with the same viewport
+// as the running project, so desktop and mobile runs both work with several users at once.
+export async function pageFor(
+  browser: Browser,
+  testInfo: TestInfo,
+  baseURL: string,
+  person: Person,
+): Promise<{ context: BrowserContext; page: Page }> {
+  const { viewport, isMobile, hasTouch, userAgent, deviceScaleFactor } = testInfo.project.use;
+  const context = await browser.newContext({ baseURL, viewport, isMobile, hasTouch, userAgent, deviceScaleFactor });
+  await loginAs(context, baseURL, person);
+  return { context, page: await context.newPage() };
 }
