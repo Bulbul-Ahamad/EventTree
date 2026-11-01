@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const refresh = vi.fn();
@@ -57,7 +58,7 @@ describe("every route has a loading skeleton and an error boundary (02_AppFlow Â
     expect(coveredBy(dir, "error.tsx", true)).toBe(true);
   });
 
-  it.each(dirs.filter((d) => d.startsWith("o") || d.startsWith("dashboard") || d.startsWith("settings")))(
+  it.each(dirs.filter((d) => ["o", "dashboard", "settings"].includes(d.split(sep)[0] ?? "")))(
     "%s keeps the navigation when it fails (boundary below the shell layout)",
     (dir) => {
       expect(coveredBy(dir, "error.tsx", false)).toBe(true);
@@ -71,7 +72,7 @@ describe("every route has a loading skeleton and an error boundary (02_AppFlow Â
 });
 
 describe("loading skeletons", () => {
-  const all: Array<[string, () => React.ReactElement]> = [
+  const all: Array<[string, () => ReactElement]> = [
     ["auth", AuthLoading],
     ["dashboard", DashboardLoading],
     ["onboarding", OnboardingLoading],
