@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `4.03`**
+**Next up: `4.04`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -104,7 +104,7 @@
 **Automated E2E & adversarial tests**
 - [x] **4.01** — Playwright setup (chromium + mobile viewport 360×740), auth fixtures (seeded users logged in via API), DB reset per spec file. _Done when:_ sample test passes locally.
 - [x] **4.02** — E2E happy path (Mode A): owner creates event → segments → head adds tasks → activate → assignee starts & submits → head verifies → progress reaches 100% → owner completes event (read-only afterwards). _Done when:_ test green on desktop and mobile viewport.
-- [ ] **4.03** — E2E Mode B: head ticks tasks directly; assignee cannot submit. _Done when:_ green.
+- [x] **4.03** — E2E Mode B: head ticks tasks directly; assignee cannot submit. _Done when:_ green.
 - [ ] **4.04** — E2E send-back and reopen flows with required comment. _Done when:_ green; history shows entries.
 - [ ] **4.05** — Permission negatives (UI + direct API): assignee cannot verify; head cannot touch sibling segment; non-participant gets 404; org admin is read-only; cross-org access denied. _Done when:_ green.
 - [ ] **4.06** — Concurrency: two sessions transition the same task; loser sees `E_STALE_STATE` message and refreshed state. _Done when:_ deterministic test green.
@@ -184,6 +184,7 @@
 | 2026-11-01 | 3.17 | Phase 3 gate: user walked through US-01…US-17 against their ACs in the browser in three batches (accounts and organizations; building the tree; doing and verifying work, plus theme). All reported OK; no gap steps needed. | (this commit) | US-07 AC2 "overdue highlighted": the user could not see it at first because overdue only shows when the event is `active` (BR-09); the rule is covered by unit tests (`isOverdue`) and the user was asked to re-check on an active event. US-08 AC2 is covered the same way. Not covered by the browser check: the 6-level depth limit (DB test `04_nodes`). |
 | 2026-11-01 | 4.01 | Playwright set up: `playwright.config.ts` (projects `desktop` and `mobile` 360×740, one worker, `pnpm dev` web server locally / build+start in CI), `tests/e2e/helpers/{env,world,auth}.ts` (local-Supabase-only guard; `World` creates unique users and an organization per spec file with the service role and removes them afterwards; `loginAs` signs in through the API and puts the app's own session cookies into the browser context), `tests/e2e/smoke.spec.ts` (2 tests × 2 projects). `.gitignore` gets `/test-results/` and `/playwright-report/`. `pnpm test:e2e` passed locally. | d984ff0 | "DB reset per spec file" is done as per-spec unique data plus cleanup instead of a full `supabase db reset` (much faster; specs still never share data). Run once per machine: `pnpm exec playwright install chromium`. |
 | 2026-11-02 | 4.02 | E2E happy path, Mode A (`tests/e2e/happy-path-mode-a.spec.ts`): owner creates the event and a segment with a head; head adds a task for a worker; owner activates; worker starts and submits; head verifies with the tick; event progress reaches 100%; owner marks it completed and the event is read-only (banner, no Mark completed, no row actions). Three separate browsers (`pageFor`) per run. Green on `desktop` and `mobile` (360×740). | d984ff0, 24d3b6a, 6b82651, 9eb9630 | First run failed only because the test reloaded the page right after clicking the verify tick and cancelled the request; the test now waits for the POST response and polls with reloads for 100%. No app change needed. |
+| 2026-11-02 | 4.03 | E2E Mode B (`tests/e2e/mode-b.spec.ts`): event, segment and two tasks are set up directly in the database (new `World.activeEvent`, service role, set-up only; review mode `head_only`, active). The worker can Start a task but sees no Submit for review, no Verify and no tick button; the head ticks one in-progress and one never-started task straight to verified; event progress reaches 100% and the worker sees both as verified. Green on `desktop` and `mobile`. | c34aae0 | Passed on the first run. |
 
 ## Decisions & Deviations Log
 
