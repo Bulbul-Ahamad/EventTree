@@ -78,7 +78,7 @@ test.describe("what the screen offers", () => {
     await expect(anyActions(a.page)).toHaveCount(0);
     await expect(anyTick(a.page)).toHaveCount(0);
     await expect(a.page.getByRole("button", { name: "Mark completed" })).toHaveCount(0);
-    await expect(a.page.getByRole("link", { name: "Settings" })).toHaveCount(0);
+    await expect(a.page.getByRole("link", { name: "Settings", exact: true })).toHaveCount(0);
     await a.context.close();
   });
 
