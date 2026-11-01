@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomBytes } from "node:crypto";
-import { SERVICE_ROLE_KEY, SUPABASE_URL } from "./env";
+import { ANON_KEY, SERVICE_ROLE_KEY, SUPABASE_URL } from "./env";
 
 export const PASSWORD = "Passw0rd!e2etest";
 
@@ -8,6 +8,8 @@ export const PASSWORD = "Passw0rd!e2etest";
 export const admin: SupabaseClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
+
+type Segment = { title: string; head: Person; tasks: { title: string; assignee: Person; status?: "submitted" }[] };
 
 export type Person = { key: string; id: string; email: string; name: string };
 
@@ -57,7 +59,8 @@ export class World {
     owner: Person;
     title: string;
     reviewMode: "assignee_submits" | "head_only";
-    segment: { title: string; head: Person; tasks: { title: string; assignee: Person }[] };
+    segment: Segment;
+    more?: Segment[]; // further segments directly under the event
   }): Promise<string> {
     const { orgId, owner, title, reviewMode, segment } = args;
     const event = await admin
@@ -68,21 +71,39 @@ export class World {
     if (event.error) throw new Error(`create event: ${event.error.message}`);
     const settings = await admin.from("event_settings").insert({ event_id: event.data.id, review_mode: reviewMode, event_status: "draft" });
     if (settings.error) throw new Error(`event settings: ${settings.error.message}`);
-    const seg = await admin
-      .from("nodes")
-      .insert({ parent_id: event.data.id, type: "segment", title: segment.title, assignee_id: segment.head.id, created_by: owner.id })
-      .select("id")
-      .single();
-    if (seg.error) throw new Error(`create segment: ${seg.error.message}`);
-    for (const t of segment.tasks) {
-      const task = await admin
+    for (const sg of [segment, ...(args.more ?? [])]) {
+      const seg = await admin
         .from("nodes")
-        .insert({ parent_id: seg.data.id, type: "task", title: t.title, assignee_id: t.assignee.id, created_by: owner.id });
-      if (task.error) throw new Error(`create task: ${task.error.message}`);
+        .insert({ parent_id: event.data.id, type: "segment", title: sg.title, assignee_id: sg.head.id, created_by: owner.id })
+        .select("id")
+        .single();
+      if (seg.error) throw new Error(`create segment: ${seg.error.message}`);
+      for (const t of sg.tasks) {
+        const task = await admin
+          .from("nodes")
+          .insert({ parent_id: seg.data.id, type: "task", title: t.title, assignee_id: t.assignee.id, created_by: owner.id })
+          .select("id")
+          .single();
+        if (task.error) throw new Error(`create task: ${task.error.message}`);
+        if (t.status === "submitted") {
+          const moved = await admin
+            .from("nodes")
+            .update({ status: "submitted", submitted_at: new Date().toISOString() })
+            .eq("id", task.data.id);
+          if (moved.error) throw new Error(`submit task: ${moved.error.message}`);
+        }
+      }
     }
     const active = await admin.from("event_settings").update({ event_status: "active" }).eq("event_id", event.data.id);
     if (active.error) throw new Error(`activate: ${active.error.message}`);
     return event.data.id;
+  }
+
+  // Titles must be unique per run (put runId in them).
+  async nodeId(title: string): Promise<string> {
+    const row = await admin.from("nodes").select("id").eq("title", title).single();
+    if (row.error) throw new Error(`find ${title}: ${row.error.message}`);
+    return row.data.id;
   }
 
   // Children first: nodes restrict organization deletes.
@@ -95,4 +116,13 @@ export class World {
     this.orgIds = [];
     for (const key of Object.keys(this.people)) delete this.people[key];
   }
+}
+
+// A client that acts as this person with the public key, so RLS applies like in the app.
+// Used to call the API directly, around the UI.
+export async function apiAs(person: Person): Promise<SupabaseClient> {
+  const client = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error } = await client.auth.signInWithPassword({ email: person.email, password: PASSWORD });
+  if (error) throw new Error(`api sign in ${person.email}: ${error.message}`);
+  return client;
 }
