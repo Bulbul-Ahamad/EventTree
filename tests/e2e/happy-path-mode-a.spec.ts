@@ -76,14 +76,20 @@ test("Mode A from an empty event to a completed, read-only one", async ({ browse
 
   // The worker starts the task and submits it for review.
   await w.page.goto(eventUrl);
-  await actionsMenu(w.page, TASK);
-  await w.page.getByRole("menuitem", { name: "Start" }).click();
-  await actionsMenu(w.page, TASK);
-  await w.page.getByRole("menuitem", { name: "Submit for review" }).click();
+  // Each click waits for the server's answer: the head must not look before the DB has the change.
+  for (const item of ["Start", "Submit for review"]) {
+    await actionsMenu(w.page, TASK);
+    const answered = w.page.waitForResponse((r) => r.request().method() === "POST");
+    await w.page.getByRole("menuitem", { name: item }).click();
+    await answered;
+  }
   await expect(w.page.getByRole("treeitem", { name: new RegExp(TASK) })).toContainText(/submitted|review/i);
 
   // The head verifies it with the tick button, and progress reaches 100%.
-  await h.page.reload();
+  await expect(async () => {
+    await h.page.reload();
+    await expect(h.page.getByRole("button", { name: `Mark ${TASK} verified` })).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 15_000 });
   // Wait for the server to answer before reloading, or the reload cancels the request.
   const verified = h.page.waitForResponse((r) => r.request().method() === "POST");
   await h.page.getByRole("button", { name: `Mark ${TASK} verified` }).click();
