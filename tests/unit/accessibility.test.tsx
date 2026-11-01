@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { axeViolations } from "./helpers/axe";
 
@@ -282,7 +283,7 @@ describe("axe: states", () => {
 describe("keyboard and focus", () => {
   it("a confirm dialog moves focus inside, Escape closes it and focus goes back", async () => {
     function Harness() {
-      const [open, setOpen] = (require("react") as typeof import("react")).useState(false);
+      const [open, setOpen] = useState(false);
       return (
         <>
           <button onClick={() => setOpen(true)}>Open</button>
