@@ -115,6 +115,7 @@ describe("a user of another organization", () => {
       expect(leaked, `rows of the victim visible in ${t}`).toHaveLength(0);
     }
     expect(blocked(await xena.client.from("organizations").select("join_code").eq("id", orgId))).toBe(true);
+    expect((await xena.client.rpc("get_join_code", { p_org: orgId })).error).not.toBeNull();
     const tree = await xena.client.rpc("get_event_tree", { p_event: eventId });
     expect(tree.error !== null || (Array.isArray(tree.data) && tree.data.length === 0)).toBe(true);
   });
@@ -174,6 +175,20 @@ describe("a member of the organization who is not part of the event", () => {
     expect(blocked(await plain.client.from("event_settings").select("*").eq("event_id", eventId))).toBe(true);
     const tree = await plain.client.rpc("get_event_tree", { p_event: eventId });
     expect(tree.error !== null || (Array.isArray(tree.data) && tree.data.length === 0)).toBe(true);
+  });
+
+  it("cannot read the join code, not through the table and not through get_join_code", async () => {
+    const direct = await plain.client.from("organizations").select("join_code").eq("id", orgId);
+    expect(direct.error, "select join_code as a member").not.toBeNull();
+    const all = await plain.client.from("organizations").select("*").eq("id", orgId);
+    expect(all.error, "select * includes the code").not.toBeNull();
+    const name = await plain.client.from("organizations").select("id, name").eq("id", orgId);
+    expect(name.data).toHaveLength(1); // the rest of the row stays readable
+    expect((await plain.client.rpc("get_join_code", { p_org: orgId })).error).not.toBeNull();
+    const real = await admin.from("organizations").select("join_code").eq("id", orgId).single();
+    const asAdmin = await owner.client.rpc("get_join_code", { p_org: orgId });
+    expect(asAdmin.error).toBeNull();
+    expect(asAdmin.data).toBe(real.data?.join_code);
   });
 
   it("cannot write, promote themselves or touch other members", async () => {

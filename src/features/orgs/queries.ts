@@ -63,7 +63,7 @@ export async function getOrgBySlug(slug: string): Promise<OrgDetail | null> {
 
   const { data: org } = await supabase
     .from("organizations")
-    .select("id, name, slug, kind, join_code")
+    .select("id, name, slug, kind")
     .eq("slug", slug)
     .maybeSingle();
   if (!org) return null;
@@ -77,13 +77,19 @@ export async function getOrgBySlug(slug: string): Promise<OrgDetail | null> {
   if (!membership) return null;
 
   const role = membership.role as OrgRole;
+  // The code is readable by admins only, in the database too (get_join_code).
+  let joinCode: string | null = null;
+  if (role === "admin") {
+    const { data: code } = await supabase.rpc("get_join_code", { p_org: org.id });
+    joinCode = typeof code === "string" ? code : null;
+  }
   return {
     id: org.id,
     name: org.name,
     slug: org.slug,
     kind: org.kind as OrgKind,
     role,
-    joinCode: role === "admin" ? org.join_code : null,
+    joinCode,
   };
 }
 
