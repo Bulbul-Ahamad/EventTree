@@ -20,6 +20,7 @@ import {
   removeMember,
   rotateJoinCode,
   setMemberRole,
+  updateOrganization,
 } from "@/features/orgs/actions";
 import { getOrgBySlug, listMyOrgs, listOrgMembers } from "@/features/orgs/queries";
 
@@ -198,6 +199,9 @@ describe("removeMember and leaveOrganization", () => {
     expect(ev.error).toBeNull();
     await expectFail(leaveOrganization({ orgId }), "E_OWNS_EVENTS");
     await expectFail(removeMember({ orgId, userId: alice.id }), "E_OWNS_EVENTS");
+    // The message says how many events the person owns (S15).
+    const refused = await removeMember({ orgId, userId: alice.id });
+    expect(refused.ok === false && refused.message).toBe("This member owns events. Resolve those first. (Events they own: 1)");
     await setMemberRole({ orgId, userId: bob.id, role: "member" });
   });
 
@@ -216,5 +220,26 @@ describe("removeMember and leaveOrganization", () => {
     actAs(alice);
     expect((await removeMember({ orgId, userId: bob.id })).ok).toBe(true);
     expect((await listOrgMembers(orgId)).map((m) => m.userId)).toEqual([alice.id]);
+  });
+});
+
+describe("updateOrganization (S16)", () => {
+  it("an admin changes the name and type; the URL name stays", async () => {
+    actAs(alice);
+    expect((await updateOrganization({ orgId, name: "Int Org Renamed", kind: "university_program" })).ok).toBe(true);
+    expect(await getOrgBySlug(slug)).toMatchObject({ name: "Int Org Renamed", kind: "university_program", slug });
+    expect((await updateOrganization({ orgId, name: "Int Org", kind: "club" })).ok).toBe(true);
+  });
+
+  it("a plain member, an outsider and bad input are refused", async () => {
+    const { data: org } = await admin.from("organizations").select("join_code").eq("id", orgId).single();
+    actAs(bob);
+    await joinOrganization({ code: org!.join_code });
+    await expectFail(updateOrganization({ orgId, name: "Hijacked", kind: "club" }), "E_NOT_AUTHORIZED");
+    actAs(xena);
+    await expectFail(updateOrganization({ orgId, name: "Hijacked", kind: "club" }), "E_NOT_AUTHORIZED");
+    actAs(alice);
+    await expectFail(updateOrganization({ orgId, name: "X", kind: "club" }), "E_VALIDATION");
+    expect((await getOrgBySlug(slug))?.name).toBe("Int Org");
   });
 });

@@ -31,6 +31,11 @@ async function currentUserId() {
   return { supabase, userId: user?.id ?? null };
 }
 
+// The signed-in user's id, or null for a guest.
+export async function getCurrentUserId(): Promise<string | null> {
+  return (await currentUserId()).userId;
+}
+
 // Organizations I belong to, with my role in each. Used by the org switcher.
 export async function listMyOrgs(): Promise<MyOrg[]> {
   const { supabase, userId } = await currentUserId();

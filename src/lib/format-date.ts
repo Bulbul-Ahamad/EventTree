@@ -7,6 +7,13 @@ export function formatDateTime(iso: string, timeZone?: string): string {
   return new Intl.DateTimeFormat("en", options).format(new Date(iso));
 }
 
+// "Nov 1, 2026" (no time), for things like a join date.
+export function formatDate(iso: string, timeZone?: string): string {
+  const options: Intl.DateTimeFormatOptions = { dateStyle: "medium" };
+  if (timeZone) options.timeZone = timeZone;
+  return new Intl.DateTimeFormat("en", options).format(new Date(iso));
+}
+
 // "Nov 1, 2026, 10:00 AM – Nov 2, 2026, 6:00 PM", "Starts …", "Ends …" or null.
 export function formatEventDates(
   startsAt: string | null,

@@ -12,9 +12,11 @@ export const ORG_KIND_LABELS: Record<OrgKind, string> = {
   other: "Other",
 };
 
+const orgName = z.string().trim().min(2, "Use at least 2 characters.").max(100, "Use at most 100 characters.");
+
 export const createOrganizationSchema = z
   .object({
-    name: z.string().trim().min(2, "Use at least 2 characters.").max(100, "Use at most 100 characters."),
+    name: orgName,
     slug: z
       .string()
       .trim()
@@ -47,3 +49,6 @@ export const setMemberRoleSchema = z
 export const removeMemberSchema = z.object({ orgId, userId }).strict();
 
 export const leaveOrganizationSchema = z.object({ orgId }).strict();
+
+// S16: name and type only. The URL name (slug) cannot be changed in the MVP.
+export const updateOrganizationSchema = z.object({ orgId, name: orgName, kind: z.enum(ORG_KINDS) }).strict();
