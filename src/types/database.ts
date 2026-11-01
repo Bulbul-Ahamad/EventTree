@@ -272,6 +272,9 @@ isOneToOne: false
               "assignee_avatar": string,"assignee_id": string,"assignee_name": string,"depth": number,"description": string,"due_at": string,"id": string,"parent_id": string,"position": number,"priority": Database["public"]['Enums']["priority_level"],"progress": number,"status": Database["public"]['Enums']["task_status"],"submitted_at": string,"title": string,"type": Database["public"]['Enums']["node_type"],"verified_at": string,"weight": number
             }[]
                            },
+"get_join_code":
+{ Args: { "p_org": string }; Returns: string
+                           },
 "get_my_tasks":
 { Args: Record<PropertyKey, never>; Returns: {
               "due_at": string,"event_id": string,"event_status": Database["public"]['Enums']["event_status"],"event_title": string,"node_id": string,"org_slug": string,"priority": Database["public"]['Enums']["priority_level"],"status": Database["public"]['Enums']["task_status"],"title": string
