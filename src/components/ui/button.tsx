@@ -19,10 +19,10 @@ export const buttonVariants = cva(
           "bg-danger text-danger-foreground hover:bg-danger/90 active:bg-danger/80",
       },
       size: {
-        sm: "h-8 px-3",
-        md: "h-10 px-4",
+        sm: "h-8 px-3 pointer-coarse:h-11",
+        md: "h-10 px-4 pointer-coarse:h-11",
         lg: "h-12 px-6 text-base",
-        icon: "size-10",
+        icon: "size-10 pointer-coarse:size-11",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },

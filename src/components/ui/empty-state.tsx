@@ -9,13 +9,16 @@ type EmptyStateProps = {
   description?: string;
   action?: ReactNode;
   className?: string;
+  // Full-page states (error, not found) are the page's only heading: use 1.
+  headingLevel?: 1 | 2;
 };
 
-export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, description, action, className, headingLevel = 2 }: EmptyStateProps) {
+  const Heading = headingLevel === 1 ? "h1" : "h2";
   return (
     <div className={cn("flex flex-col items-center gap-2 px-4 py-10 text-center", className)}>
       <Icon aria-hidden className="size-10 text-foreground-subtle" />
-      <h2 className="text-balance text-lg font-semibold">{title}</h2>
+      <Heading className="text-balance text-lg font-semibold">{title}</Heading>
       {description ? <p className="max-w-[360px] text-sm text-foreground-muted">{description}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>

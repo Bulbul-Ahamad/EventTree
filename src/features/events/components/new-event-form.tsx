@@ -108,7 +108,7 @@ export function NewEventForm({ orgId, orgSlug }: { orgId: string; orgSlug: strin
       <fieldset className="flex flex-col gap-1">
         <legend className="mb-1 text-sm font-medium">Review mode</legend>
         {REVIEW_OPTIONS.map((o) => (
-          <label key={o.value} className="flex min-h-10 cursor-pointer items-center gap-3 text-sm">
+          <label key={o.value} className="flex min-h-10 cursor-pointer items-center gap-3 text-sm pointer-coarse:min-h-11">
             <input
               type="radio"
               name="reviewMode"

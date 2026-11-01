@@ -46,6 +46,7 @@ export function RouteError({
     >
       <EmptyState
         icon={TriangleAlert}
+        headingLevel={1}
         title="Something went wrong."
         description="Please try again. If it keeps happening, come back in a few minutes."
         action={

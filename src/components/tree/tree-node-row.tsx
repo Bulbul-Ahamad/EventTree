@@ -122,7 +122,7 @@ function TreeNodeRowImpl(p: TreeNodeRowProps) {
           data-row-control
           aria-hidden
           onClick={() => p.onToggle(node.id)}
-          className="grid size-5 shrink-0 place-items-center rounded-sm text-foreground-muted hover:bg-border"
+          className="relative grid size-5 shrink-0 place-items-center rounded-sm text-foreground-muted hover:bg-border pointer-coarse:before:absolute pointer-coarse:before:-inset-3 pointer-coarse:before:content-['']"
         >
           <ChevronRight className={cn("size-4 transition-transform duration-150", expanded && "rotate-90")} />
         </span>

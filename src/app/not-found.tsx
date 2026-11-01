@@ -9,6 +9,7 @@ export default function NotFound() {
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center p-4 md:p-6">
       <EmptyState
         icon={SearchX}
+        headingLevel={1}
         title="We couldn't find that page."
         action={
           <Link href="/dashboard" className={buttonVariants()}>

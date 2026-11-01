@@ -19,6 +19,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
         <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center p-4 md:p-6">
           <EmptyState
             icon={TriangleAlert}
+            headingLevel={1}
             title="Something went wrong."
             description="Please try again. If it keeps happening, come back in a few minutes."
             action={
