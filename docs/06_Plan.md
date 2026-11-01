@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `4.01`**
+**Next up: `4.02`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -102,7 +102,7 @@
 ## Phase 4 — Edge-Case Tests & Hardening
 
 **Automated E2E & adversarial tests**
-- [ ] **4.01** — Playwright setup (chromium + mobile viewport 360×740), auth fixtures (seeded users logged in via API), DB reset per spec file. _Done when:_ sample test passes locally.
+- [x] **4.01** — Playwright setup (chromium + mobile viewport 360×740), auth fixtures (seeded users logged in via API), DB reset per spec file. _Done when:_ sample test passes locally.
 - [ ] **4.02** — E2E happy path (Mode A): owner creates event → segments → head adds tasks → activate → assignee starts & submits → head verifies → progress reaches 100% → owner completes event (read-only afterwards). _Done when:_ test green on desktop and mobile viewport.
 - [ ] **4.03** — E2E Mode B: head ticks tasks directly; assignee cannot submit. _Done when:_ green.
 - [ ] **4.04** — E2E send-back and reopen flows with required comment. _Done when:_ green; history shows entries.
@@ -182,6 +182,7 @@
 | 2026-11-01 | 3.15 | Responsive and dark-mode pass. Code audit of every screen at 360 / 768 / 1280, then fixes: tree rows below `md` show the status as an icon only (`StatusBadge compact`, label for screen readers, per 03_UI_Spec §8.6) and indent 12 px per level instead of 20 px (`--indent`), so a task three levels deep still shows part of its title next to the avatar, verify tick and ⋮; the Members name column takes the free width and truncates (`w-full max-w-0`); `break-words` on user-entered names in the dashboard event card, events list card and title, event header, dialog title and description, form hints, panel breadcrumb, event-settings back link and members subtitle (found by the user: a long unbroken event name pushed the Draft badge out of the dashboard card); Bangla-safe clipping: `.truncate` gets `padding-block: .2em` with an equal negative margin so vowel signs are not cut (the `:lang(bn)` rule alone does not help because user text carries no `lang`). Tests: responsive-pass (compact badge, no hard-coded colours or palette utilities anywhere in `src`, `break-words` on each user-text heading). Manual checklist run by the user at 360 / 768 / 1280, light and dark, on dashboard, events, new event, event tree, event settings, members, org settings, profile, login: no horizontal scroll at 360, Bangla titles not clipped, dialogs and panel fit. `pnpm check` passed; verified by the user in the browser. | 57e9f37, 55ce645 | Real-browser checks could not be automated (no database or npm in the build sandbox); they are the manual checklist above. Bangla user text is not tagged `lang="bn"`, so its line height stays at the Tailwind size; only clipping is handled. |
 | 2026-11-01 | 3.16 | Accessibility pass per `03_UI_Spec §10`. axe-core 4.14.0 added as a dev dependency (approved); `tests/unit/helpers/axe.ts` + `tests/unit/accessibility.test.tsx` (21 tests): zero serious/critical violations on event header/tree/row menu/detail panel/dialogs, all forms and settings, members/join code, dashboard, empty/skeleton/error/not-found states. Fixes: one `h1` on full-page states (`EmptyState headingLevel`), 44 px touch targets on coarse pointers (buttons, tree chevron, radio labels). `Dialog` now remembers its opener in a layout effect and returns focus to it on close. Manual: keyboard-only walkthrough, focus rings, 200% zoom, contrast and colour-not-only checked by the user. `pnpm check` passed. | 2a98f44, e7a5977, 8ecc1d1, 58e02cd, d4dba74 | axe `color-contrast` is off in jsdom (no layout), so contrast is a manual/browser check. Bangla user text is not tagged `lang="bn"`. |
 | 2026-11-01 | 3.17 | Phase 3 gate: user walked through US-01…US-17 against their ACs in the browser in three batches (accounts and organizations; building the tree; doing and verifying work, plus theme). All reported OK; no gap steps needed. | (this commit) | US-07 AC2 "overdue highlighted": the user could not see it at first because overdue only shows when the event is `active` (BR-09); the rule is covered by unit tests (`isOverdue`) and the user was asked to re-check on an active event. US-08 AC2 is covered the same way. Not covered by the browser check: the 6-level depth limit (DB test `04_nodes`). |
+| 2026-11-01 | 4.01 | Playwright set up: `playwright.config.ts` (projects `desktop` and `mobile` 360×740, one worker, `pnpm dev` web server locally / build+start in CI), `tests/e2e/helpers/{env,world,auth}.ts` (local-Supabase-only guard; `World` creates unique users and an organization per spec file with the service role and removes them afterwards; `loginAs` signs in through the API and puts the app's own session cookies into the browser context), `tests/e2e/smoke.spec.ts` (2 tests × 2 projects). `.gitignore` gets `/test-results/` and `/playwright-report/`. `pnpm test:e2e` passed locally. | d984ff0 | "DB reset per spec file" is done as per-spec unique data plus cleanup instead of a full `supabase db reset` (much faster; specs still never share data). Run once per machine: `pnpm exec playwright install chromium`. |
 
 ## Decisions & Deviations Log
 
@@ -205,6 +206,7 @@ Record here any approved change to the docs (what, why, who approved, date).
 | 2026-11-01 | 02_AppFlow S15 vs §7 (E_OWNS_EVENTS) | S15 says "Transfer or delete this user's events first (events they own: N)"; the §7 catalogue says "This member owns events. Resolve those first." Ownership cannot be transferred (BR-01), so "Transfer" would mislead. Decision: show the catalogue message followed by the count: "This member owns events. Resolve those first. (Events they own: N)". | Approved by the user (asked in 3.13). |
 | 2026-11-01 | 02_AppFlow S15 (Leave organization) | S15 lists Leave only for non-admins, but then an admin could never see `E_LAST_ADMIN` when trying to leave. Decision: every member, admins included, gets **Leave organization**; the database guards (`E_LAST_ADMIN`, `E_OWNS_EVENTS`) decide. | Approved by the user (asked in 3.13). |
 | 2026-11-01 | 04_TRD §2 (dev dependencies) | `axe-core` 4.14.0 added as a dev dependency for automated accessibility tests (approved by the user). `radix-ui` ^1.8.1 declared in `package.json` and the lockfile (it had been installed locally but never committed). |
+| 2026-11-01 | 06_Plan 4.01 (DB reset per spec file) | Interpreted as isolated, cleaned-up data per spec file (unique users and organization created via the service role, deleted in `afterAll`) rather than running `supabase db reset` before each file. Same guarantee, seconds instead of tens of seconds per file. |
 
 ## Parking Lot (ideas that are Non-Goals right now — do not build)
 
