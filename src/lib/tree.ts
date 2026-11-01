@@ -1,4 +1,5 @@
 import type { EventStatus, NodeContext, NodeType, TaskStatus } from "@/lib/permissions";
+import { taskProgress, weightedProgress } from "@/lib/progress";
 
 // Flat rows (from the get_event_tree RPC) -> nested tree, plus filters and
 // expansion helpers for the tree view. Pure functions.
@@ -228,4 +229,47 @@ export function withTaskStatus(root: TreeNode, id: string, status: TaskStatus): 
     return changed ? { ...n, children } : n;
   };
   return visit(root);
+}
+
+// A copy of the tree without one node and everything under it. Progress of the
+// ancestors is worked out again with the same roll-up as the database (BR-06),
+// so a parent shows its new percentage at once. The event root cannot be removed.
+export function withoutNode(root: TreeNode, id: string): TreeNode {
+  if (root.id === id) return root;
+  const visit = (n: TreeNode): { node: TreeNode; changed: boolean } => {
+    let changed = false;
+    const children: TreeNode[] = [];
+    for (const c of n.children) {
+      if (c.id === id) {
+        changed = true;
+        continue;
+      }
+      const r = visit(c);
+      if (r.changed) changed = true;
+      children.push(r.node);
+    }
+    if (!changed) return { node: n, changed: false };
+    const progress = weightedProgress(
+      children.map((c) => ({ progress: c.type === "task" ? taskProgress(c.status) : c.progress, weight: c.weight })),
+    );
+    return { node: { ...n, children, progress }, changed: true };
+  };
+  return visit(root).node;
+}
+
+// What a delete takes with it: the node itself plus everything below.
+export type DeleteImpact = { segments: number; tasks: number; total: number };
+
+export function deleteImpact(node: TreeNode): DeleteImpact {
+  let segments = 0;
+  let tasks = 0;
+  for (const n of walk(node)) {
+    if (n.type === "segment") segments += 1;
+    if (n.type === "task") tasks += 1;
+  }
+  return { segments, tasks, total: segments + tasks };
+}
+
+export function isInSubtree(node: TreeNode, id: string): boolean {
+  return walk(node).some((n) => n.id === id);
 }

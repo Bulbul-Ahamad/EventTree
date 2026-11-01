@@ -283,7 +283,7 @@ describe("NodeActions (permission-gated row menu)", () => {
     const nodeCtx = buildNodeContexts(root).get(id);
     if (!nodeCtx) throw new Error(id);
     const { container, unmount } = render(
-      <NodeActions node={find(root, id)} ctx={c} nodeCtx={nodeCtx} onOpenDialog={vi.fn()} transitions={[]} onTransition={vi.fn()} />,
+      <NodeActions node={find(root, id)} ctx={c} nodeCtx={nodeCtx} onOpenDialog={vi.fn()} transitions={[]} onTransition={vi.fn()} onDelete={vi.fn()} />,
     );
     const trigger = within(container).queryByRole("button");
     if (!trigger) {
@@ -299,12 +299,12 @@ describe("NodeActions (permission-gated row menu)", () => {
 
   it("owner: add on the root, everything on a segment", async () => {
     expect(await menuFor(ID.event, ctx(ID.u_owner))).toEqual(["Add segment", "Add task"]);
-    expect(await menuFor(ID.venue, ctx(ID.u_owner))).toEqual(["Add segment", "Add task", "Edit", "Reassign"]);
+    expect(await menuFor(ID.venue, ctx(ID.u_owner))).toEqual(["Add segment", "Add task", "Edit", "Reassign", "Delete"]);
   });
 
   it("head: add under own segment, edit and reassign below it, nothing on the root", async () => {
     expect(await menuFor(ID.venue, ctx(ID.u_head))).toEqual(["Add segment", "Add task"]);
-    expect(await menuFor(ID.task, ctx(ID.u_head))).toEqual(["Edit", "Reassign"]);
+    expect(await menuFor(ID.task, ctx(ID.u_head))).toEqual(["Edit", "Reassign", "Delete"]);
     expect(await menuFor(ID.event, ctx(ID.u_head))).toBeNull();
   });
 

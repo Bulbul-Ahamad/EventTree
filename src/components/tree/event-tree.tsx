@@ -2,7 +2,7 @@
 
 import { SearchX } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useOptimistic, useState } from "react";
+import { useCallback, useEffect, useMemo, useOptimistic, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { ComboboxOption } from "@/components/ui/combobox";
@@ -12,7 +12,20 @@ import { errorMessage } from "@/lib/errors";
 import { canCreateChild, isEventOwner, type EventContext, type TaskStatus } from "@/lib/permissions";
 import type { Transition } from "@/lib/status";
 import { notify } from "@/lib/toast";
-import { buildNodeContexts, filterTasks, isOverdue, parseFilter, walk, withTaskStatus, type TreeFilter, type TreeNode } from "@/lib/tree";
+import {
+  buildNodeContexts,
+  filterTasks,
+  isInSubtree,
+  isOverdue,
+  parseFilter,
+  walk,
+  withoutNode,
+  withTaskStatus,
+  type TreeFilter,
+  type TreeNode,
+} from "@/lib/tree";
+import { deleteNode } from "@/features/nodes/actions";
+import { DeleteNodeDialog } from "./delete-node-dialog";
 import { NodeActions } from "./node-actions";
 import { NodeDetailPanel } from "./node-detail-panel";
 import { NodeFormDialog, type NodeDialogTarget } from "./node-form-dialog";
@@ -43,9 +56,15 @@ export function EventTree({
   activityFor: string | null;
 }) {
   const { eventStatus, userId } = ctx;
-  // Status changes show at once and roll back by themselves if the request fails.
-  const [root, applyOptimistic] = useOptimistic(serverRoot, (current: TreeNode, change: { id: string; status: TaskStatus }) =>
-    withTaskStatus(current, change.id, change.status),
+  // Status changes and deletes show at once and roll back by themselves if the request fails.
+  const [root, applyChange] = useOptimistic(
+    serverRoot,
+    (current: TreeNode, change: { kind: "status"; id: string; status: TaskStatus } | { kind: "remove"; id: string }) =>
+      change.kind === "status" ? withTaskStatus(current, change.id, change.status) : withoutNode(current, change.id),
+  );
+  const applyOptimistic = useCallback(
+    (change: { id: string; status: TaskStatus }) => applyChange({ kind: "status", ...change }),
+    [applyChange],
   );
   const router = useRouter();
   const pathname = usePathname();
@@ -67,12 +86,14 @@ export function EventTree({
   const selectedNode = selectedId ? (nodeById.get(selectedId) ?? null) : null;
 
   // A ?node= that does not exist (or I cannot see): drop it and say so (S12).
+  // Checked against the server tree, so a delete in flight does not trigger it.
+  const serverIds = useMemo(() => new Set(walk(serverRoot).map((n) => n.id)), [serverRoot]);
   useEffect(() => {
-    if (selectedId && !nodeById.has(selectedId)) {
+    if (selectedId && !serverIds.has(selectedId)) {
       notify.error(errorMessage("E_NOT_FOUND"));
       go((q) => q.delete("node"));
     }
-  }, [selectedId, nodeById, go]);
+  }, [selectedId, serverIds, go]);
 
   const onOpenNode = useCallback((id: string) => go((q) => q.set("node", id)), [go]);
   const setFilter = useCallback(
@@ -84,6 +105,29 @@ export function EventTree({
   const nodeContexts = useMemo(() => buildNodeContexts(serverRoot), [serverRoot]);
   const tx = useTaskTransitions({ ctx, nodeContexts, apply: applyOptimistic });
   const { transitionsFor, run: runTransition } = tx;
+  const [deleting, setDeleting] = useState<TreeNode | null>(null);
+  const [, startDelete] = useTransition();
+
+  // The row (and its progress share in every ancestor) goes at once; if the
+  // server refuses, the tree comes back and the reason is shown.
+  const confirmDelete = useCallback(
+    (node: TreeNode) => {
+      setDeleting(null);
+      if (selectedId && isInSubtree(node, selectedId)) go((q) => q.delete("node"));
+      startDelete(async () => {
+        applyChange({ kind: "remove", id: node.id });
+        const result = await deleteNode({ nodeId: node.id });
+        if (result.ok) {
+          notify.success(node.type === "segment" ? "Segment deleted" : "Task deleted");
+          router.refresh();
+          return;
+        }
+        notify.error(result.message);
+        if (result.code === "E_NOT_FOUND") router.refresh();
+      });
+    },
+    [selectedId, go, applyChange, router],
+  );
   const [commentFor, setCommentFor] = useState<{ node: TreeNode; transition: Transition } | null>(null);
 
   const renderActions = useCallback(
@@ -98,6 +142,7 @@ export function EventTree({
           onOpenDialog={setDialog}
           transitions={transitionsFor(node)}
           onTransition={(t) => (t.commentRequired ? setCommentFor({ node, transition: t }) : runTransition(node, t))}
+          onDelete={setDeleting}
         />
       );
     },
@@ -206,6 +251,7 @@ export function EventTree({
           }}
         />
       ) : null}
+      <DeleteNodeDialog node={deleting} onCancel={() => setDeleting(null)} onConfirm={confirmDelete} />
       {dialog ? (
         <NodeFormDialog
           key={dialog.kind === "create" ? `create-${dialog.parent.id}-${dialog.type}` : `${dialog.kind}-${dialog.node.id}`}

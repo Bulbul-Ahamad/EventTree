@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, MoreVertical, Pencil, Plus, UserRoundCog } from "lucide-react";
+import { Check, MoreVertical, Pencil, Plus, Trash2, UserRoundCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,15 +9,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { canCreateChild, canEditNode, canReassignNode, type EventContext, type NodeContext } from "@/lib/permissions";
+import {
+  canCreateChild,
+  canDeleteNode,
+  canEditNode,
+  canReassignNode,
+  type EventContext,
+  type NodeContext,
+} from "@/lib/permissions";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { Transition } from "@/lib/status";
 import type { TreeNode } from "@/lib/tree";
 import type { NodeDialogTarget } from "./node-form-dialog";
 
 // Row ⋮ menu (02_AppFlow S11). Items appear only when the permission mirror
-// allows them; the database still has the final say. Delete and status
-// actions arrive in 3.10 and 3.11.
+// allows them; the database still has the final say.
 type Props = {
   node: TreeNode;
   ctx: EventContext;
@@ -26,14 +32,16 @@ type Props = {
   // Status changes the viewer may make on this task right now (lib/status.ts).
   transitions: Transition[];
   onTransition: (t: Transition) => void;
+  onDelete: (node: TreeNode) => void;
 };
 
-export function NodeActions({ node, ctx, nodeCtx, onOpenDialog, transitions, onTransition }: Props) {
+export function NodeActions({ node, ctx, nodeCtx, onOpenDialog, transitions, onTransition, onDelete }: Props) {
   const canAdd = canCreateChild(ctx, nodeCtx);
   const canEdit = node.type !== "event" && canEditNode(ctx, nodeCtx);
   const canReassign = canReassignNode(ctx, nodeCtx);
   const verify = transitions.find((t) => t.to === "verified");
-  const hasMenu = canAdd || canEdit || canReassign || transitions.length > 0;
+  const canDelete = node.type !== "event" && canDeleteNode(ctx, nodeCtx);
+  const hasMenu = canAdd || canEdit || canReassign || canDelete || transitions.length > 0;
   if (!hasMenu) return null;
 
   return (
@@ -57,7 +65,7 @@ export function NodeActions({ node, ctx, nodeCtx, onOpenDialog, transitions, onT
             {t.label}
           </DropdownMenuItem>
         ))}
-        {transitions.length > 0 && (canAdd || canEdit || canReassign) ? <DropdownMenuSeparator /> : null}
+        {transitions.length > 0 && (canAdd || canEdit || canReassign || canDelete) ? <DropdownMenuSeparator /> : null}
         {canAdd ? (
           <>
             <DropdownMenuItem onSelect={() => onOpenDialog({ kind: "create", parent: node, type: "segment" })}>
@@ -68,7 +76,7 @@ export function NodeActions({ node, ctx, nodeCtx, onOpenDialog, transitions, onT
             </DropdownMenuItem>
           </>
         ) : null}
-        {canAdd && (canEdit || canReassign) ? <DropdownMenuSeparator /> : null}
+        {canAdd && (canEdit || canReassign || canDelete) ? <DropdownMenuSeparator /> : null}
         {canEdit ? (
           <DropdownMenuItem onSelect={() => onOpenDialog({ kind: "edit", node })}>
             <Pencil aria-hidden /> Edit
@@ -78,6 +86,14 @@ export function NodeActions({ node, ctx, nodeCtx, onOpenDialog, transitions, onT
           <DropdownMenuItem onSelect={() => onOpenDialog({ kind: "reassign", node })}>
             <UserRoundCog aria-hidden /> Reassign
           </DropdownMenuItem>
+        ) : null}
+        {canDelete ? (
+          <>
+            {canEdit || canReassign ? <DropdownMenuSeparator /> : null}
+            <DropdownMenuItem destructive onSelect={() => onDelete(node)}>
+              <Trash2 aria-hidden /> Delete
+            </DropdownMenuItem>
+          </>
         ) : null}
       </DropdownMenuContent>
     </DropdownMenu>

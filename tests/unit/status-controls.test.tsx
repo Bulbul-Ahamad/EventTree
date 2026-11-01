@@ -18,7 +18,7 @@ vi.mock("@/features/updates/actions", () => ({
   addComment: vi.fn(),
   addProofLink: vi.fn(),
 }));
-vi.mock("@/features/nodes/actions", () => ({ createNode: vi.fn(), updateNode: vi.fn(), reassignNode: vi.fn() }));
+vi.mock("@/features/nodes/actions", () => ({ createNode: vi.fn(), updateNode: vi.fn(), reassignNode: vi.fn(), deleteNode: vi.fn() }));
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock("@/lib/toast", () => ({ notify: toast }));
 
