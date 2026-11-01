@@ -20,7 +20,7 @@ test("a logged-out visitor is sent to the login page and back after logging in",
 });
 
 test("a user created through the API starts logged in and sees the dashboard", async ({ context, page, baseURL }) => {
-  await loginAs(context, baseURL ?? "http://localhost:3000", world.people.owner);
+  await loginAs(context, baseURL ?? "http://localhost:3000", world.who("owner"));
   await page.goto("/dashboard");
   await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /My events/ })).toBeVisible();

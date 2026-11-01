@@ -34,8 +34,8 @@ test.afterAll(async () => {
 test("Mode B: the assignee cannot submit and the head ticks tasks directly", async ({ browser, baseURL }, testInfo) => {
   const base = baseURL ?? "http://localhost:3000";
   const eventUrl = `/o/${slug}/events/${eventId}`;
-  const w = await pageFor(browser, testInfo, base, world.people.worker);
-  const h = await pageFor(browser, testInfo, base, world.people.head);
+  const w = await pageFor(browser, testInfo, base, world.who("worker"));
+  const h = await pageFor(browser, testInfo, base, world.who("head"));
 
   // The worker can start a task, but there is no Submit and no Verify, and no tick button.
   await w.page.goto(eventUrl);

@@ -36,12 +36,21 @@ export class World {
     return person;
   }
 
+  // The person created under this key (fails loudly instead of returning undefined).
+  who(key: string): Person {
+    const person = this.people[key];
+    if (!person) throw new Error(`no person "${key}" in this world`);
+    return person;
+  }
+
   // Organization with the given members (first one is the admin).
   async org(name: string, members: Person[]): Promise<{ id: string; slug: string; name: string }> {
+    const admin0 = members[0];
+    if (!admin0) throw new Error("an organization needs at least one member");
     const slug = `e2e-${this.runId}-${randomBytes(2).toString("hex")}`;
     const created = await admin
       .from("organizations")
-      .insert({ name, slug, kind: "club", created_by: members[0].id })
+      .insert({ name, slug, kind: "club", created_by: admin0.id })
       .select("id")
       .single();
     if (created.error) throw new Error(`create org: ${created.error.message}`);

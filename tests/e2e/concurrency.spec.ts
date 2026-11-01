@@ -39,8 +39,8 @@ test("the second person to act on the same task gets the stale-state message and
   const eventUrl = `/o/${slug}/events/${eventId}`;
   const tick = (name: string) => ({ name: `Mark ${name} verified` });
 
-  const head = await pageFor(browser, testInfo, base, world.people.head);
-  const owner = await pageFor(browser, testInfo, base, world.people.owner);
+  const head = await pageFor(browser, testInfo, base, world.who("head"));
+  const owner = await pageFor(browser, testInfo, base, world.who("owner"));
   await head.page.goto(eventUrl);
   await owner.page.goto(eventUrl);
   // Both screens show the task as submitted, with the tick available.

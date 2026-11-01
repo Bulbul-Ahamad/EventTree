@@ -63,8 +63,8 @@ async function expectStatus(page: Page, status: RegExp) {
 test("send back and reopen need a comment and are kept in the history", async ({ browser, baseURL }, testInfo) => {
   const base = baseURL ?? "http://localhost:3000";
   const eventUrl = `/o/${slug}/events/${eventId}`;
-  const w = await pageFor(browser, testInfo, base, world.people.worker);
-  const h = await pageFor(browser, testInfo, base, world.people.head);
+  const w = await pageFor(browser, testInfo, base, world.who("worker"));
+  const h = await pageFor(browser, testInfo, base, world.who("head"));
 
   // The worker starts and submits the task.
   await w.page.goto(eventUrl);

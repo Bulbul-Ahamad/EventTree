@@ -25,7 +25,7 @@ test.beforeAll(async () => {
   const worker = await world.person("worker", "Wren Worker");
   await world.person("plain", "Pia Plain");
   const xena = await world.person("xena", "Xena Elsewhere");
-  const org = await world.org("Rules Club", [orgAdmin, owner, head1, head2, worker, world.people.plain]);
+  const org = await world.org("Rules Club", [orgAdmin, owner, head1, head2, worker, world.who("plain")]);
   await world.org("Other Club", [xena]);
   slug = org.slug;
   eventId = await world.activeEvent({
@@ -50,7 +50,7 @@ const anyTick = (page: Page) => page.getByRole("button", { name: /^Mark .* verif
 
 test.describe("what the screen offers", () => {
   test("the assignee of a submitted task cannot verify or send it back", async ({ browser, baseURL }, testInfo) => {
-    const w = await pageFor(browser, testInfo, baseURL ?? "http://localhost:3000", world.people.worker);
+    const w = await pageFor(browser, testInfo, baseURL ?? "http://localhost:3000", world.who("worker"));
     await w.page.goto(eventUrl());
     await expect(w.page.getByRole("treeitem", { name: new RegExp(T1) })).toBeVisible();
     await expect(anyTick(w.page)).toHaveCount(0);
@@ -60,7 +60,7 @@ test.describe("what the screen offers", () => {
   });
 
   test("a head cannot touch the sibling segment", async ({ browser, baseURL }, testInfo) => {
-    const h = await pageFor(browser, testInfo, baseURL ?? "http://localhost:3000", world.people.head2);
+    const h = await pageFor(browser, testInfo, baseURL ?? "http://localhost:3000", world.who("head2"));
     await h.page.goto(eventUrl());
     await expect(h.page.getByRole("treeitem", { name: new RegExp(T1) })).toBeVisible(); // visible (BR-03) ...
     await expect(h.page.getByRole("button", { name: `Actions for ${S1}` })).toHaveCount(0); // ... but read-only
@@ -71,7 +71,7 @@ test.describe("what the screen offers", () => {
   });
 
   test("an organization admin who is not assigned can only look", async ({ browser, baseURL }, testInfo) => {
-    const a = await pageFor(browser, testInfo, baseURL ?? "http://localhost:3000", world.people.admin);
+    const a = await pageFor(browser, testInfo, baseURL ?? "http://localhost:3000", world.who("admin"));
     await a.page.goto(eventUrl());
     await expect(a.page.getByRole("heading", { level: 1, name: EVENT })).toBeVisible();
     await expect(a.page.getByRole("treeitem", { name: new RegExp(T1) })).toBeVisible();
@@ -83,7 +83,7 @@ test.describe("what the screen offers", () => {
   });
 
   test("a member who is not part of the event, and a user of another organization, get a 404", async ({ browser, baseURL }, testInfo) => {
-    for (const who of [world.people.plain, world.people.xena]) {
+    for (const who of [world.who("plain"), world.who("xena")]) {
       const p = await pageFor(browser, testInfo, baseURL ?? "http://localhost:3000", who);
       await p.page.goto(eventUrl());
       await expect(p.page.getByText("We couldn't find that page.")).toBeVisible();
@@ -95,7 +95,7 @@ test.describe("what the screen offers", () => {
 
 test.describe("what the database says to direct API calls", () => {
   test("the assignee cannot verify, edit or comment around the UI", async () => {
-    const api = await apiAs(world.people.worker);
+    const api = await apiAs(world.who("worker"));
     const verify = await api.rpc("transition_task_status", { p_node: t1, p_from: "submitted", p_to: "verified", p_comment: null });
     expect(verify.error, "verify by the assignee").not.toBeNull();
     const direct = await api.from("nodes").update({ status: "verified", title: "hacked" }).eq("id", t1).select();
@@ -105,7 +105,7 @@ test.describe("what the database says to direct API calls", () => {
   });
 
   test("a head cannot create or verify anything in the sibling segment", async () => {
-    const api = await apiAs(world.people.head2);
+    const api = await apiAs(world.who("head2"));
     const create = await api.rpc("create_node", {
       p_parent: s1, p_type: "task", p_title: "sneaky", p_description: null, p_assignee: null, p_due_at: null, p_priority: "medium", p_weight: 1,
     });
@@ -115,7 +115,7 @@ test.describe("what the database says to direct API calls", () => {
   });
 
   test("an unassigned organization admin cannot write", async () => {
-    const api = await apiAs(world.people.admin);
+    const api = await apiAs(world.who("admin"));
     expect((await api.from("nodes").select("id").eq("id", t1)).data).toHaveLength(1); // may look
     const verify = await api.rpc("transition_task_status", { p_node: t1, p_from: "submitted", p_to: "verified", p_comment: null });
     expect(verify.error, "verify by an org admin").not.toBeNull();
@@ -128,7 +128,7 @@ test.describe("what the database says to direct API calls", () => {
   });
 
   test("a non-participant and another organization's user see nothing and change nothing", async () => {
-    for (const who of [world.people.plain, world.people.xena]) {
+    for (const who of [world.who("plain"), world.who("xena")]) {
       const api = await apiAs(who);
       expect((await api.from("nodes").select("id").eq("id", t1)).data ?? []).toHaveLength(0);
       expect((await api.from("nodes").select("id").eq("id", eventId)).data ?? []).toHaveLength(0);

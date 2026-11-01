@@ -35,7 +35,9 @@ async function pickAssignee(page: Page, name: string) {
 
 test("Mode A from an empty event to a completed, read-only one", async ({ browser, baseURL }, testInfo) => {
   const base = baseURL ?? "http://localhost:3000";
-  const { owner, head, worker } = world.people;
+  const owner = world.who("owner");
+  const head = world.who("head");
+  const worker = world.who("worker");
   const slug = org.slug;
 
   const o = await pageFor(browser, testInfo, base, owner);
