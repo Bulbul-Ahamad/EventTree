@@ -126,6 +126,7 @@ const orgMembers: OrgMember[] = [
 beforeEach(() => {
   vi.clearAllMocks();
   nav.search = "";
+  vi.spyOn(console, "error").mockImplementation(() => {}); // the error boundary logs its digest
 });
 
 describe("axe: event page", () => {
@@ -299,7 +300,8 @@ describe("keyboard and focus", () => {
     expect(dialog.contains(document.activeElement)).toBe(true);
     fireEvent.keyDown(dialog, { key: "Escape" });
     await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    expect(document.activeElement).toBe(trigger);
+    // Radix hands focus back one tick after the dialog is gone.
+    await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 
   it("the tree is one tab stop: only one row is tabbable", () => {

@@ -9,6 +9,8 @@ import axe from "axe-core";
 //    these tests render single components. The landmark and heading structure of the
 //    real pages is tested separately.
 export async function axeViolations(root: Element = document.body): Promise<string[]> {
+  // jsdom has no canvas; axe probes for one and jsdom prints a warning each time.
+  HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext;
   const results = await axe.run(root, {
     rules: {
       "color-contrast": { enabled: false },
