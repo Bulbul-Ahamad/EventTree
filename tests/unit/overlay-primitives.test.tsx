@@ -260,3 +260,33 @@ describe("Combobox", () => {
     expect(trigger).toHaveAttribute("id", "who");
   });
 });
+
+describe("returnTargetFor (where focus goes when a dialog closes)", () => {
+  it("is the focused element, or the pressed one when nothing has focus", () => {
+    const a = document.createElement("button");
+    const b = document.createElement("button");
+    document.body.append(a, b);
+    expect(returnTargetFor(a, b)).toBe(a);
+    expect(returnTargetFor(document.body, b)).toBe(b);
+    expect(returnTargetFor(null, null)).toBeNull();
+    a.remove();
+    b.remove();
+  });
+
+  it("for a menu item it is the button that opened the menu", () => {
+    const trigger = document.createElement("button");
+    trigger.id = "menu-trigger-1";
+    const menu = document.createElement("div");
+    menu.setAttribute("role", "menu");
+    menu.setAttribute("aria-labelledby", "menu-trigger-1");
+    const item = document.createElement("div");
+    item.setAttribute("role", "menuitem");
+    menu.append(item);
+    document.body.append(trigger, menu);
+    expect(returnTargetFor(item, null)).toBe(trigger);
+    // still works after the menu closed and the item left the page
+    menu.remove();
+    expect(returnTargetFor(item, null)).toBe(trigger);
+    trigger.remove();
+  });
+});

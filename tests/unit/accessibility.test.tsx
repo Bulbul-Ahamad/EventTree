@@ -304,6 +304,18 @@ describe("keyboard and focus", () => {
     await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 
+  it("a dialog opened from a row menu gives focus back to that row's menu button", async () => {
+    eventTree();
+    const menuButton = screen.getByRole("button", { name: "Actions for Venue" });
+    menuButton.focus();
+    fireEvent.keyDown(menuButton, { key: "Enter" });
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Add task/ }));
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await vi.waitFor(() => expect(document.activeElement).toBe(menuButton));
+  });
+
   it("the tree is one tab stop: only one row is tabbable", () => {
     eventTree();
     const rows = screen.getAllByRole("treeitem");
