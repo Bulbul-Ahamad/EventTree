@@ -82,9 +82,18 @@ test("Mode A from an empty event to a completed, read-only one", async ({ browse
 
   // The head verifies it with the tick button, and progress reaches 100%.
   await h.page.reload();
+  // Wait for the server to answer before reloading, or the reload cancels the request.
+  const verified = h.page.waitForResponse((r) => r.request().method() === "POST");
   await h.page.getByRole("button", { name: `Mark ${TASK} verified` }).click();
-  await h.page.reload();
-  await expect(h.page.getByRole("progressbar", { name: `${EVENT} overall progress` })).toHaveAttribute("aria-valuenow", "100");
+  await verified;
+  await expect(async () => {
+    await h.page.reload();
+    await expect(h.page.getByRole("progressbar", { name: `${EVENT} overall progress` })).toHaveAttribute(
+      "aria-valuenow",
+      "100",
+      { timeout: 2000 },
+    );
+  }).toPass({ timeout: 15_000 });
 
   // The owner completes the event; from then on it is read-only.
   await o.page.reload();
