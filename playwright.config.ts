@@ -8,6 +8,8 @@ const baseURL = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: "tests/e2e",
   testMatch: "**/*.spec.ts",
+  // Whole stories with several users and a dev server that compiles pages on first visit.
+  timeout: 90_000,
   // Specs share one local database, so they run one after another.
   workers: 1,
   fullyParallel: false,
