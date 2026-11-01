@@ -39,16 +39,25 @@ export async function createEvent(input: unknown): Promise<ActionResult<{ eventI
 }
 
 // Title and description live on the event node, the rest on event_settings:
-// two writes (no single RPC exists). Settings are written first because they
-// are the ones most likely to be rejected by a CHECK (end before start).
+// two writes (no single RPC exists). Settings are written first because only
+// the owner may write them (RLS), so nobody else reaches the node update. A
+// completed or archived event is refused up front: the node guard would reject
+// the title anyway, but only after the settings were already saved.
 export async function updateEventSettings(input: unknown): Promise<ActionResult> {
   const parsed = updateEventSettingsSchema.safeParse(input);
   if (!parsed.success) return failValidation(parsed.error);
   const v = parsed.data;
 
   const supabase = await createServerClient();
-  const { data: visible } = await supabase.from("nodes").select("id").eq("id", v.eventId).eq("type", "event").maybeSingle();
+  const { data: visible } = await supabase
+    .from("nodes")
+    .select("id, event_settings!inner(event_status)")
+    .eq("id", v.eventId)
+    .eq("type", "event")
+    .maybeSingle();
   if (!visible) return fail("E_NOT_FOUND");
+  const status = visible.event_settings.event_status;
+  if (status === "completed" || status === "archived") return fail("E_EVENT_READONLY");
 
   const settings = await supabase
     .from("event_settings")
