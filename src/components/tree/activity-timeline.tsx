@@ -34,7 +34,7 @@ function What({ item }: { item: ActivityItem }) {
           <Link2 aria-hidden className="mt-0.5 size-4 shrink-0 text-foreground-muted" />
           Added a proof link:
           {href ? (
-            <a href={href} target="_blank" rel="noopener noreferrer" className="min-w-0 break-all text-primary underline">
+            <a href={href} target="_blank" rel="noopener noreferrer nofollow" className="min-w-0 break-all text-primary underline">
               {item.linkUrl}
             </a>
           ) : (

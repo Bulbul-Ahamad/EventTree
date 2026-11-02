@@ -166,7 +166,7 @@ describe("Activity timeline", () => {
     expect(entries[1]).toHaveTextContent("Sumon");
     const link = within(entries[1]!).getByRole("link", { name: "https://example.com/proof" });
     expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer nofollow");
     expect(entries[1]).toHaveTextContent("Signed letter");
     expect(entries[2]?.querySelector("i")).toBeNull();
     expect(entries[2]).toHaveTextContent("Quote <i>received</i>");
