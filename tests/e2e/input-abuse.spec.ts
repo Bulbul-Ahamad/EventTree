@@ -97,7 +97,7 @@ test("a hostile `next` after login never leaves the site", async ({ browser, bas
     const page = await context.newPage();
     await page.goto(`/login?next=${encodeURIComponent(next)}`);
     await page.getByLabel("Email").fill(owner.email);
-    await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
+    await page.locator('input[type="password"]').fill(PASSWORD);
     await page.getByRole("button", { name: "Log in" }).click();
     await page.waitForURL((url) => !url.pathname.startsWith("/login"));
     expect(new URL(page.url()).origin, `next=${next}`).toBe(new URL(base).origin);
