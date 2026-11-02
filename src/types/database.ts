@@ -199,14 +199,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "avatar_url": string | null,"created_at": string,"email": string,"full_name": string,"id": string,"updated_at": string
+                    "avatar_url": string | null,"created_at": string,"email": string,"full_name": string,"id": string,"phone": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_url"?: string | null,"created_at"?: string,"email": string,"full_name": string,"id": string,"updated_at"?: string
+                    "avatar_url"?: string | null,"created_at"?: string,"email": string,"full_name": string,"id": string,"phone"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "avatar_url"?: string | null,"created_at"?: string,"email"?: string,"full_name"?: string,"id"?: string,"updated_at"?: string
+                    "avatar_url"?: string | null,"created_at"?: string,"email"?: string,"full_name"?: string,"id"?: string,"phone"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
