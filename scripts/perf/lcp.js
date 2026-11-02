@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- one-off CommonJS script */
 // Plan 4.10: what Lighthouse says about the Largest Contentful Paint, from the file perf:lighthouse wrote.
 // Run:  node scripts/perf/lcp.js /tmp/lh-tree.json
-const r = require(process.argv[2] || "/tmp/lh-tree.json");
+const { readFileSync } = require("node:fs");
+const r = JSON.parse(readFileSync(process.argv[2] || "/tmp/lh-tree.json", "utf8"));
 const out = (s) => process.stdout.write(`${s}\n`);
 const find = (o, depth = 0) => {
   if (!o || typeof o !== "object" || depth > 8) return [];
