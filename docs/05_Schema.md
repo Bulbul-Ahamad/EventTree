@@ -52,7 +52,8 @@ Functions that touch `ltree` use `set search_path = public, extensions`. Policie
 | `id` | uuid | **PK**, FK → `auth.users(id)` ON DELETE CASCADE |
 | `full_name` | text | NOT NULL, CHECK `char_length BETWEEN 1 AND 100` |
 | `email` | text | NOT NULL |
-| `avatar_url` | text | NULL |
+| `avatar_url` | text | NULL. Holds the storage object path `{id}/avatar` (with a `?v=` version suffix), not a public URL (US-18) |
+| `phone` | text | NULL in the database (older rows have none; the app requires it, US-18). CHECK `phone ~ '^\+?[0-9]{8,15}$'`, stored normalized |
 | `created_at` | timestamptz | NOT NULL DEFAULT now() |
 | `updated_at` | timestamptz | NOT NULL DEFAULT now() |
 
@@ -348,7 +349,7 @@ revoke all on all tables in schema public from authenticated;
 grant select on public.profiles, public.organizations, public.org_members,
                 public.nodes, public.event_settings, public.event_members, public.node_updates
   to authenticated;
-grant update (full_name, avatar_url)                         on public.profiles       to authenticated;
+grant update (full_name, avatar_url, phone)                  on public.profiles       to authenticated;
 grant update (name, kind)                                    on public.organizations  to authenticated;
 grant insert (parent_id, type, title, description, assignee_id, priority, due_at, weight, position)
                                                              on public.nodes          to authenticated;
@@ -469,6 +470,12 @@ end $$;
 7. **Logout**: `signOut()` then redirect `/login`.
 8. **Auth settings (Supabase dashboard / `config.toml`)**: Site URL = production URL; additional redirect URLs = `http://localhost:3000/**` and production `/**`; JWT expiry 3600 s; refresh token rotation ON; min password length 10; email confirmations ON; signup enabled.
 
+## 7a. Storage: `avatars` bucket (US-18)
+
+- Private bucket `avatars`, `file_size_limit` 2 MB, `allowed_mime_types` `image/jpeg, image/png, image/webp`.
+- Policies on `storage.objects` for `bucket_id = 'avatars'`: **select** for `authenticated`; **insert / update / delete** only when `(storage.foldername(name))[1] = (select auth.uid())::text`. `anon` has nothing.
+- `profiles.phone` is readable by exactly the people who can already read the profile row (self or `shares_org_with`), so no new read policy is needed.
+
 ## 8. Data Lifecycle & Integrity Notes
 
 - Deleting a node cascades to its subtree and its `node_updates` (history is lost; accepted in MVP).
@@ -489,3 +496,4 @@ end $$;
 8. Org membership guards: last admin, owns events, unassign on removal.
 9. `node_updates` immutability and forced `user_id`.
 10. Client cannot write `status`, `progress_cached`, `verified_*` directly.
+11. (US-18) `profiles.phone` check constraint accepts valid numbers and rejects bad ones; a user in another organization cannot read my phone; `avatars` bucket: a user can write only in their own folder, cannot overwrite another user's object, `anon` cannot read, wrong type or size is rejected.

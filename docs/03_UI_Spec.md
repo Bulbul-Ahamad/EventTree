@@ -198,7 +198,13 @@ Focus ring (global): `outline: 2px solid var(--ring); outline-offset: 2px`. Neve
 - bg `--surface-muted`, radius matches target element, shimmer overlay. Tree skeleton = 8 rows with varying indent.
 
 ### 8.12 Avatar
-- Image or initials (first letters of first two words; Bangla-safe using `Array.from`). Bg derived from user id into one of 6 fixed `--primary-soft`-family tints; initials in `--primary`.
+- Image (the user's uploaded profile picture, `object-cover`, no dark-mode filter) or initials (first letters of first two words; Bangla-safe using `Array.from`). The image falls back to initials if it fails to load. Bg derived from user id into one of 6 fixed `--primary-soft`-family tints; initials in `--primary`.
+
+### 8.12a Avatar upload (profile page)
+- Avatar 80 px with **[Upload photo]** (secondary button) and **[Remove photo]** (ghost button, only when a picture exists). Hidden `input type=file accept="image/jpeg,image/png,image/webp"`. While uploading: button disabled with spinner label "Uploading…". Errors appear under the avatar in `--danger` `text-sm` with the message from `02_AppFlow §7`.
+
+### 8.12b Phone field
+- Standard text field, `type="tel"`, `inputmode="tel"`, `autocomplete="tel"`, label "Phone number", helper text "Like 01712345678 or +8801712345678".
 
 ### 8.13 Tabs / Segmented control
 - Height 36, selected: bg `--surface` + `--shadow-sm` (light) / bg `--primary-soft` (dark); container bg `--surface-muted`.

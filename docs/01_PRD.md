@@ -48,7 +48,7 @@ Context notes:
 
 ## 4. MVP Scope Summary
 
-Web application (responsive, PWA-ready, mobile-first) with: email/Google auth, organizations, event tree builder, role-based task workflow with verification, progress roll-up, "My Tasks" dashboard, activity history, light/dark theme.
+Web application (responsive, PWA-ready, mobile-first) with: email/Google auth, profile picture and phone number, organizations, event tree builder, role-based task workflow with verification, progress roll-up, "My Tasks" dashboard, activity history, light/dark theme.
 
 ## 5. MVP User Stories
 
@@ -129,6 +129,13 @@ Format: **ID — As a [persona], I want …, so that …** + acceptance criteria
 
 ### 5.4 Experience
 
+**US-18 — Profile picture and phone number.** As any user, I want a profile picture and a phone number on my profile, so that teammates in my organization can recognize and reach me.
+- AC1: Phone number is **required**. Signup asks for it. A signed-in user without one (older account, Google signup) is sent to `/complete-profile` and cannot use the rest of the app until they save a valid number.
+- AC2: Phone must be Bangladeshi (`01XXXXXXXXX` or `+8801XXXXXXXXX`) or international (`+` then 8 to 15 digits). It is stored normalized (digits with a leading `+`).
+- AC3: Members of an organization I belong to can see my phone number (members list). People who share no organization with me cannot.
+- AC4: I can upload, replace and remove a profile picture (JPG, PNG or WebP, up to 2 MB). Only I can change my picture. Without one, the initials avatar is shown.
+- AC5: Only signed-in users can fetch pictures; a wrong file type or size is rejected with a clear message.
+
 **US-17 — Theme.** As any user, I want light/dark/system theme, so that I can use the app comfortably.
 - AC1: Default = system. Choice persists across sessions.
 
@@ -188,7 +195,7 @@ The coding agent must **not** build, scaffold, stub or "prepare for" any of the 
 1. Native mobile app (iOS/Android, React Native, Flutter). PWA manifest is also deferred.
 2. Email, SMS or push notifications (only Supabase auth emails).
 3. Real-time collaboration / live updates (no Supabase Realtime, no websockets).
-4. File uploads or storage buckets (proof is **links only**).
+4. File uploads or storage buckets (proof is **links only**). **Exception (approved 2026-11-03):** one private `avatars` bucket for profile pictures only (US-18); nothing else may be uploaded.
 5. Task dependencies, subtasks beyond the tree, recurring tasks, templates, event cloning.
 6. Kanban, Gantt, calendar views. (Only tree + dashboard lists.)
 7. Budgeting, payments, ticketing, attendee/participant registration, QR check-in, certificates.

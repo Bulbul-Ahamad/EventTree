@@ -40,13 +40,15 @@
 | `/o/[orgSlug]/members` | S15 | Org member (manage = admin) | |
 | `/o/[orgSlug]/settings` | S16 | Org admin | |
 | `/settings/profile` | S17 | Authed | |
+| `/complete-profile` | S19 | Authed, phone missing | Asks for the phone number (US-18) |
 | `*` | S18 | Any | `not-found.tsx`, `error.tsx`, `global-error.tsx` |
 
 ### Guard rules (implemented in `middleware.ts` + server layouts)
 
 1. No session + route not public → redirect `/login?next=<original path+query>`.
 2. Session + route in {`/login`,`/signup`,`/forgot-password`} → redirect `/dashboard`.
-3. Session + 0 org memberships + route ≠ `/onboarding`, `/settings/profile`, `/auth/*` → redirect `/onboarding`.
+3. Session + 0 org memberships + route ≠ `/onboarding`, `/settings/profile`, `/complete-profile`, `/auth/*` → redirect `/onboarding`.
+3a. Session + profile has no phone + route ≠ `/complete-profile`, `/auth/*` → redirect `/complete-profile` (checked before rule 3). A profile that has a phone and opens `/complete-profile` → `/dashboard`.
 4. Session + ≥1 org + `/onboarding` → allowed (user may join another org) but shows "Back to dashboard".
 5. `/o/[orgSlug]/*` where user is not a member → 404.
 6. `/o/[orgSlug]/events/[eventId]` where user cannot view event (RLS returns no row) → 404.
@@ -81,9 +83,9 @@ Legend: **[B]** button/control → action → result. **Empty**, **Loading**, **
 - Authed: server redirect to `/dashboard`.
 
 ### S02 — Sign up `/signup`
-- Fields: Full name, Email, Password (show/hide toggle), **[Continue with Google]**.
+- Fields: Full name, Email, Phone number (required, US-18), Password (show/hide toggle), **[Continue with Google]** (Google users give the phone on `/complete-profile` afterwards).
 - **[Create account]** → validate (Zod) → `supabase.auth.signUp` → success → `/signup/check-email?email=…`.
-- Errors: field validation inline (name 1–100, email format, password ≥ 10 chars with at least 1 letter and 1 digit); `E_EMAIL_TAKEN` → "An account with this email may already exist. Try logging in." (generic wording; do not confirm existence); `E_RATE_LIMIT` → "Too many attempts. Try again in a few minutes."
+- Errors: field validation inline (name 1–100, email format, phone format per US-18 AC2 → "Enter a valid phone number, like 01712345678 or +8801712345678.", password ≥ 10 chars with at least 1 letter and 1 digit); `E_EMAIL_TAKEN` → "An account with this email may already exist. Try logging in." (generic wording; do not confirm existence); `E_RATE_LIMIT` → "Too many attempts. Try again in a few minutes."
 - Link: "Already have an account? Log in".
 
 ### S03 — Check email `/signup/check-email`
@@ -163,7 +165,7 @@ Sections (in order):
 - Danger zone: **[Delete event]** (enabled only in `draft`/`archived`; confirm by typing the event title) → redirect `/o/{slug}/events`.
 
 ### S15 — Members `/o/[orgSlug]/members`
-- Table: avatar, name, email, role, joined date. Admin controls: role select (Admin/Member), **[Remove]**.
+- Table: avatar, name, email, phone, role, joined date. Admin controls: role select (Admin/Member), **[Remove]**.
 - Admin panel: join code (masked, **[Copy]**, **[Rotate]** with confirm).
 - Non-admin: read-only list + **[Leave organization]**.
 - Errors: `E_LAST_ADMIN`, `E_OWNS_EVENTS` → "Transfer or delete this user's events first (events they own: N)."
@@ -172,7 +174,12 @@ Sections (in order):
 - Edit name and type. (Slug is immutable in MVP.)
 
 ### S17 — Profile `/settings/profile`
-- Edit full name; show email (read-only); theme preference radio (System/Light/Dark); **[Log out]**.
+- Edit full name; edit phone number (required); profile picture: **[Upload photo]** (JPG/PNG/WebP, ≤ 2 MB), **[Remove photo]** when one exists; show email (read-only); theme preference radio (System/Light/Dark); **[Log out]**.
+- Errors: `E_FILE_TYPE`, `E_FILE_TOO_LARGE`, phone → inline message as in S02.
+
+### S19 — Complete profile `/complete-profile`
+- Shown once to a signed-in user whose profile has no phone number (older accounts, Google signup).
+- Fields: Phone number (required). **[Save and continue]** → saves, then `?next` (default `/dashboard`). A **[Log out]** link is the only other action.
 
 ### S18 — Error pages
 - 404: "We couldn't find that page." + **[Go to dashboard]**.
@@ -244,6 +251,8 @@ Database/RPC errors are raised as `raise exception 'E_CODE'`; the Server Action 
 | `E_INVALID_CREDENTIALS` | "Incorrect email or password." |
 | `E_EMAIL_NOT_CONFIRMED` | "Please confirm your email first." |
 | `E_VALIDATION` | Field-level messages from Zod |
+| `E_FILE_TYPE` | "Use a JPG, PNG or WebP image." |
+| `E_FILE_TOO_LARGE` | "The image must be 2 MB or smaller." |
 | `E_RATE_LIMIT` | "Too many attempts. Try again in a few minutes." |
 | `E_NETWORK` | "Can't reach the server. Check your connection and retry." |
 | `E_UNKNOWN` | "Something went wrong. Please try again." |
