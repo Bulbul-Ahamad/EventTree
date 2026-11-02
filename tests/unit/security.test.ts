@@ -65,7 +65,9 @@ describe("SECURITY DEFINER functions in the migrations (§8 rule 2)", () => {
   });
 
   it("no function is granted to anon", () => {
-    expect(sql).not.toMatch(/grant execute on function[\s\S]*?to[^;]*\banon\b/i);
+    const grants = [...sql.matchAll(/grant execute on function([^;]*);/gi)].map((m) => m[1] ?? "");
+    expect(grants.length).toBeGreaterThan(5);
+    expect(grants.filter((g) => /\bto\b[^;]*\banon\b/i.test(g))).toEqual([]);
   });
 });
 
