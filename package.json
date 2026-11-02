@@ -17,7 +17,9 @@
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/types/database.ts",
     "seed": "tsx scripts/seed.ts",
-    "check": "pnpm lint && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "perf:seed": "tsx scripts/perf/seed.ts",
+    "perf:page": "tsx scripts/perf/tree-page.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^6.0.1",
