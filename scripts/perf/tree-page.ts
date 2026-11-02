@@ -46,11 +46,13 @@ async function main() {
   }
 
   const times: number[] = [];
+  let bytes = 0;
   for (let i = 0; i < 45; i++) {
     const t0 = performance.now();
     const res = await fetch(page, { headers: { cookie } });
     const body = await res.text();
     const ms = performance.now() - t0;
+    bytes = Buffer.byteLength(body);
     if (res.status !== 200 || !body.includes("Perf Event")) throw new Error(`unexpected response ${res.status}`);
     if (i >= 5) times.push(ms); // the first five warm up the server
   }
@@ -58,6 +60,7 @@ async function main() {
   const at = (q: number) => times[Math.min(times.length - 1, Math.floor(q * times.length))] ?? 0;
   process.stdout.write(`tree page, 1000 nodes, ${times.length} requests\n`);
   process.stdout.write(`min ${at(0).toFixed(0)} ms | median ${at(0.5).toFixed(0)} ms | p95 ${at(0.95).toFixed(0)} ms | max ${at(1).toFixed(0)} ms\n`);
+  process.stdout.write(`page HTML: ${(bytes / 1024).toFixed(0)} KB uncompressed\n`);
   process.stdout.write(`${at(0.95) <= 1000 ? "OK: within the 1.0 s budget" : "OVER the 1.0 s budget"}\n`);
 }
 
