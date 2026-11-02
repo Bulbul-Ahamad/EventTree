@@ -1,0 +1,144 @@
+# Plan 4.12 / 04_TRD §12: the five minimum jobs. Everything runs against a LOCAL Supabase started
+# inside the runner; production is never touched and no secrets are used.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Skip containers the tests do not need (faster start).
+  SUPABASE_EXCLUDE: studio,imgproxy,edge-runtime,logflare,vector
+
+jobs:
+  check:
+    name: check (lint, typecheck, unit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+
+  db:
+    name: db (pgTAP, generated types)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec supabase start -x "$SUPABASE_EXCLUDE"
+      - run: pnpm exec supabase db reset
+      - run: pnpm test:db
+      - name: generated types are up to date
+        run: |
+          pnpm db:types
+          git diff --exit-code src/types/database.ts
+
+  integration:
+    name: integration (against local Supabase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec supabase start -x "$SUPABASE_EXCLUDE"
+      - name: write .env.local from the local stack
+        run: |
+          pnpm exec supabase status -o env > "$RUNNER_TEMP/supabase.env"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(grep '^API_URL=' "$RUNNER_TEMP/supabase.env" | cut -d= -f2- | tr -d '"')"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(grep '^ANON_KEY=' "$RUNNER_TEMP/supabase.env" | cut -d= -f2- | tr -d '"')"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(grep '^SERVICE_ROLE_KEY=' "$RUNNER_TEMP/supabase.env" | cut -d= -f2- | tr -d '"')"
+            echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000"
+          } > .env.local
+      - run: pnpm test:int
+
+  e2e:
+    name: e2e (Playwright, desktop and mobile)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec supabase start -x "$SUPABASE_EXCLUDE"
+      - name: write .env.local from the local stack
+        run: |
+          pnpm exec supabase status -o env > "$RUNNER_TEMP/supabase.env"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(grep '^API_URL=' "$RUNNER_TEMP/supabase.env" | cut -d= -f2- | tr -d '"')"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(grep '^ANON_KEY=' "$RUNNER_TEMP/supabase.env" | cut -d= -f2- | tr -d '"')"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(grep '^SERVICE_ROLE_KEY=' "$RUNNER_TEMP/supabase.env" | cut -d= -f2- | tr -d '"')"
+            echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000"
+          } > .env.local
+      # playwright.config.ts starts `pnpm build && pnpm start` itself when CI is set.
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  security:
+    name: security (audit, forbidden strings)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: no high or critical advisories in production dependencies
+        run: pnpm audit --prod --audit-level high
+      - name: forbidden strings in src/
+        run: |
+          if grep -rnE 'service_role|SERVICE_ROLE|dangerouslySetInnerHTML' src/; then
+            echo "Found a forbidden string in src/ (04_TRD section 8)."
+            exit 1
+          fi
