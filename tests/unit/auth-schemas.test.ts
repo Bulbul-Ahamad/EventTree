@@ -51,7 +51,7 @@ describe("signUpSchema", () => {
   it("requires a phone number and stores it normalized (US-18)", () => {
     const r = signUpSchema.safeParse(valid);
     expect(r.success && r.data.phone).toBe("+8801712345678");
-    const { phone: _phone, ...without } = valid;
+    const without = { fullName: valid.fullName, email: valid.email, password: valid.password };
     expect(signUpSchema.safeParse(without).success).toBe(false);
     expect(signUpSchema.safeParse({ ...valid, phone: "  " }).success).toBe(false);
     expect(signUpSchema.safeParse({ ...valid, phone: "12345" }).success).toBe(false);
