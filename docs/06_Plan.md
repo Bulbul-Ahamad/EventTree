@@ -6,7 +6,7 @@
 
 ## Current Step
 
-**Next up: `4.09`**
+**Next up: `4.10`**
 (Agent: update this line after each completed step.)
 
 ## How to read a step
@@ -110,7 +110,7 @@
 - [x] **4.06** — Concurrency: two sessions transition the same task; loser sees `E_STALE_STATE` message and refreshed state. _Done when:_ deterministic test green.
 - [x] **4.07** — Structural edge cases: empty segment progress; weights; depth 6 limit; 1000-node limit; reassign removes visibility; delete subtree recalculates parents; last-admin; member who owns event can't be removed; completed event rejects writes; reopen works. _Done when:_ each case has a test.
 - [x] **4.08** — Adversarial RLS suite: with another user's JWT call PostgREST/RPC directly (select, insert with forged `org_id/event_id/status/created_by`, update protected columns, call RPCs on foreign ids). _Done when:_ all rejected/empty; results documented.
-- [ ] **4.09** — Input abuse tests: oversized text, Bangla/emoji text, `javascript:` proof links, open-redirect `next`, HTML in titles rendered as text. _Done when:_ all handled safely.
+- [x] **4.09** — Input abuse tests: oversized text, Bangla/emoji text, `javascript:` proof links, open-redirect `next`, HTML in titles rendered as text. _Done when:_ all handled safely.
 
 **Quality gates**
 - [ ] **4.10** — Performance: seed 1000-node event; `EXPLAIN ANALYZE get_event_tree` ≤ 100 ms; tree page p95 ≤ 1 s; Lighthouse budgets in `04_TRD §9`. _Done when:_ numbers logged; add indexes only if needed (new migration).
@@ -190,6 +190,7 @@
 | 2026-11-02 | 4.06 | Concurrency (`tests/e2e/concurrency.spec.ts`): head and owner both have the same submitted task open; head verifies; the owner's stale screen still offers the tick, using it shows "This task was just updated by someone else. We've refreshed it.", the screen refreshes to verified with no tick left, and the database row is unchanged by the loser. Deterministic (the two actions are sequential). Green on `desktop` and `mobile`. | 6a0831b | Passed on the first run. |
 | 2026-11-02 | 4.07 | Structural edge cases: all ten cases of the step (empty segment, weights, depth 6, 1000-node limit, reassign removes visibility, delete subtree recalculates parents, last admin, member who owns an event, completed event rejects writes, reopen) already had tests from Phases 1–3; `tests/EDGE_CASES.md` maps each case to its test file(s). `pnpm check`, `pnpm test:db`, `pnpm test:int` and `pnpm test:e2e` all green. | 8bebec2, fda5a60, 90865ee, 1417500 | `06_progress_rollup.test.sql` looked nodes up by title and failed when other rows with the same titles existed in the local DB; now looks up by id. E2E typing: `World.who(key)` replaces `world.people.x` (strict index access). Happy-path race fixed (worker requests awaited before the head looks). No new application tests were needed. |
 | 2026-11-02 | 4.08 | Adversarial RLS suite `tests/integration/rls-adversarial.test.ts` (attacks listed in `tests/RLS_ADVERSARIAL.md`): no login, user of another organization, member who is not in the event, and the assignee of a task call PostgREST and every RPC directly with forged `org_id`/`event_id`/`status`/`created_by`/`user_id`, protected-column updates, deletes, history edits and foreign ids. All refused or empty, and a before/after snapshot of the victim's data is identical. `pnpm check`, `test:db`, `test:int`, `test:e2e` green. | 901864e, 93123a0, b34d998, 70e2f43 | One real finding: any member could read `organizations.join_code` through the API. Fixed with migration `20261102000000_join_code_admin_only.sql` (column grant without `join_code`, admin-only RPC `get_join_code`), `getOrgBySlug` updated, types regenerated; approved by the user, see Decisions log. |
+| 2026-11-02 | 4.09 | Input abuse. Browser side `tests/e2e/input-abuse.spec.ts` (3 tests × 2 viewports): HTML and `<script>` titles, Bangla and emoji titles, and history comments render as plain text (no `img`, `b` or `script` elements, no `alert()`); an `https://` proof link opens in a new tab with `noopener` and no link ever has a `javascript:` href; the database refuses `javascript:`, `data:` and `ftp:` proof links (`node_updates_link_url_check`); logging in with `next` = `//evil.example`, `https://evil.example`, `/\evil.example` or `javascript:alert(1)` never leaves the site. Size limits, `javascript:` link schema and `sanitizeNext` were already covered by unit and integration tests (`schemas-events-nodes`, `schemas-updates-orgs`, `route-guards`, `updates`, `nodes`). `pnpm test:e2e`: 34 passed. | 3724a2c, 7c36b47, ec52b98 | First run: the test tried to insert a `javascript:` link through the service role and the database check refused it (defence in depth), so it became its own test. Second run: the password field was looked up by label, which also matched the "Show password" button; now by input type. No application change. |
 
 ## Decisions & Deviations Log
 
