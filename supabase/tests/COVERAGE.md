@@ -14,5 +14,6 @@ Run with `pnpm test:db`. Every item of the Phase 1 gate maps to at least one fil
 | 8 | Org guards: last admin, owns events, unassign on removal | `03_organizations`, `04_nodes`, `09_rpc_orgs` |
 | 9 | `node_updates` immutability and forced `user_id` | `05_event_tables`, `08_rls_policies`, `13_gap_coverage` |
 | 10 | Client cannot write status, progress_cached, verified_* | `08_rls_policies`, `13_gap_coverage` |
+| 11 | (US-18) Phone check constraint, signup trigger, phone visibility, `avatars` bucket policies and settings | `14_profile_phone_avatars` |
 
 Also covered: enums/extensions (`01`), profiles trigger (`02`), organization RPCs (`09`), event/node RPCs (`10`), read RPCs (`12`).
