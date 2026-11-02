@@ -1,3 +1,9 @@
 allowBuilds:
   esbuild: true
   unrs-resolver: true
+
+# 4.12: `pnpm audit --prod` flagged the postcss 8.4.31 that Next 15.5 pins for itself (two high
+# advisories, fixed in >=8.5.18). The app already uses postcss 8.5.32 directly, so Next's copy is
+# pointed at the same version. No new dependency. Drop this when a Next patch release does it.
+overrides:
+  "next>postcss": "8.5.32"
