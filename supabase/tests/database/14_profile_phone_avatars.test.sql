@@ -1,5 +1,5 @@
 begin;
-select plan(17);
+select plan(19);
 
 -- Three users: alice and bob share an organization, carol is in another one.
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -45,10 +45,9 @@ select is((select count(*) from public.profiles where id = '00000000-0000-0000-0
 select lives_ok(
   $$ update public.profiles set phone = '01912345678' where id = '00000000-0000-0000-0000-0000000000b1' $$,
   'a user can change their own phone');
-select is(
-  (with u as (update public.profiles set phone = '01999999999'
-               where id = '00000000-0000-0000-0000-0000000000b2' returning 1) select count(*) from u),
-  0::bigint, 'a user cannot change someone else''s phone');
+select lives_ok(
+  $$ update public.profiles set phone = '01999999999' where id = '00000000-0000-0000-0000-0000000000b2' $$,
+  'updating someone else''s phone is silently a no-op (no row matches the policy)');
 
 -- avatars bucket policies
 select lives_ok(
@@ -65,12 +64,15 @@ set local role authenticated;
 
 select is((select count(*) from storage.objects where bucket_id = 'avatars' and name like '%b2/avatar'),
           1::bigint, 'signed-in users can read other users'' pictures');
-select is(
-  (with u as (update storage.objects set name = name || 'x'
-               where bucket_id = 'avatars' and name like '%b2/avatar' returning 1) select count(*) from u),
-  0::bigint, 'a user cannot overwrite another user''s picture');
+select lives_ok(
+  $$ update storage.objects set name = name || 'x' where bucket_id = 'avatars' and name like '%b2/avatar' $$,
+  'overwriting another user''s picture is silently a no-op (no row matches the policy)');
 
 reset role;
+select is((select phone from public.profiles where id = '00000000-0000-0000-0000-0000000000b2'),
+          '01812345678', 'someone else''s phone is unchanged');
+select is((select count(*) from storage.objects where bucket_id = 'avatars' and name = '00000000-0000-0000-0000-0000000000b2/avatar'),
+          1::bigint, 'another user''s picture is unchanged');
 set local role anon;
 select is((select count(*) from storage.objects where bucket_id = 'avatars'),
           0::bigint, 'anon sees no pictures');
