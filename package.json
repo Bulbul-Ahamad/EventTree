@@ -19,7 +19,8 @@
     "seed": "tsx scripts/seed.ts",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "perf:seed": "tsx scripts/perf/seed.ts",
-    "perf:page": "tsx scripts/perf/tree-page.ts"
+    "perf:page": "tsx scripts/perf/tree-page.ts",
+    "perf:lighthouse": "bash scripts/perf/lighthouse.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^6.0.1",

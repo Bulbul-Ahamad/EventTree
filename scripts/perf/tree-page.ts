@@ -2,7 +2,7 @@
  * Plan 4.10: server response time of the event tree page, as the perf owner, over N requests.
  * Run against a production build for real numbers:  pnpm build && pnpm start   then   pnpm perf:page
  * Prints min / median / p95 in ms. Budget (04_TRD section 9): p95 <= 1000 ms.
- * With --cookie it prints the Cookie header (for Lighthouse extra headers) and exits.
+ * With --cookie it prints the Cookie header, with --url the page address (both for Lighthouse), and exits.
  */
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
@@ -40,6 +40,10 @@ async function main() {
   const ev = await admin.from("nodes").select("id").eq("type", "event").eq("title", "Perf Event (1000 nodes)").limit(1).single();
   if (ev.error) throw new Error(`find event: ${ev.error.message}`);
   const page = `${base}/o/perf-club/events/${ev.data.id}`;
+  if (process.argv.includes("--url")) {
+    process.stdout.write(`${page}\n`);
+    return;
+  }
 
   const times: number[] = [];
   for (let i = 0; i < 45; i++) {
