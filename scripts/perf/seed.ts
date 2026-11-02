@@ -41,7 +41,7 @@ async function user(email: string, name: string): Promise<string> {
 async function main() {
   const have = await db.from("organizations").select("id").eq("slug", SLUG).maybeSingle();
   if (have.data) {
-    console.log("perf seed: already present, nothing changed.");
+    process.stdout.write("perf seed: already present, nothing changed.\n");
   } else {
     const owner = await user("perf-owner@demo.test", "Perf Owner");
     const people = await Promise.all([1, 2, 3, 4, 5].map((i) => user(`perf-m${i}@demo.test`, `Perf Member ${i}`)));
@@ -91,11 +91,11 @@ async function main() {
       );
     }
     const count = await db.from("nodes").select("id", { count: "exact", head: true }).eq("event_id", event.id);
-    console.log(`perf seed: created ${count.count} nodes in the event.`);
+    process.stdout.write(`perf seed: created ${count.count} nodes in the event.\n`);
   }
   const ev = must(await db.from("nodes").select("id").eq("type", "event").eq("title", "Perf Event (1000 nodes)").limit(1).single(), "find event");
-  console.log(`\nEvent page: http://localhost:3000/o/${SLUG}/events/${ev.id}`);
-  console.log(`Log in as perf-owner@demo.test / ${PERF_PASSWORD}`);
+  process.stdout.write(`\nEvent page: http://localhost:3000/o/${SLUG}/events/${ev.id}\n`);
+  process.stdout.write(`Log in as perf-owner@demo.test / ${PERF_PASSWORD}\n`);
 }
 
 void main();

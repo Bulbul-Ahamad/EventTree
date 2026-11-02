@@ -32,7 +32,7 @@ async function main() {
   if (error) throw new Error(`sign in: ${error.message} (run pnpm perf:seed first)`);
   const cookie = [...jar].map(([n, v]) => `${n}=${v}`).join("; ");
   if (process.argv.includes("--cookie")) {
-    console.log(cookie);
+    process.stdout.write(`${cookie}\n`);
     return;
   }
 
@@ -52,9 +52,9 @@ async function main() {
   }
   times.sort((a, b) => a - b);
   const at = (q: number) => times[Math.min(times.length - 1, Math.floor(q * times.length))] ?? 0;
-  console.log(`tree page, 1000 nodes, ${times.length} requests`);
-  console.log(`min ${at(0).toFixed(0)} ms | median ${at(0.5).toFixed(0)} ms | p95 ${at(0.95).toFixed(0)} ms | max ${at(1).toFixed(0)} ms`);
-  console.log(at(0.95) <= 1000 ? "OK: within the 1.0 s budget" : "OVER the 1.0 s budget");
+  process.stdout.write(`tree page, 1000 nodes, ${times.length} requests\n`);
+  process.stdout.write(`min ${at(0).toFixed(0)} ms | median ${at(0.5).toFixed(0)} ms | p95 ${at(0.95).toFixed(0)} ms | max ${at(1).toFixed(0)} ms\n`);
+  process.stdout.write(`${at(0.95) <= 1000 ? "OK: within the 1.0 s budget" : "OVER the 1.0 s budget"}\n`);
 }
 
 void main();
