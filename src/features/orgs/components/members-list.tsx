@@ -48,6 +48,9 @@ export function MembersList({ orgId, members, viewerId, viewerIsAdmin }: Props) 
               <th scope="col" className="px-3 py-2 font-medium md:px-4">
                 Member
               </th>
+              <th scope="col" className="hidden px-3 py-2 font-medium sm:table-cell md:px-4">
+                Phone
+              </th>
               <th scope="col" className="px-3 py-2 font-medium md:px-4">
                 Role
               </th>
@@ -132,8 +135,15 @@ function MemberRow({
               {isSelf ? <span className="font-normal text-foreground-muted"> (you)</span> : null}
             </span>
             <span className="truncate text-xs text-foreground-muted">{member.email}</span>
+            {/* Below sm the phone column is hidden, so the number sits here instead. */}
+            {member.phone ? (
+              <span className="truncate text-xs text-foreground-muted sm:hidden">{member.phone}</span>
+            ) : null}
           </div>
         </div>
+      </td>
+      <td className="hidden whitespace-nowrap px-3 py-3 text-foreground-muted sm:table-cell md:px-4">
+        {member.phone ?? "Not added"}
       </td>
       <td className="px-3 py-3 md:px-4">
         {viewerIsAdmin ? (

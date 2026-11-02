@@ -30,7 +30,7 @@ function must<T>(r: { data: T; error: { message: string } | null }, what: string
 }
 
 async function user(email: string, name: string): Promise<string> {
-  const created = await db.auth.admin.createUser({ email, password: PERF_PASSWORD, email_confirm: true, user_metadata: { full_name: name } });
+  const created = await db.auth.admin.createUser({ email, password: PERF_PASSWORD, email_confirm: true, user_metadata: { full_name: name, phone: "+8801700000099" } });
   if (created.data.user) return created.data.user.id;
   const list = await db.auth.admin.listUsers({ page: 1, perPage: 200 });
   const found = list.data?.users.find((u) => u.email === email);

@@ -7,7 +7,12 @@ import {
   signUpSchema,
 } from "@/features/auth/schemas";
 
-const valid = { fullName: "Bulbul Ahamad", email: "Bulbul@Example.com ", password: "Passw0rd!demo" };
+const valid = {
+  fullName: "Bulbul Ahamad",
+  email: "Bulbul@Example.com ",
+  phone: "01712345678",
+  password: "Passw0rd!demo",
+};
 
 describe("signUpSchema", () => {
   it("accepts valid input and normalises the email", () => {
@@ -41,6 +46,15 @@ describe("signUpSchema", () => {
 
   it("rejects unknown keys (strict)", () => {
     expect(signUpSchema.safeParse({ ...valid, role: "admin" }).success).toBe(false);
+  });
+
+  it("requires a phone number and stores it normalized (US-18)", () => {
+    const r = signUpSchema.safeParse(valid);
+    expect(r.success && r.data.phone).toBe("+8801712345678");
+    const { phone: _phone, ...without } = valid;
+    expect(signUpSchema.safeParse(without).success).toBe(false);
+    expect(signUpSchema.safeParse({ ...valid, phone: "  " }).success).toBe(false);
+    expect(signUpSchema.safeParse({ ...valid, phone: "12345" }).success).toBe(false);
   });
 });
 
@@ -89,10 +103,12 @@ describe("mapAuthError (generic wording, no account enumeration)", () => {
 describe("updateProfileSchema", () => {
   it("trims and checks 1-100 characters", async () => {
     const { updateProfileSchema } = await import("@/features/auth/schemas");
-    const r = updateProfileSchema.safeParse({ fullName: "  বুলবুল  " });
+    const phone = "+8801712345678";
+    const r = updateProfileSchema.safeParse({ fullName: "  বুলবুল  ", phone });
     expect(r.success && r.data.fullName).toBe("বুলবুল");
-    expect(updateProfileSchema.safeParse({ fullName: " " }).success).toBe(false);
-    expect(updateProfileSchema.safeParse({ fullName: "a".repeat(101) }).success).toBe(false);
-    expect(updateProfileSchema.safeParse({ fullName: "ok", email: "x@y.co" }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ fullName: " ", phone }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ fullName: "a".repeat(101), phone }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ fullName: "ok", phone, email: "x@y.co" }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ fullName: "ok" }).success).toBe(false); // phone is required
   });
 });

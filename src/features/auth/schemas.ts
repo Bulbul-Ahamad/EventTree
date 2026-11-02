@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhone, normalizePhone, PHONE_MESSAGE } from "@/lib/phone";
 
 // 02_AppFlow S02: name 1-100, email format, password >= 10 with a letter and a digit.
 const email = z
@@ -20,12 +21,24 @@ const fullName = z
   .min(1, "Enter your name.")
   .max(100, "Use at most 100 characters.");
 
-export const updateProfileSchema = z.object({ fullName }).strict();
+// Required (US-18). Trimmed, normalized to "+<digits>", then checked.
+export const phoneSchema = z
+  .string()
+  .trim()
+  .min(1, "Enter your phone number.")
+  .pipe(z.string().transform(normalizePhone).refine(isValidPhone, PHONE_MESSAGE));
+
+export const updateProfileSchema = z.object({ fullName, phone: phoneSchema }).strict();
+
+export const completeProfileSchema = z
+  .object({ phone: phoneSchema, next: z.string().optional() })
+  .strict();
 
 export const signUpSchema = z
   .object({
     fullName,
     email,
+    phone: phoneSchema,
     password: passwordRule,
   })
   .strict();

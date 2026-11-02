@@ -35,9 +35,9 @@ const TANIA = "00000000-0000-4000-8000-0000000000a2";
 const NILA = "00000000-0000-4000-8000-0000000000a3";
 
 const members: OrgMember[] = [
-  { userId: ME, fullName: "Bulbul", email: "bulbul@x.com", avatarUrl: null, role: "admin", joinedAt: "2026-10-01T05:00:00.000Z" },
-  { userId: TANIA, fullName: "Tania", email: "tania@x.com", avatarUrl: null, role: "member", joinedAt: "2026-10-05T05:00:00.000Z" },
-  { userId: NILA, fullName: "Nila", email: "nila@x.com", avatarUrl: null, role: "member", joinedAt: "2026-10-06T05:00:00.000Z" },
+  { userId: ME, fullName: "Bulbul", email: "bulbul@x.com", phone: "+8801700000001", avatarUrl: null, role: "admin", joinedAt: "2026-10-01T05:00:00.000Z" },
+  { userId: TANIA, fullName: "Tania", email: "tania@x.com", phone: "+8801700000002", avatarUrl: null, role: "member", joinedAt: "2026-10-05T05:00:00.000Z" },
+  { userId: NILA, fullName: "Nila", email: "nila@x.com", phone: "+8801700000003", avatarUrl: null, role: "member", joinedAt: "2026-10-06T05:00:00.000Z" },
 ];
 const list = (viewerId: string, viewerIsAdmin: boolean) =>
   render(
@@ -56,6 +56,7 @@ describe("MembersList", () => {
     const row = screen.getByRole("row", { name: /Bulbul/ });
     expect(within(row).getByText("bulbul@x.com")).toBeInTheDocument();
     expect(within(row).getByText("Admin")).toBeInTheDocument();
+    expect(within(row).getAllByText("+8801700000001").length).toBeGreaterThan(0); // US-18: members see the phone
     expect(within(row).getByText(formatDate("2026-10-01T05:00:00.000Z"))).toBeInTheDocument();
     expect(screen.getByText(/\(you\)/)).toBeInTheDocument();
   });

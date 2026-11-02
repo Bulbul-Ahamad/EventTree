@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { decideRoute, needsOrgCount } from "@/lib/route-guards";
+import { decideRoute, needsOrgCount, needsPhoneCheck } from "@/lib/route-guards";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
@@ -8,15 +8,22 @@ export async function middleware(request: NextRequest) {
   const hasSession = user !== null;
   const allowDev = process.env.NODE_ENV !== "production";
 
+  // Rule 3a: a signed-in user without a phone number goes to /complete-profile.
+  let hasPhone: boolean | null = null;
+  if (user && needsPhoneCheck({ pathname, search, hasSession, allowDev })) {
+    const { data, error } = await supabase.from("profiles").select("phone").eq("id", user.id).maybeSingle();
+    hasPhone = error || !data ? null : data.phone !== null;
+  }
+
   let orgCount: number | null = null;
-  if (needsOrgCount({ pathname, search, hasSession, allowDev })) {
+  if (hasPhone !== false && needsOrgCount({ pathname, search, hasSession, allowDev })) {
     const { count, error } = await supabase
       .from("org_members")
       .select("org_id", { count: "exact", head: true });
     orgCount = error ? null : count;
   }
 
-  const decision = decideRoute({ pathname, search, hasSession, orgCount, allowDev });
+  const decision = decideRoute({ pathname, search, hasSession, orgCount, allowDev, hasPhone });
   if (decision.type === "next") return response;
 
   const redirect = NextResponse.redirect(new URL(decision.to, request.url));

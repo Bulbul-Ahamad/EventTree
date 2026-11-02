@@ -12,23 +12,33 @@ import { fieldErrorsFrom } from "@/lib/action-result";
 import { notify } from "@/lib/toast";
 import { useFormAction } from "./use-form-action";
 
-export function ProfileForm({ initialName, email }: { initialName: string; email: string }) {
+export function ProfileForm({
+  initialName,
+  initialPhone,
+  email,
+}: {
+  initialName: string;
+  initialPhone: string;
+  email: string;
+}) {
   const router = useRouter();
   const form = useFormAction();
   const [name, setName] = useState(initialName);
+  const [phone, setPhone] = useState(initialPhone);
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    const parsed = updateProfileSchema.safeParse({ fullName: name });
+    const parsed = updateProfileSchema.safeParse({ fullName: name, phone });
     if (!parsed.success) {
       form.reset();
       form.setFieldErrors(fieldErrorsFrom(parsed.error));
       return;
     }
     form.run(
-      () => updateProfile({ fullName: name }),
-      ({ fullName }) => {
+      () => updateProfile({ fullName: name, phone }),
+      ({ fullName, phone: saved }) => {
         setName(fullName);
+        setPhone(saved ?? "");
         notify.success("Profile saved.");
         router.refresh();
       },
@@ -39,6 +49,11 @@ export function ProfileForm({ initialName, email }: { initialName: string; email
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <FormField label="Full name" required error={form.fieldErrors.fullName}>
         {(p) => <Input {...p} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />}
+      </FormField>
+      <FormField label="Phone number" required hint="Like 01712345678 or +8801712345678." error={form.fieldErrors.phone}>
+        {(p) => (
+          <Input {...p} type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        )}
       </FormField>
       <FormField label="Email" hint="Your email cannot be changed here.">
         {(p) => <Input {...p} type="email" value={email} disabled readOnly />}

@@ -119,8 +119,8 @@ const eventDetail: EventDetail = {
 };
 
 const orgMembers: OrgMember[] = [
-  { userId: ID.owner, fullName: "Bulbul", email: "bulbul@x.com", avatarUrl: null, role: "admin", joinedAt: "2026-10-01T05:00:00.000Z" },
-  { userId: ID.head, fullName: "Tania", email: "tania@x.com", avatarUrl: null, role: "member", joinedAt: "2026-10-05T05:00:00.000Z" },
+  { userId: ID.owner, fullName: "Bulbul", email: "bulbul@x.com", phone: "+8801700000001", avatarUrl: null, role: "admin", joinedAt: "2026-10-01T05:00:00.000Z" },
+  { userId: ID.head, fullName: "Tania", email: "tania@x.com", phone: "+8801700000002", avatarUrl: null, role: "member", joinedAt: "2026-10-05T05:00:00.000Z" },
 ];
 
 beforeEach(() => {

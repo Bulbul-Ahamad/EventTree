@@ -21,14 +21,16 @@ export class World {
   readonly people: Record<string, Person> = {};
   private orgIds: string[] = [];
 
-  async person(key: string, displayName?: string): Promise<Person> {
+  // Everybody gets a phone number (US-18), otherwise the app sends them to /complete-profile.
+  // Pass `null` to create a person without one.
+  async person(key: string, displayName?: string, phone: string | null = "+8801700000000"): Promise<Person> {
     const email = `e2e-${this.runId}-${key}@test.local`;
     const name = displayName ?? `E2E ${key}`;
     const { data, error } = await admin.auth.admin.createUser({
       email,
       password: PASSWORD,
       email_confirm: true,
-      user_metadata: { full_name: name },
+      user_metadata: phone === null ? { full_name: name } : { full_name: name, phone },
     });
     if (error || !data.user) throw new Error(`createUser ${key}: ${error?.message}`);
     const person = { key, id: data.user.id, email, name };

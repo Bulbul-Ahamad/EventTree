@@ -6,6 +6,7 @@ import { sanitizeNext } from "@/lib/route-guards";
 import { createServerClient } from "@/lib/supabase/server";
 import { mapAuthError } from "./map-error";
 import {
+  completeProfileSchema,
   emailOnlySchema,
   oauthSchema,
   resetPasswordSchema,
@@ -27,13 +28,13 @@ function callbackUrl(next?: string | null): string {
 export async function signUp(input: unknown): Promise<ActionResult<{ email: string }>> {
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) return failValidation(parsed.error);
-  const { fullName, email, password } = parsed.data;
+  const { fullName, email, phone, password } = parsed.data;
 
   const supabase = await createServerClient();
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName }, emailRedirectTo: callbackUrl() },
+    options: { data: { full_name: fullName, phone }, emailRedirectTo: callbackUrl() },
   });
   if (error) {
     const code = mapAuthError(error);
@@ -114,8 +115,10 @@ export async function startGoogleOAuth(input: unknown): Promise<ActionResult<{ u
   return ok({ url: data.url });
 }
 
-// S17: change the display name. RLS lets a user update only their own profile.
-export async function updateProfile(input: unknown): Promise<ActionResult<{ fullName: string }>> {
+// S17: change the display name and phone number. RLS lets a user update only their own profile.
+export async function updateProfile(
+  input: unknown,
+): Promise<ActionResult<{ fullName: string; phone: string | null }>> {
   const parsed = updateProfileSchema.safeParse(input);
   if (!parsed.success) return failValidation(parsed.error);
 
@@ -127,11 +130,33 @@ export async function updateProfile(input: unknown): Promise<ActionResult<{ full
 
   const { data, error } = await supabase
     .from("profiles")
-    .update({ full_name: parsed.data.fullName })
+    .update({ full_name: parsed.data.fullName, phone: parsed.data.phone })
     .eq("id", user.id)
-    .select("full_name")
+    .select("full_name, phone")
     .maybeSingle();
   if (error) return failFrom(error);
   if (!data) return fail("E_NOT_FOUND");
-  return ok({ fullName: data.full_name });
+  return ok({ fullName: data.full_name, phone: data.phone });
+}
+
+// S19: first-time phone number for accounts that have none (older accounts, Google signup).
+export async function completeProfile(input: unknown): Promise<ActionResult<{ redirectTo: string }>> {
+  const parsed = completeProfileSchema.safeParse(input);
+  if (!parsed.success) return failValidation(parsed.error);
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return fail("E_NOT_AUTHORIZED");
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ phone: parsed.data.phone })
+    .eq("id", user.id)
+    .select("id")
+    .maybeSingle();
+  if (error) return failFrom(error);
+  if (!data) return fail("E_NOT_FOUND");
+  return ok({ redirectTo: sanitizeNext(parsed.data.next) ?? "/dashboard" });
 }

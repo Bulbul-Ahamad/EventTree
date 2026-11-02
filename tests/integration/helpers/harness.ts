@@ -23,7 +23,7 @@ export async function createPersona(name: string): Promise<Persona> {
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { full_name: `Int ${name}` },
+    user_metadata: { full_name: `Int ${name}`, phone: "+8801700000000" },
   });
   if (error || !data.user) throw new Error(`createUser ${name}: ${error?.message}`);
 

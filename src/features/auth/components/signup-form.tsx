@@ -17,7 +17,7 @@ import { useFormAction } from "./use-form-action";
 export function SignUpForm() {
   const router = useRouter();
   const form = useFormAction();
-  const [values, setValues] = useState({ fullName: "", email: "", password: "" });
+  const [values, setValues] = useState({ fullName: "", email: "", phone: "", password: "" });
   const set = (k: keyof typeof values) => (e: { target: { value: string } }) =>
     setValues((v) => ({ ...v, [k]: e.target.value }));
 
@@ -43,6 +43,14 @@ export function SignUpForm() {
         </FormField>
         <FormField label="Email" required error={form.fieldErrors.email}>
           {(p) => <Input {...p} type="email" autoComplete="email" value={values.email} onChange={set("email")} />}
+        </FormField>
+        <FormField
+          label="Phone number"
+          required
+          hint="Like 01712345678 or +8801712345678."
+          error={form.fieldErrors.phone}
+        >
+          {(p) => <Input {...p} type="tel" inputMode="tel" autoComplete="tel" value={values.phone} onChange={set("phone")} />}
         </FormField>
         <FormField
           label="Password"

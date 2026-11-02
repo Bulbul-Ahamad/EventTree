@@ -13,6 +13,7 @@ export type OrgMember = {
   userId: string;
   fullName: string;
   email: string;
+  phone: string | null;
   avatarUrl: string | null;
   role: OrgRole;
   joinedAt: string;
@@ -98,7 +99,7 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
   const { supabase } = await currentUserId();
   const { data, error } = await supabase
     .from("org_members")
-    .select("user_id, role, joined_at, profiles(full_name, email, avatar_url)")
+    .select("user_id, role, joined_at, profiles(full_name, email, phone, avatar_url)")
     .eq("org_id", orgId);
   if (error) throw new Error("E_UNKNOWN");
 
@@ -110,6 +111,7 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
               userId: m.user_id,
               fullName: m.profiles.full_name,
               email: m.profiles.email,
+              phone: m.profiles.phone,
               avatarUrl: m.profiles.avatar_url,
               role: m.role as OrgRole,
               joinedAt: m.joined_at,

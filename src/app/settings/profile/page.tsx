@@ -14,7 +14,7 @@ export default async function ProfilePage() {
   if (!user) notFound(); // middleware already redirects guests
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email")
+    .select("full_name, email, phone")
     .eq("id", user.id)
     .maybeSingle();
   if (!profile) notFound();
@@ -31,7 +31,7 @@ export default async function ProfilePage() {
         <CardHeader>
           <CardTitle>Your details</CardTitle>
         </CardHeader>
-        <ProfileForm initialName={profile.full_name} email={profile.email} />
+        <ProfileForm initialName={profile.full_name} initialPhone={profile.phone ?? ""} email={profile.email} />
       </Card>
       <Card>
         <ThemeRadio />

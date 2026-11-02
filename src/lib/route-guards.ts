@@ -12,7 +12,7 @@ export function sanitizeNext(raw: string | null | undefined): string | null {
 
 const GUEST_ONLY = ["/signup", "/login", "/forgot-password"];
 // Allowed for a signed-in user with no organization (rule 3).
-const ONBOARDING_EXEMPT = ["/onboarding", "/settings/profile", "/auth", "/reset-password"];
+const ONBOARDING_EXEMPT = ["/onboarding", "/settings/profile", "/complete-profile", "/auth", "/reset-password"];
 
 function matches(pathname: string, base: string): boolean {
   return pathname === base || pathname.startsWith(`${base}/`);
@@ -30,6 +30,8 @@ export type GuardInput = {
   orgCount: number | null;
   // /dev/* check pages are reachable only outside production.
   allowDev: boolean;
+  // Whether the profile has a phone number (US-18); omitted or null when unknown, which lets the request through.
+  hasPhone?: boolean | null;
 };
 
 export function isGuestOnly(pathname: string): boolean {
@@ -52,8 +54,17 @@ export function needsOrgCount(input: Omit<GuardInput, "orgCount">): boolean {
   return !ONBOARDING_EXEMPT.some((p) => matches(pathname, p));
 }
 
+// True when this request needs to know whether the profile has a phone (rule 3a).
+export function needsPhoneCheck(input: Omit<GuardInput, "orgCount" | "hasPhone">): boolean {
+  const { pathname, hasSession, allowDev } = input;
+  if (!hasSession) return false;
+  if (pathname === "/" || isGuestOnly(pathname)) return false;
+  if (allowDev && matches(pathname, "/dev")) return false;
+  return !(matches(pathname, "/auth") || matches(pathname, "/reset-password"));
+}
+
 export function decideRoute(input: GuardInput): RouteDecision {
-  const { pathname, search, hasSession, orgCount, allowDev } = input;
+  const { pathname, search, hasSession, orgCount, allowDev, hasPhone } = input;
 
   if (!hasSession) {
     // S06 needs a recovery session; without one send the user to start over.
@@ -69,6 +80,19 @@ export function decideRoute(input: GuardInput): RouteDecision {
   // S01: signed-in users go to the dashboard. Rule 2: guest-only pages too.
   if (pathname === "/" || isGuestOnly(pathname)) {
     return { type: "redirect", to: "/dashboard" };
+  }
+
+  // Rule 3a: no phone yet -> /complete-profile; with a phone that page is pointless.
+  if (needsPhoneCheck({ pathname, search, hasSession, allowDev })) {
+    if (matches(pathname, "/complete-profile")) {
+      if (hasPhone === true) return { type: "redirect", to: "/dashboard" };
+      return { type: "next" };
+    }
+    if (hasPhone === false) {
+      const back = sanitizeNext(`${pathname}${search}`);
+      const query = back && back !== "/dashboard" ? `?next=${encodeURIComponent(back)}` : "";
+      return { type: "redirect", to: `/complete-profile${query}` };
+    }
   }
 
   // Rule 3

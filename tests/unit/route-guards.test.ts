@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   decideRoute,
   needsOrgCount,
+  needsPhoneCheck,
   sanitizeNext,
   type GuardInput,
 } from "@/lib/route-guards";
@@ -116,5 +117,58 @@ describe("needsOrgCount", () => {
     expect(q("/login")).toBe(false);
     expect(q("/onboarding")).toBe(false);
     expect(q("/settings/profile")).toBe(false);
+  });
+});
+
+describe("rule 3a: phone number (US-18)", () => {
+  const signedIn = { hasSession: true, orgCount: 1 };
+
+  it("sends a signed-in user without a phone to /complete-profile, remembering where they were going", () => {
+    expect(go({ ...signedIn, pathname: "/dashboard", hasPhone: false })).toEqual(redirect("/complete-profile"));
+    expect(go({ ...signedIn, pathname: "/o/club/events/1", search: "?node=2", hasPhone: false })).toEqual(
+      redirect("/complete-profile?next=%2Fo%2Fclub%2Fevents%2F1%3Fnode%3D2"),
+    );
+    expect(go({ ...signedIn, pathname: "/settings/profile", hasPhone: false })).toEqual(
+      redirect("/complete-profile?next=%2Fsettings%2Fprofile"),
+    );
+  });
+
+  it("happens before the no-organization redirect", () => {
+    expect(go({ hasSession: true, orgCount: 0, pathname: "/dashboard", hasPhone: false })).toEqual(
+      redirect("/complete-profile"),
+    );
+  });
+
+  it("lets /complete-profile and /auth through, and keeps people with a phone out of /complete-profile", () => {
+    expect(go({ ...signedIn, pathname: "/complete-profile", hasPhone: false })).toEqual(next);
+    expect(go({ ...signedIn, pathname: "/auth/callback", hasPhone: false })).toEqual(next);
+    expect(go({ ...signedIn, pathname: "/reset-password", hasPhone: false })).toEqual(next);
+    expect(go({ ...signedIn, pathname: "/complete-profile", hasPhone: true })).toEqual(redirect("/dashboard"));
+  });
+
+  it("does nothing when the phone is present or unknown", () => {
+    expect(go({ ...signedIn, pathname: "/dashboard", hasPhone: true })).toEqual(next);
+    expect(go({ ...signedIn, pathname: "/dashboard", hasPhone: null })).toEqual(next);
+    expect(go({ ...signedIn, pathname: "/dashboard" })).toEqual(next);
+  });
+
+  it("guests are untouched, and /complete-profile needs a login", () => {
+    expect(go({ pathname: "/complete-profile" })).toEqual(redirect("/login?next=%2Fcomplete-profile"));
+  });
+
+  it("needsPhoneCheck skips guests, the home page, guest-only pages and auth routes", () => {
+    const q = (pathname: string, hasSession = true) =>
+      needsPhoneCheck({ pathname, search: "", hasSession, allowDev: false });
+    expect(q("/dashboard")).toBe(true);
+    expect(q("/complete-profile")).toBe(true);
+    expect(q("/dashboard", false)).toBe(false);
+    expect(q("/")).toBe(false);
+    expect(q("/login")).toBe(false);
+    expect(q("/auth/callback")).toBe(false);
+    expect(q("/reset-password")).toBe(false);
+  });
+
+  it("/complete-profile does not need the organization count", () => {
+    expect(needsOrgCount({ pathname: "/complete-profile", search: "", hasSession: true, allowDev: false })).toBe(false);
   });
 });

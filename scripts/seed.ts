@@ -35,12 +35,12 @@ if (!serviceKey) {
 
 const PASSWORD = "Passw0rd!demo";
 const PEOPLE = {
-  owner: { email: "bulbul@demo.test", name: "Bulbul Ahmed" },
-  rafi: { email: "rafi@demo.test", name: "Rafi Islam" },
-  tania: { email: "tania@demo.test", name: "Tania Khan" },
-  nila: { email: "nila@demo.test", name: "Nila Rahman" },
-  sumon: { email: "sumon@demo.test", name: "Sumon Das" },
-  outsider: { email: "imran@demo.test", name: "Imran Hossain" },
+  owner: { email: "bulbul@demo.test", name: "Bulbul Ahmed", phone: "+8801700000001" },
+  rafi: { email: "rafi@demo.test", name: "Rafi Islam", phone: "+8801700000002" },
+  tania: { email: "tania@demo.test", name: "Tania Khan", phone: "+8801700000003" },
+  nila: { email: "nila@demo.test", name: "Nila Rahman", phone: "+8801700000004" },
+  sumon: { email: "sumon@demo.test", name: "Sumon Das", phone: "+8801700000005" },
+  outsider: { email: "imran@demo.test", name: "Imran Hossain", phone: "+8801700000006" },
 } as const;
 type PersonKey = keyof typeof PEOPLE;
 
@@ -69,7 +69,7 @@ async function ensureUsers(client: SupabaseClient): Promise<Record<PersonKey, st
       email: person.email,
       password: PASSWORD,
       email_confirm: true,
-      user_metadata: { full_name: person.name },
+      user_metadata: { full_name: person.name, phone: person.phone },
     });
     if (created.error || !created.data.user) fail(`createUser ${person.email}: ${created.error?.message}`);
     ids[key] = created.data.user.id;
