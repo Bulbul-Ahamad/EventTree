@@ -36,11 +36,19 @@ test.beforeAll(async () => {
   });
   taskId = await world.nodeId(HTML_TITLE);
   const history = await admin.from("node_updates").insert([
-    { node_id: taskId, event_id: eventId, user_id: owner.id, kind: "proof_link", link_url: "javascript:alert(3)", body: "<b>not bold</b>" },
-    { node_id: taskId, event_id: eventId, user_id: owner.id, kind: "proof_link", link_url: "https://example.com/proof", body: null },
+    { node_id: taskId, event_id: eventId, user_id: owner.id, kind: "proof_link", link_url: "https://example.com/proof", body: "<b>not bold</b>" },
     { node_id: taskId, event_id: eventId, user_id: owner.id, kind: "comment", body: "<img src=y onerror=alert(4)> কাজ শেষ ✅" },
   ]);
   if (history.error) throw new Error(history.error.message);
+});
+
+// The database itself refuses a proof link that is not http(s), whatever the app does.
+test("the database refuses a javascript: proof link", async () => {
+  const owner = world.who("owner");
+  for (const link_url of ["javascript:alert(3)", "data:text/html,<script>alert(1)</script>", "ftp://example.com/x"]) {
+    const res = await admin.from("node_updates").insert({ node_id: taskId, event_id: eventId, user_id: owner.id, kind: "proof_link", link_url });
+    expect(res.error?.message, link_url).toMatch(/node_updates_link_url_check/);
+  }
 });
 
 test.afterAll(async () => {
@@ -68,7 +76,6 @@ test("hostile and unusual titles are shown as plain text and nothing runs", asyn
   // The history of the task: links are only clickable when they are http(s); text stays text.
   await page.goto(`/o/${slug}/events/${eventId}?node=${taskId}`);
   const panel = page.getByRole("dialog");
-  await expect(panel.getByText("javascript:alert(3)")).toBeVisible();
   await expect(panel.locator('a[href^="javascript"]')).toHaveCount(0);
   const good = panel.getByRole("link", { name: "https://example.com/proof" });
   await expect(good).toHaveAttribute("rel", /noopener/);
