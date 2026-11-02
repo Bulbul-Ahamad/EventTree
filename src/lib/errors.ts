@@ -21,6 +21,8 @@ export const ERROR_MESSAGES = {
   E_EMAIL_TAKEN: "An account with this email may already exist. Try logging in.",
   E_INVALID_CREDENTIALS: "Incorrect email or password.",
   E_EMAIL_NOT_CONFIRMED: "Please confirm your email first.",
+  E_FILE_TYPE: "Use a JPG, PNG or WebP image.",
+  E_FILE_TOO_LARGE: "The image must be 2 MB or smaller.",
   // The catalogue says "field-level messages from Zod"; this is the fallback
   // shown when no field message is available.
   E_VALIDATION: "Please check the highlighted fields.",
