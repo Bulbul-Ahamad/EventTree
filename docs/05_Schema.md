@@ -472,7 +472,7 @@ end $$;
 
 ## 7a. Storage: `avatars` bucket (US-18)
 
-- Private bucket `avatars`, `file_size_limit` 2 MB, `allowed_mime_types` `image/jpeg, image/png, image/webp`.
+- Private bucket `avatars`, `file_size_limit` 10 MB, `allowed_mime_types` `image/jpeg, image/png, image/webp`.
 - Policies on `storage.objects` for `bucket_id = 'avatars'`: **select** for `authenticated`; **insert / update / delete** only when `(storage.foldername(name))[1] = (select auth.uid())::text`. `anon` has nothing.
 - `profiles.phone` is readable by exactly the people who can already read the profile row (self or `shares_org_with`), so no new read policy is needed.
 

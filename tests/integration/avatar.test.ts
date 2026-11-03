@@ -62,7 +62,7 @@ describe("uploadAvatar / removeAvatar", () => {
     expect(await uploadAvatar(form(new Uint8Array(0), "x.png"))).toMatchObject({ code: "E_FILE_TYPE" });
   });
 
-  it("rejects a file over 2 MB even when it starts like a PNG", async () => {
+  it("rejects a file over 10 MB even when it starts like a PNG", async () => {
     const big = new Uint8Array(MAX_AVATAR_BYTES + 1);
     big.set(PNG.subarray(0, 8));
     expect(await uploadAvatar(form(big))).toMatchObject({ ok: false, code: "E_FILE_TOO_LARGE" });

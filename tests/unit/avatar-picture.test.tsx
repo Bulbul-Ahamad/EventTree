@@ -45,7 +45,7 @@ describe("avatar paths", () => {
     expect(avatarValue("u1", 5)).toBe("u1/avatar?v=5");
     expect(storagePathOf("u1/avatar?v=5")).toBe("u1/avatar");
     expect(storagePathOf("u1/avatar")).toBe("u1/avatar");
-    expect(MAX_AVATAR_BYTES).toBe(2 * 1024 * 1024);
+    expect(MAX_AVATAR_BYTES).toBe(10 * 1024 * 1024);
   });
 });
 
@@ -116,12 +116,12 @@ describe("AvatarUpload", () => {
     await waitFor(() => expect(refresh).toHaveBeenCalled());
   });
 
-  it("rejects a wrong type or a file over 2 MB before sending anything", async () => {
+  it("rejects a wrong type or a file over 10 MB before sending anything", async () => {
     render(<AvatarUpload userId="u1" name="Ada" hasAvatar={false} />);
     pick(new File(["hi"], "notes.txt", { type: "text/plain" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Use a JPG, PNG or WebP image.");
     pick(png(MAX_AVATAR_BYTES + 1));
-    expect(await screen.findByRole("alert")).toHaveTextContent("The image must be 2 MB or smaller.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("The image must be 10 MB or smaller.");
     expect(uploadAvatar).not.toHaveBeenCalled();
   });
 

@@ -70,7 +70,7 @@ export function AvatarUpload({ userId, name, hasAvatar }: { userId: string; name
         aria-label="Choose a profile picture"
         onChange={onPick}
       />
-      <p className="text-xs text-foreground-muted">JPG, PNG or WebP, up to 2 MB.</p>
+      <p className="text-xs text-foreground-muted">JPG, PNG or WebP, up to 10 MB.</p>
       <FormError message={error} />
     </div>
   );

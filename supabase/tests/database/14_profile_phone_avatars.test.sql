@@ -81,8 +81,8 @@ reset role;
 -- bucket settings
 select results_eq(
   $$ select public, file_size_limit, allowed_mime_types from storage.buckets where id = 'avatars' $$,
-  $$ values (false, 2097152::bigint, array['image/jpeg','image/png','image/webp']) $$,
-  'avatars bucket is private, 2 MB, jpeg/png/webp only');
+  $$ values (false, 10485760::bigint, array['image/jpeg','image/png','image/webp']) $$,
+  'avatars bucket is private, 10 MB, jpeg/png/webp only');
 
 select * from finish();
 rollback;

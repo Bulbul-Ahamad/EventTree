@@ -2,7 +2,7 @@
 // `profiles.avatar_url` holds that path plus a `?v=` version, so a new upload is a new value.
 
 export const AVATAR_BUCKET = "avatars";
-export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+export const MAX_AVATAR_BYTES = 10 * 1024 * 1024;
 export const AVATAR_ACCEPT = "image/jpeg,image/png,image/webp";
 
 export function avatarPath(userId: string): string {

@@ -32,8 +32,8 @@ function contentSecurityPolicy(): string {
 }
 
 const nextConfig: NextConfig = {
-  // Profile pictures are uploaded through a Server Action: 2 MB file + form overhead (US-18).
-  experimental: { serverActions: { bodySizeLimit: "3mb" } },
+  // Profile pictures are uploaded through a Server Action: 10 MB file + form overhead (US-18).
+  experimental: { serverActions: { bodySizeLimit: "12mb" } },
   async headers() {
     return [
       {

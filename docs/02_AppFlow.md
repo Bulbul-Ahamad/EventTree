@@ -174,7 +174,7 @@ Sections (in order):
 - Edit name and type. (Slug is immutable in MVP.)
 
 ### S17 — Profile `/settings/profile`
-- Edit full name; edit phone number (required); profile picture: **[Upload photo]** (JPG/PNG/WebP, ≤ 2 MB), **[Remove photo]** when one exists; show email (read-only); theme preference radio (System/Light/Dark); **[Log out]**.
+- Edit full name; edit phone number (required); profile picture: **[Upload photo]** (JPG/PNG/WebP, ≤ 10 MB), **[Remove photo]** when one exists; show email (read-only); theme preference radio (System/Light/Dark); **[Log out]**.
 - Errors: `E_FILE_TYPE`, `E_FILE_TOO_LARGE`, phone → inline message as in S02.
 
 ### S19 — Complete profile `/complete-profile`
@@ -252,7 +252,7 @@ Database/RPC errors are raised as `raise exception 'E_CODE'`; the Server Action 
 | `E_EMAIL_NOT_CONFIRMED` | "Please confirm your email first." |
 | `E_VALIDATION` | Field-level messages from Zod |
 | `E_FILE_TYPE` | "Use a JPG, PNG or WebP image." |
-| `E_FILE_TOO_LARGE` | "The image must be 2 MB or smaller." |
+| `E_FILE_TOO_LARGE` | "The image must be 10 MB or smaller." |
 | `E_RATE_LIMIT` | "Too many attempts. Try again in a few minutes." |
 | `E_NETWORK` | "Can't reach the server. Check your connection and retry." |
 | `E_UNKNOWN` | "Something went wrong. Please try again." |

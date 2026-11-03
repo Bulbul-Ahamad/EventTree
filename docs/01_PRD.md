@@ -133,7 +133,7 @@ Format: **ID — As a [persona], I want …, so that …** + acceptance criteria
 - AC1: Phone number is **required**. Signup asks for it. A signed-in user without one (older account, Google signup) is sent to `/complete-profile` and cannot use the rest of the app until they save a valid number.
 - AC2: Phone must be Bangladeshi (`01XXXXXXXXX` or `+8801XXXXXXXXX`) or international (`+` then 8 to 15 digits). It is stored normalized (digits with a leading `+`).
 - AC3: Members of an organization I belong to can see my phone number (members list). People who share no organization with me cannot.
-- AC4: I can upload, replace and remove a profile picture (JPG, PNG or WebP, up to 2 MB). Only I can change my picture. Without one, the initials avatar is shown.
+- AC4: I can upload, replace and remove a profile picture (JPG, PNG or WebP, up to 10 MB). Only I can change my picture. Without one, the initials avatar is shown.
 - AC5: Only signed-in users can fetch pictures; a wrong file type or size is rejected with a clear message.
 
 **US-17 — Theme.** As any user, I want light/dark/system theme, so that I can use the app comfortably.

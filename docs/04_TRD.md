@@ -54,7 +54,7 @@ Versions are locked at **major.minor**. Step 1.02 of `06_Plan.md` must verify ea
 |---|---|---|
 | Supabase Auth | Email+password, Google OAuth, password reset, session cookies | Email confirmation **ON**. Min password length 10. Enable leaked-password protection if the plan allows. |
 | Supabase Postgres | Primary datastore | Extensions: `ltree`, `pgcrypto`. |
-| Supabase Storage | Profile pictures only (US-18) | One **private** bucket `avatars`, 2 MB limit, allowed types `image/jpeg`, `image/png`, `image/webp`. Object path `{user_id}/avatar`; RLS on `storage.objects` lets a user write only inside their own folder and any authenticated user read. No other bucket, no public URLs, no proof files. |
+| Supabase Storage | Profile pictures only (US-18) | One **private** bucket `avatars`, 10 MB limit, allowed types `image/jpeg`, `image/png`, `image/webp`. Object path `{user_id}/avatar`; RLS on `storage.objects` lets a user write only inside their own folder and any authenticated user read. No other bucket, no public URLs, no proof files. |
 | Supabase PostgREST | Auto API used by `supabase-js` | Exposed schema: `public` only. `app_private` is **not** exposed. |
 | Google Cloud OAuth | Google sign-in | Credentials set in Supabase dashboard; redirect URL = `{SUPABASE_URL}/auth/v1/callback`. |
 | SMTP provider (Resend) | Production auth emails | Supabase's default mailer is heavily rate-limited — configure custom SMTP before launch (plan step 4.11). |
@@ -162,7 +162,7 @@ Rules: server-only modules import `"server-only"`. Client Components are the exc
 3. `SUPABASE_SERVICE_ROLE_KEY` never appears in `src/`, never shipped to client or Vercel. CI greps for it.
 4. Session cookies are managed by `@supabase/ssr` (httpOnly, secure, sameSite=lax). Do not store tokens in localStorage manually.
 5. Validate all inputs with Zod on the server (never trust client validation). Reject unknown keys (`.strict()`).
-5a. Uploads: only the `avatars` bucket exists. The server checks the file type by content (magic bytes), not only the declared type or extension, and the size (2 MB) before uploading; the bucket repeats both limits. Pictures are shown with short-lived signed URLs, never public ones.
+5a. Uploads: only the `avatars` bucket exists. The server checks the file type by content (magic bytes), not only the declared type or extension, and the size (10 MB) before uploading; the bucket repeats both limits. Pictures are shown with short-lived signed URLs, never public ones.
 6. XSS: render user content as plain text only (React escaping). **No `dangerouslySetInnerHTML`** anywhere. Proof links validated `^https?://` and rendered with `rel="noopener noreferrer nofollow" target="_blank"`.
 7. Open redirect: `next` param must be a same-origin relative path (`/…`, not `//…`).
 8. CSRF: rely on Server Actions' built-in origin checks; no custom state-changing GET routes. `auth/callback` is the only route handler.
