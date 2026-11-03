@@ -1,6 +1,7 @@
 import { TreeDeciduous } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AvatarUrlsProvider } from "@/components/ui/avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NavLinks } from "./nav-links";
 import { navItemsFor } from "./nav-items";
@@ -16,6 +17,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
   const items = navItemsFor(data.navOrg?.slug ?? null, data.navOrg?.role === "admin");
 
   return (
+    <AvatarUrlsProvider urls={data.avatarUrls}>
     <TooltipProvider delayDuration={300}>
       <a
         href="#main"
@@ -55,5 +57,6 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
         <NavLinks items={items} variant="bottom" />
       </nav>
     </TooltipProvider>
+    </AvatarUrlsProvider>
   );
 }

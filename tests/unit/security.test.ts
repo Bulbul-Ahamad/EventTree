@@ -107,6 +107,11 @@ describe("security headers (§8 rule 9)", () => {
     expect(csp).not.toMatch(/\bws:/);
   });
 
+  it("pictures may load from the Supabase origin (signed avatar URLs)", async () => {
+    const csp = (await headersFor("production")).get("Content-Security-Policy") ?? "";
+    expect(csp).toContain("img-src 'self' data: https: https://abc.supabase.co");
+  });
+
   it("development CSP also allows eval and websockets for the dev server", async () => {
     const csp = (await headersFor("development")).get("Content-Security-Policy") ?? "";
     expect(csp).toContain("'unsafe-eval'");

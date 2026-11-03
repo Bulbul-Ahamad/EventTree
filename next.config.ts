@@ -18,7 +18,8 @@ function contentSecurityPolicy(): string {
     "default-src": ["'self'"],
     "script-src": ["'self'", "'unsafe-inline'", ...(dev ? ["'unsafe-eval'"] : [])],
     "style-src": ["'self'", "'unsafe-inline'"],
-    "img-src": ["'self'", "data:", "https:"],
+    // Signed picture URLs come from the Supabase origin (https in production, http on the local stack).
+    "img-src": ["'self'", "data:", "https:", ...(supabase ? [supabase] : [])],
     "font-src": ["'self'", "data:"],
     "connect-src": ["'self'", ...(supabase ? [supabase] : []), ...(dev ? ["ws:", "wss:"] : [])],
     "object-src": ["'none'"],
@@ -31,6 +32,8 @@ function contentSecurityPolicy(): string {
 }
 
 const nextConfig: NextConfig = {
+  // Profile pictures are uploaded through a Server Action: 2 MB file + form overhead (US-18).
+  experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
     return [
       {

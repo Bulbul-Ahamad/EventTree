@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ThemeRadio } from "@/components/shell/theme-radio";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { AvatarUpload } from "@/features/auth/components/avatar-upload";
 import { LogoutButton } from "@/features/auth/components/logout-button";
 import { ProfileForm } from "@/features/auth/components/profile-form";
 import { createServerClient } from "@/lib/supabase/server";
@@ -14,7 +15,7 @@ export default async function ProfilePage() {
   if (!user) notFound(); // middleware already redirects guests
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email, phone")
+    .select("full_name, email, phone, avatar_url")
     .eq("id", user.id)
     .maybeSingle();
   if (!profile) notFound();
@@ -31,6 +32,9 @@ export default async function ProfilePage() {
         <CardHeader>
           <CardTitle>Your details</CardTitle>
         </CardHeader>
+        <div className="mb-4">
+          <AvatarUpload userId={user.id} name={profile.full_name} hasAvatar={Boolean(profile.avatar_url)} />
+        </div>
         <ProfileForm initialName={profile.full_name} initialPhone={profile.phone ?? ""} email={profile.email} />
       </Card>
       <Card>
