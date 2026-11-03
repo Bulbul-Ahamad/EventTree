@@ -26,6 +26,11 @@ test("upload, see it in the members list, replace, remove; bad files are refused
   const url = baseURL ?? "http://localhost:3000";
   const a = await pageFor(browser, testInfo, url, world.who("ada"));
   const page = a.page;
+  // The picture comes from the Supabase origin: the CSP must let it through (04_TRD §8 rule 9).
+  const cspErrors: string[] = [];
+  page.on("console", (m) => {
+    if (/content security policy/i.test(m.text())) cspErrors.push(m.text());
+  });
   await page.goto("/settings/profile");
   const picker = page.getByLabel("Choose a profile picture");
   // Next.js has its own empty role=alert (route announcer), so pick ours by its text.
@@ -55,6 +60,7 @@ test("upload, see it in the members list, replace, remove; bad files are refused
   const row = b.page.getByRole("row", { name: /Ada Admin/ });
   await expect(row.locator("img")).toHaveCount(1);
   await expect(row.locator("img")).toHaveAttribute("src", /\/storage\/v1\/object\/sign\/avatars\//);
+  await expect.poll(() => row.locator("img").evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
 
   // Replace it.
   await picker.setInputFiles({ name: "again.png", mimeType: "image/png", buffer: PNG });
@@ -67,6 +73,7 @@ test("upload, see it in the members list, replace, remove; bad files are refused
   await b.page.reload();
   await expect(b.page.getByRole("row", { name: /Ada Admin/ }).locator("img")).toHaveCount(0);
 
+  expect(cspErrors).toEqual([]);
   await a.context.close();
   await b.context.close();
 });

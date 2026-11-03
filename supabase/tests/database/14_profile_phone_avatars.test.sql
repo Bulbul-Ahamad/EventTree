@@ -1,5 +1,5 @@
 begin;
-select plan(19);
+select plan(22);
 
 -- Three users: alice and bob share an organization, carol is in another one.
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -49,6 +49,14 @@ select lives_ok(
   $$ update public.profiles set phone = '01999999999' where id = '00000000-0000-0000-0000-0000000000b2' $$,
   'updating someone else''s phone is silently a no-op (no row matches the policy)');
 
+-- avatar_url must name the user's own picture
+select lives_ok(
+  $$ update public.profiles set avatar_url = '00000000-0000-0000-0000-0000000000b1/avatar?v=123' where id = '00000000-0000-0000-0000-0000000000b1' $$,
+  'a user can point avatar_url at their own picture');
+select throws_ok(
+  $$ update public.profiles set avatar_url = '00000000-0000-0000-0000-0000000000b2/avatar' where id = '00000000-0000-0000-0000-0000000000b1' $$,
+  '23514', null, 'a user cannot point avatar_url at somebody else''s picture');
+
 -- avatars bucket policies
 select lives_ok(
   $$ insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-0000-0000-0000000000b1/avatar') $$,
@@ -56,6 +64,9 @@ select lives_ok(
 select throws_ok(
   $$ insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-0000-0000-0000000000b2/avatar') $$,
   '42501', null, 'a user cannot write inside another user''s folder');
+select throws_ok(
+  $$ insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-0000-0000-0000000000b1/anything-else') $$,
+  '42501', null, 'a user can write only the one object {uid}/avatar, not other names in their own folder');
 
 reset role;
 insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-0000-0000-0000000000b2/avatar');

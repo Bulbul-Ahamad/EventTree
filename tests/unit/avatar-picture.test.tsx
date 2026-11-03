@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Avatar, AvatarUrlsProvider } from "@/components/ui/avatar";
 import { detectImageType } from "@/lib/image-type";
+import { axeViolations } from "./helpers/axe";
 import { MAX_AVATAR_BYTES, avatarPath, avatarValue, storagePathOf } from "@/lib/avatar";
 
 const refresh = vi.fn();
@@ -87,6 +88,23 @@ describe("Avatar with a picture", () => {
 
 describe("AvatarUpload", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("has no serious accessibility problems, with and without a picture, and with an error", async () => {
+    const withPicture = render(
+      <AvatarUrlsProvider urls={{ u1: "https://x.supabase.co/sign/u1.png" }}>
+        <AvatarUpload userId="u1" name="Ada" hasAvatar />
+      </AvatarUrlsProvider>,
+    );
+    expect(await axeViolations()).toEqual([]);
+    withPicture.unmount();
+    render(<AvatarUpload userId="u1" name="Ada" hasAvatar={false} />);
+    expect(await axeViolations()).toEqual([]);
+    fireEvent.change(screen.getByLabelText("Choose a profile picture"), {
+      target: { files: [new File(["x"], "n.txt", { type: "text/plain" })] },
+    });
+    await screen.findByRole("alert");
+    expect(await axeViolations()).toEqual([]);
+  });
 
   const picker = () => screen.getByLabelText("Choose a profile picture") as HTMLInputElement;
   const pick = (file: File) => fireEvent.change(picker(), { target: { files: [file] } });

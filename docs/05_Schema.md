@@ -52,7 +52,7 @@ Functions that touch `ltree` use `set search_path = public, extensions`. Policie
 | `id` | uuid | **PK**, FK → `auth.users(id)` ON DELETE CASCADE |
 | `full_name` | text | NOT NULL, CHECK `char_length BETWEEN 1 AND 100` |
 | `email` | text | NOT NULL |
-| `avatar_url` | text | NULL. Holds the storage object path `{id}/avatar` (with a `?v=` version suffix), not a public URL (US-18) |
+| `avatar_url` | text | NULL. Holds the storage object path `{id}/avatar` (with a `?v=<digits>` version suffix), not a public URL (US-18). CHECK `avatar_url ~ ('^' \|\| id::text \|\| '/avatar(\?v=[0-9]+)?$')`, so it can only name the user's own picture |
 | `phone` | text | NULL in the database (older rows have none; the app requires it, US-18). CHECK `phone ~ '^\+?[0-9]{8,15}$'`, stored normalized |
 | `created_at` | timestamptz | NOT NULL DEFAULT now() |
 | `updated_at` | timestamptz | NOT NULL DEFAULT now() |
@@ -473,7 +473,7 @@ end $$;
 ## 7a. Storage: `avatars` bucket (US-18)
 
 - Private bucket `avatars`, `file_size_limit` 10 MB, `allowed_mime_types` `image/jpeg, image/png, image/webp`.
-- Policies on `storage.objects` for `bucket_id = 'avatars'`: **select** for `authenticated`; **insert / update / delete** only when `(storage.foldername(name))[1] = (select auth.uid())::text`. `anon` has nothing.
+- Policies on `storage.objects` for `bucket_id = 'avatars'`: **select** for `authenticated`; **insert / update / delete** only on the one object `name = (select auth.uid())::text || '/avatar'` (nothing else in the folder). `anon` has nothing.
 - `profiles.phone` is readable by exactly the people who can already read the profile row (self or `shares_org_with`), so no new read policy is needed.
 
 ## 8. Data Lifecycle & Integrity Notes
