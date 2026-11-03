@@ -28,18 +28,20 @@ test("upload, see it in the members list, replace, remove; bad files are refused
   const page = a.page;
   await page.goto("/settings/profile");
   const picker = page.getByLabel("Choose a profile picture");
+  // Next.js has its own empty role=alert (route announcer), so pick ours by its text.
+  const alert = (text: string) => page.getByRole("alert").filter({ hasText: text });
 
   // Wrong type: refused before anything is sent.
   await picker.setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello") });
-  await expect(page.getByRole("alert")).toContainText("Use a JPG, PNG or WebP image.");
+  await expect(alert("Use a JPG, PNG or WebP image.")).toBeVisible();
 
   // A text file dressed up as a PNG passes the browser check and is refused by the server.
   await picker.setInputFiles({ name: "evil.png", mimeType: "image/png", buffer: Buffer.from("not really an image") });
-  await expect(page.getByRole("alert")).toContainText("Use a JPG, PNG or WebP image.");
+  await expect(alert("Use a JPG, PNG or WebP image.")).toBeVisible();
 
   // Over 2 MB: refused.
   await picker.setInputFiles({ name: "huge.png", mimeType: "image/png", buffer: Buffer.concat([PNG, Buffer.alloc(2 * 1024 * 1024)]) });
-  await expect(page.getByRole("alert")).toContainText("The image must be 2 MB or smaller.");
+  await expect(alert("The image must be 2 MB or smaller.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Remove photo" })).toHaveCount(0);
 
   // A real picture.
