@@ -71,7 +71,9 @@ describe("Avatar with a picture", () => {
         <Avatar id="u1" name="Ada Lovelace" />
       </AvatarUrlsProvider>,
     );
-    fireEvent.error(container.querySelector("img")!); // eslint-disable-line @typescript-eslint/no-non-null-assertion -- the test just rendered it
+    const img = container.querySelector("img");
+    expect(img).not.toBeNull();
+    fireEvent.error(img as Element);
     expect(container.querySelector("img")).toBeNull();
     expect(screen.getByText("AL")).toBeInTheDocument();
   });

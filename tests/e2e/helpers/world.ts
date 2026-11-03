@@ -123,6 +123,9 @@ export class World {
       await admin.from("nodes").delete().in("org_id", this.orgIds);
       await admin.from("organizations").delete().in("id", this.orgIds);
     }
+    // Profile pictures a test may have left behind (US-18).
+    const pictures = Object.values(this.people).map((p) => `${p.id}/avatar`);
+    if (pictures.length > 0) await admin.storage.from("avatars").remove(pictures);
     for (const p of Object.values(this.people)) await admin.auth.admin.deleteUser(p.id);
     this.orgIds = [];
     for (const key of Object.keys(this.people)) delete this.people[key];
