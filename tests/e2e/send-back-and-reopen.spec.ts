@@ -80,9 +80,14 @@ test("send back and reopen need a comment and are kept in the history", async ({
   // The worker fixes it and submits again; the head verifies with the tick.
   await w.page.reload();
   await runFromMenu(w.page, "Submit for review");
-  await expectStatus(h.page, /submitted/i);
+  // No live updates: reload the head's page until it shows the second submission and the tick.
+  const tick = h.page.getByRole("button", { name: `Mark ${TASK} verified` });
+  await expect(async () => {
+    await h.page.reload();
+    await expect(tick).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
   const verified = h.page.waitForResponse((r) => r.request().method() === "POST");
-  await h.page.getByRole("button", { name: `Mark ${TASK} verified` }).click();
+  await tick.click();
   await verified;
   await expectStatus(h.page, /verified/i);
 
